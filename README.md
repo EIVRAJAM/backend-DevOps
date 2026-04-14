@@ -101,6 +101,14 @@ Este proyecto está bajo la licencia MIT (o la que definas).
 
 ---
 
-## 📌 Autor
+## 📌 Equipo de desarrollo
 
-* Tu nombre o equipo
+### Equipo Backend
+@JsMartinez-dev
+@SeumaRayo
+
+### Equipo Frontend
+@EIVRAJAM
+@Saruizz
+@Orion-Contreras
+
