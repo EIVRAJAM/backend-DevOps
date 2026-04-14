@@ -24,7 +24,7 @@ public class Usuario {
     @Column(name = "id_usuario")
     private Long idUsuario;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "id_rol", nullable = false)
     private Rol rol;
 
