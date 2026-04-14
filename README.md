@@ -91,7 +91,10 @@ git push origin feature/nueva-funcionalidad
 4. Abre un Pull Request hacia `develop`
 
 ---
+## Backlog
+[Ver Backlog](https://universidadmag-my.sharepoint.com/:x:/g/personal/jsmartinezu_unimagdalena_edu_co/IQAyaaFyRVNYS5YKeTFzrSdlASe55Vka0whrO-8tFUiysRI?e=fMJEMO)
 
+---
 ## 📄 Licencia
 
 Este proyecto está bajo la licencia MIT (o la que definas).
