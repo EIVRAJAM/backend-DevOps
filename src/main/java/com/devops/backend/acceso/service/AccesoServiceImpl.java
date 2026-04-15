@@ -1,5 +1,6 @@
 package com.devops.backend.acceso.service;
 
+import com.devops.backend.acceso.dto.AccesoUserDTO;
 import com.devops.backend.acceso.entity.*;
 import com.devops.backend.acceso.repository.*;
 import com.devops.backend.exception.ApiValidationError;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import com.devops.backend.acceso.util.PasswordGeneratorUtil;
 
 @Service
@@ -24,9 +26,6 @@ public class AccesoServiceImpl implements AccesoService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
-
-    @Autowired
-    private RolRepository rolRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -99,6 +98,44 @@ public class AccesoServiceImpl implements AccesoService {
         acceso.setIntentosFallidos(0);
 
         return accesoRepository.save(acceso);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Acceso> findByIdUsuario(Long idUsuario) {
+        return accesoRepository.findById(idUsuario);
+    }
+
+    @Override
+    @Transactional
+    public Acceso update(Long idUsuario, AccesoUserDTO accesoUserDTO) {
+        Acceso existingAcceso = accesoRepository.findById(idUsuario)
+                .orElseThrow(() -> new BadRequestException("No existe un acceso con ID: " + idUsuario));
+
+        List<ApiValidationError> errors = new java.util.ArrayList<>();
+
+        if (!existingAcceso.getUsername().equals(accesoUserDTO.username())
+                && accesoRepository.existsByUsername(accesoUserDTO.username())) {
+            errors.add(new ApiValidationError("username", "El username ya está en uso"));
+        }
+
+        if (!existingAcceso.getCorreoAcceso().equals(accesoUserDTO.correoAcceso())
+                && accesoRepository.existsByCorreoAcceso(accesoUserDTO.correoAcceso())) {
+            errors.add(new ApiValidationError("correoAcceso", "El correo ya está en uso"));
+        }
+
+        if (!errors.isEmpty()) {
+            throw new ConflictException("Campos duplicados en la actualización", errors);
+        }
+
+        if (accesoUserDTO.username() != null) {
+            existingAcceso.setUsername(accesoUserDTO.username());
+        }
+        if (accesoUserDTO.correoAcceso() != null) {
+            existingAcceso.setCorreoAcceso(accesoUserDTO.correoAcceso());
+        }
+
+        return accesoRepository.save(existingAcceso);
     }
 
 }
