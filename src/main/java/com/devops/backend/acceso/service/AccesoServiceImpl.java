@@ -1,6 +1,7 @@
 package com.devops.backend.acceso.service;
 
 import com.devops.backend.acceso.dto.AccesoUserDTO;
+import com.devops.backend.acceso.dto.ActualizarPasswordUserDTO;
 import com.devops.backend.acceso.entity.*;
 import com.devops.backend.acceso.repository.*;
 import com.devops.backend.exception.ApiValidationError;
@@ -145,6 +146,47 @@ public class AccesoServiceImpl implements AccesoService {
                 .orElseThrow(() -> new BadRequestException("No existe un acceso con ID: " + idUsuario));
 
         acceso.setEstadoCuenta("INACTIVO");
+        return accesoRepository.save(acceso);
+    }
+
+    @Override
+    @Transactional
+    public Acceso activarCuenta(Long idUsuario) {
+        Acceso acceso = accesoRepository.findById(idUsuario)
+                .orElseThrow(() -> new BadRequestException("No existe un acceso con ID: " + idUsuario));
+
+        acceso.setEstadoCuenta("ACTIVO");
+        acceso.setIntentosFallidos(0);
+        return accesoRepository.save(acceso);
+    }
+
+    @Override
+    @Transactional
+    public Acceso bloquearCuenta(Long idUsuario) {
+        Acceso acceso = accesoRepository.findById(idUsuario)
+                .orElseThrow(() -> new BadRequestException("No existe un acceso con ID: " + idUsuario));
+
+        acceso.setEstadoCuenta("BLOQUEADO");
+        return accesoRepository.save(acceso);
+    }
+
+    @Override
+    @Transactional
+    public Acceso cambiarPassword(Long idUsuario, ActualizarPasswordUserDTO passwordDTO) {
+        Acceso acceso = accesoRepository.findById(idUsuario)
+                .orElseThrow(() -> new BadRequestException("No existe un acceso con ID: " + idUsuario));
+
+        // Validar que la contraseña actual sea correcta
+        if (!passwordEncoder.matches(passwordDTO.passwordActual(), acceso.getClaveAcceso())) {
+            throw new BadRequestException("La contraseña actual es incorrecta");
+        }
+
+        // Encriptar y guardar la nueva contraseña
+        acceso.setClaveAcceso(passwordEncoder.encode(passwordDTO.passwordNueva()));
+
+        // Resetear intentos fallidos
+        acceso.setIntentosFallidos(0);
+
         return accesoRepository.save(acceso);
     }
 

@@ -3,6 +3,7 @@ package com.devops.backend.acceso.controller;
 import com.devops.backend.acceso.dto.CreateAccesoAdminRequestDTO;
 import com.devops.backend.acceso.dto.AccesoAdminDTO;
 import com.devops.backend.acceso.dto.AccesoUserDTO;
+import com.devops.backend.acceso.dto.ActualizarPasswordUserDTO;
 import com.devops.backend.acceso.entity.Acceso;
 import com.devops.backend.acceso.mappers.AccesoMapper;
 import com.devops.backend.acceso.service.AccesoService;
@@ -94,5 +95,36 @@ public class AccesoController {
             AccesoUserDTO responseDTO = accesoMapper.toAccesoUserDTO(acceso);
             return ResponseEntity.ok(responseDTO);
         }
+    }
+
+    @PatchMapping("/{idUsuario}/activar")
+    public ResponseEntity<AccesoAdminDTO> activarCuenta(
+            @PathVariable("idUsuario") Long idUsuario) {
+
+        Acceso acceso = accesoService.activarCuenta(idUsuario);
+        AccesoAdminDTO responseDTO = accesoMapper.toAccesoAdminDTO(acceso);
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    @PatchMapping("/{idUsuario}/bloquear")
+    public ResponseEntity<AccesoAdminDTO> bloquearCuenta(
+            @PathVariable("idUsuario") Long idUsuario) {
+
+        Acceso acceso = accesoService.bloquearCuenta(idUsuario);
+        AccesoAdminDTO responseDTO = accesoMapper.toAccesoAdminDTO(acceso);
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    @PatchMapping("/cambiar-password")
+    public ResponseEntity<AccesoUserDTO> cambiarPassword(
+            @Valid @RequestBody ActualizarPasswordUserDTO passwordDTO,
+            Authentication authentication) {
+
+        // Obtener el idUsuario del token
+        Long idUsuario = Long.parseLong(authentication.getName());
+
+        Acceso acceso = accesoService.cambiarPassword(idUsuario, passwordDTO);
+        AccesoUserDTO responseDTO = accesoMapper.toAccesoUserDTO(acceso);
+        return ResponseEntity.ok(responseDTO);
     }
 }

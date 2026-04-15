@@ -1,6 +1,7 @@
 package com.devops.backend.acceso.service;
 
 import com.devops.backend.acceso.dto.AccesoUserDTO;
+import com.devops.backend.acceso.dto.ActualizarPasswordUserDTO;
 import com.devops.backend.acceso.entity.*;
 
 import java.util.List;
@@ -19,4 +20,10 @@ public interface AccesoService {
     Acceso update(Long idUsuario, AccesoUserDTO accesoUserDTO);
 
     Acceso desactivarCuenta(Long idUsuario);
+
+    Acceso activarCuenta(Long idUsuario);
+
+    Acceso bloquearCuenta(Long idUsuario);
+
+    Acceso cambiarPassword(Long idUsuario, ActualizarPasswordUserDTO passwordDTO);
 }
