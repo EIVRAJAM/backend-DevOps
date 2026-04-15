@@ -1,6 +1,7 @@
 package com.devops.backend.acceso.mappers;
 
 import com.devops.backend.acceso.dto.AccesoAdminDTO;
+import com.devops.backend.acceso.dto.AccesoUserDTO;
 import com.devops.backend.acceso.entity.Acceso;
 import org.springframework.stereotype.Component;
 
@@ -22,5 +23,15 @@ public class AccesoMapper {
                 acceso.getUltimoLogin(),
                 acceso.getCreadoEn(),
                 acceso.getActualizadoEn());
+    }
+
+    public AccesoUserDTO toAccesoUserDTO(Acceso acceso) {
+        if (acceso == null) {
+            return null;
+        }
+
+        return new AccesoUserDTO(
+                acceso.getUsername(),
+                acceso.getCorreoAcceso());
     }
 }
