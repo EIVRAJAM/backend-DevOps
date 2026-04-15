@@ -75,4 +75,24 @@ public class AccesoController {
                 .toList();
         return ResponseEntity.ok(accesos);
     }
+
+    @PatchMapping("/{idUsuario}/desactivar")
+    public ResponseEntity<?> desactivarCuenta(
+            @PathVariable("idUsuario") Long idUsuario,
+            Authentication authentication) {
+
+        Acceso acceso = accesoService.desactivarCuenta(idUsuario);
+
+        // Verificar si el usuario autenticado tiene rol de ADMIN
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            AccesoAdminDTO responseDTO = accesoMapper.toAccesoAdminDTO(acceso);
+            return ResponseEntity.ok(responseDTO);
+        } else {
+            AccesoUserDTO responseDTO = accesoMapper.toAccesoUserDTO(acceso);
+            return ResponseEntity.ok(responseDTO);
+        }
+    }
 }

@@ -162,11 +162,11 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Contraseña incorrecta");
         }
 
-        if ("DESACTIVADO".equalsIgnoreCase(acceso.getEstadoCuenta())) {
-            throw new RuntimeException("La cuenta está desactivada");
+        if ("INACTIVO".equalsIgnoreCase(acceso.getEstadoCuenta())) {
+            throw new RuntimeException("La cuenta está  inactiva");
         }
         if ("BLOQUEADO".equalsIgnoreCase(acceso.getEstadoCuenta())) {
-            throw new RuntimeException("La cuenta está bloqueada");
+            throw new RuntimeException("La cuenta está bloqueada, por favor contacte al soporte");
         }
 
         String token = Jwts.builder()

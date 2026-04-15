@@ -138,4 +138,14 @@ public class AccesoServiceImpl implements AccesoService {
         return accesoRepository.save(existingAcceso);
     }
 
+    @Override
+    @Transactional
+    public Acceso desactivarCuenta(Long idUsuario) {
+        Acceso acceso = accesoRepository.findById(idUsuario)
+                .orElseThrow(() -> new BadRequestException("No existe un acceso con ID: " + idUsuario));
+
+        acceso.setEstadoCuenta("INACTIVO");
+        return accesoRepository.save(acceso);
+    }
+
 }

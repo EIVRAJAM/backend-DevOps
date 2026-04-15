@@ -17,4 +17,6 @@ public interface AccesoService {
     Acceso saveWithDefaultPassword(Long idUsuario, String username, String correoAcceso);
 
     Acceso update(Long idUsuario, AccesoUserDTO accesoUserDTO);
+
+    Acceso desactivarCuenta(Long idUsuario);
 }
