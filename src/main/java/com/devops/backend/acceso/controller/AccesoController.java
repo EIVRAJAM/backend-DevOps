@@ -4,6 +4,7 @@ import com.devops.backend.acceso.dto.CreateAccesoAdminRequestDTO;
 import com.devops.backend.acceso.dto.AccesoAdminDTO;
 import com.devops.backend.acceso.dto.AccesoUserDTO;
 import com.devops.backend.acceso.dto.ActualizarPasswordUserDTO;
+import com.devops.backend.acceso.dto.ActualizarPasswordAdminDTO;
 import com.devops.backend.acceso.entity.Acceso;
 import com.devops.backend.acceso.mappers.AccesoMapper;
 import com.devops.backend.acceso.service.AccesoService;
@@ -125,6 +126,16 @@ public class AccesoController {
 
         Acceso acceso = accesoService.cambiarPassword(idUsuario, passwordDTO);
         AccesoUserDTO responseDTO = accesoMapper.toAccesoUserDTO(acceso);
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    @PatchMapping("/{idUsuario}/cambiar-password-admin")
+    public ResponseEntity<AccesoAdminDTO> cambiarPasswordAdmin(
+            @PathVariable("idUsuario") Long idUsuario,
+            @Valid @RequestBody ActualizarPasswordAdminDTO passwordDTO) {
+
+        Acceso acceso = accesoService.cambiarPasswordAdmin(idUsuario, passwordDTO);
+        AccesoAdminDTO responseDTO = accesoMapper.toAccesoAdminDTO(acceso);
         return ResponseEntity.ok(responseDTO);
     }
 }

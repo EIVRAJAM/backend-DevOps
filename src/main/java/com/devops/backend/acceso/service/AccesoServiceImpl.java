@@ -2,6 +2,7 @@ package com.devops.backend.acceso.service;
 
 import com.devops.backend.acceso.dto.AccesoUserDTO;
 import com.devops.backend.acceso.dto.ActualizarPasswordUserDTO;
+import com.devops.backend.acceso.dto.ActualizarPasswordAdminDTO;
 import com.devops.backend.acceso.entity.*;
 import com.devops.backend.acceso.repository.*;
 import com.devops.backend.exception.ApiValidationError;
@@ -180,6 +181,21 @@ public class AccesoServiceImpl implements AccesoService {
         if (!passwordEncoder.matches(passwordDTO.passwordActual(), acceso.getClaveAcceso())) {
             throw new BadRequestException("La contraseña actual es incorrecta");
         }
+
+        // Encriptar y guardar la nueva contraseña
+        acceso.setClaveAcceso(passwordEncoder.encode(passwordDTO.passwordNueva()));
+
+        // Resetear intentos fallidos
+        acceso.setIntentosFallidos(0);
+
+        return accesoRepository.save(acceso);
+    }
+
+    @Override
+    @Transactional
+    public Acceso cambiarPasswordAdmin(Long idUsuario, ActualizarPasswordAdminDTO passwordDTO) {
+        Acceso acceso = accesoRepository.findById(idUsuario)
+                .orElseThrow(() -> new BadRequestException("No existe un acceso con ID: " + idUsuario));
 
         // Encriptar y guardar la nueva contraseña
         acceso.setClaveAcceso(passwordEncoder.encode(passwordDTO.passwordNueva()));
