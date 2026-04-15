@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import com.devops.backend.acceso.util.PasswordGeneratorUtil;
 
 @Service
 public class AccesoServiceImpl implements AccesoService {
@@ -64,6 +65,39 @@ public class AccesoServiceImpl implements AccesoService {
         // Encriptar clave
         acceso.setClaveAcceso(passwordEncoder.encode(acceso.getClaveAcceso()));
         System.out.println(acceso.getClaveAcceso());
+        return accesoRepository.save(acceso);
+    }
+
+    @Override
+    @Transactional
+    public Acceso saveWithDefaultPassword(Long idUsuario, String username, String correoAcceso) {
+        // Validar existencia de usuario
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new BadRequestException("No existe un usuario con ID: " + idUsuario));
+
+        // Validar unicidad de username y correo
+        List<ApiValidationError> errors = new java.util.ArrayList<>();
+        if (accesoRepository.existsByUsername(username)) {
+            errors.add(new ApiValidationError("username", "El username ya está en uso"));
+        }
+
+        if (accesoRepository.existsByCorreoAcceso(correoAcceso)) {
+            errors.add(new ApiValidationError("correoAcceso", "El correo ya está en uso"));
+        }
+
+        if (!errors.isEmpty()) {
+            throw new ConflictException("Campos duplicados en el registro", errors);
+        }
+
+        // Crear entidad Acceso con contraseña aleatoria generada
+        Acceso acceso = new Acceso();
+        acceso.setUsuario(usuario);
+        acceso.setUsername(username);
+        acceso.setCorreoAcceso(correoAcceso);
+        acceso.setClaveAcceso(passwordEncoder.encode(PasswordGeneratorUtil.generateSecurePassword()));
+        acceso.setEstadoCuenta("ACTIVO");
+        acceso.setIntentosFallidos(0);
+
         return accesoRepository.save(acceso);
     }
 

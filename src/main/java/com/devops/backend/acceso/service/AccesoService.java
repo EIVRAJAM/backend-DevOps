@@ -7,5 +7,8 @@ import java.util.List;
 public interface AccesoService {
 
     List<Acceso> findAll();
+
     Acceso save(Acceso acceso);
+
+    Acceso saveWithDefaultPassword(Long idUsuario, String username, String correoAcceso);
 }
