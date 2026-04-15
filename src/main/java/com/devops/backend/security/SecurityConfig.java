@@ -37,7 +37,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // .requestMatchers(HttpMethod.GET, "/api/acceso/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/**").permitAll() // Cualquier cosa en /api/auth/
-                        .requestMatchers(HttpMethod.POST, "/api/acceso/sign-up").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/accesos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/accesos/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/sign-in").permitAll() // ✅ Permitir la nueva ruta
                         .anyRequest().authenticated())
                 .addFilter(jwtAuthenticationFilter)
