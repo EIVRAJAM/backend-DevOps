@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -44,8 +45,8 @@ public class Acceso {
     @Column(name = "estado_cuenta", length = 20, nullable = false)
     private String estadoCuenta = "ACTIVO";
 
-    @Column(name = "uuid_acceso", length = 100)
-    private String uuidAcceso;
+    @Column(name = "uuid_acceso", nullable = false, updatable = false)
+    private UUID uuidAcceso;
 
     @Column(name = "ultimo_login")
     private LocalDateTime ultimoLogin;
@@ -60,10 +61,15 @@ public class Acceso {
     protected void onCreate() {
         creadoEn = LocalDateTime.now();
         actualizadoEn = LocalDateTime.now();
+
         if (intentosFallidos == null)
             intentosFallidos = 0;
+
         if (estadoCuenta == null)
             estadoCuenta = "ACTIVO";
+
+        if (uuidAcceso == null)
+            uuidAcceso = UUID.randomUUID();
     }
 
     @PreUpdate
