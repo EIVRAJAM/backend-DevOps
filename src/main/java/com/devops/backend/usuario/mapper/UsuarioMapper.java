@@ -3,6 +3,7 @@ package com.devops.backend.usuario.mapper;
 import com.devops.backend.auth.dto.SignUpRequest;
 import com.devops.backend.rol.entity.Rol;
 import com.devops.backend.usuario.dto.SignUpResponseUsuario;
+import com.devops.backend.usuario.dto.UserListResponse;
 import com.devops.backend.usuario.dto.UsuarioDTO;
 import com.devops.backend.usuario.entity.Usuario;
 import org.springframework.stereotype.Component;
@@ -55,5 +56,11 @@ public class UsuarioMapper {
         usuario.setRol(validRol);
         usuario.setEstado("ACTIVO");
         return usuario;
+    }
+
+    public UserListResponse toListResponse(Usuario u){
+        return new UserListResponse(u.getIdUsuario(),u.getNombres(),
+                                    u.getApellidos(), u.getDocumento(),
+                                    u.getRol().getNombreRol());
     }
 }

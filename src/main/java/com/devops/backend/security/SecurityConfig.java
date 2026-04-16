@@ -39,7 +39,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/**").permitAll() // Cualquier cosa en /api/auth/
                         .requestMatchers(HttpMethod.POST, "/api/acceso/sign-up").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/sign-in").permitAll() // ✅ Permitir la nueva ruta
-                        .requestMatchers(HttpMethod.POST, "/usuarios").permitAll() // Permito la nueva ruta usuarios
+                        .requestMatchers(HttpMethod.POST, "/usuarios/**").permitAll() // Cualquier POST  en /api/usuarios/
+                        .requestMatchers(HttpMethod.GET, "/usuarios/**").permitAll() // Cualquier GET en /api/usuarios/
+                        .requestMatchers(HttpMethod.PUT, "/usuarios/**").permitAll() // Cualquier GET en /api/usuarios/
+                        .requestMatchers(HttpMethod.PATCH, "/usuarios/**").permitAll() // Cualquier GET en /api/usuarios/
                         .anyRequest().authenticated())
                 .addFilter(jwtAuthenticationFilter)
                 .addFilter(jwtValidationFilter)

@@ -8,6 +8,7 @@ import com.devops.backend.exception.ConflictException;
 import com.devops.backend.rol.entity.Rol;
 import com.devops.backend.rol.repository.RolRepository;
 import com.devops.backend.usuario.dto.SignUpResponseUsuario;
+import com.devops.backend.usuario.dto.UserListResponse;
 import com.devops.backend.usuario.dto.UsuarioDTO;
 import com.devops.backend.usuario.entity.Usuario;
 import com.devops.backend.usuario.mapper.UsuarioMapper;
@@ -15,6 +16,8 @@ import com.devops.backend.usuario.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
@@ -74,6 +77,15 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         return usuarioRepository.save(usuarioMapper.toUsuario(dto,validRol));
     }
+
+    @Override
+    public List<UserListResponse> getAllUsers() {
+
+        return StreamSupport.stream(usuarioRepository.findAll().spliterator(),false).
+                //    Nota: Aclarar con el equipo si lo dejamos la lista modificable o sin modifical .collect(Collectors.toList()
+                map(usuarioMapper::toListResponse).toList();
+    }
+
     private void validacionesDto(UsuarioDTO dto) {
 
         List<ApiValidationError> errors = new ArrayList<>();
