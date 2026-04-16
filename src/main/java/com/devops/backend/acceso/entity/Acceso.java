@@ -60,7 +60,7 @@ public class Acceso {
     @PrePersist
     protected void onCreate() {
         creadoEn = LocalDateTime.now();
-        // actualizadoEn = LocalDateTime.now();
+        actualizadoEn = LocalDateTime.now();
 
         if (intentosFallidos == null)
             intentosFallidos = 0;
