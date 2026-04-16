@@ -2,17 +2,16 @@ package com.devops.backend.usuario.service;
 
 import com.devops.backend.acceso.repository.AccesoRepository;
 import com.devops.backend.auth.dto.SignUpRequest;
-import com.devops.backend.auth.dto.SignUpResponse;
 import com.devops.backend.exception.ApiValidationError;
 import com.devops.backend.exception.BadRequestException;
 import com.devops.backend.exception.ConflictException;
-import com.devops.backend.exception.ValidationException;
 import com.devops.backend.rol.entity.Rol;
 import com.devops.backend.rol.repository.RolRepository;
+import com.devops.backend.usuario.dto.SignUpResponseUsuario;
 import com.devops.backend.usuario.dto.UsuarioDTO;
 import com.devops.backend.usuario.entity.Usuario;
+import com.devops.backend.usuario.mapper.UsuarioMapper;
 import com.devops.backend.usuario.repository.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,43 +22,26 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final RolRepository rolRepository;
     private final AccesoRepository accesoRepository;
-
+    private final UsuarioMapper usuarioMapper;
     private static final String DEFAULT_ROLE = "ROLE_USER";
-    private static final short GENERO_MASCULINO_CODE = 1;
-    private static final short GENERO_FEMENINO_CODE = 2;
+
 
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository,
-                              RolRepository rolRepository, AccesoRepository accesoRepository) {
-
+                              RolRepository rolRepository, AccesoRepository accesoRepository, UsuarioMapper usuarioMapper) {
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRepository;
         this.accesoRepository = accesoRepository;
+        this.usuarioMapper = usuarioMapper;
     }
 
     @Override
-    public Usuario saveUser(SignUpRequest signupRequest) {
+    public SignUpResponseUsuario saveUser(SignUpRequest signupRequest) {
 
         Long idRol = obtenerRolPorDefecto();
         validaciones(signupRequest);
+        Usuario usuario = save(usuarioMapper.toDTO(signupRequest,idRol));
 
-        Short generoShort = signupRequest.genero().equalsIgnoreCase("masculino") ? (short) 1 : (short) 2;
-
-
-        java.time.LocalDate fechaNacimiento = null;
-        if (signupRequest.fechaNacimiento() != null) {
-            fechaNacimiento = new java.sql.Date(signupRequest.fechaNacimiento().getTime()).toLocalDate();
-        }
-        // Aqui Construyo el UsuarioDTO y delego a save()
-        UsuarioDTO dto = new UsuarioDTO(
-                signupRequest.documento(),
-                signupRequest.nombres(),
-                signupRequest.apellidos(),
-                generoShort,
-                fechaNacimiento,
-                signupRequest.telefono(),
-                idRol
-        );
-        return save(dto);
+        return  usuarioMapper.toResponse(usuario);
     }
 
     private void validaciones(SignUpRequest signupRequest) {
@@ -84,6 +66,16 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public Usuario save(UsuarioDTO dto) {
+        validacionesDto(dto);
+
+        // Obtener el rol válido desde la BD
+        Rol validRol = rolRepository.findById(dto.idRol())
+                .orElseThrow(() -> new BadRequestException("El rol con ID " + dto.idRol() + " no existe"));
+
+        return usuarioRepository.save(usuarioMapper.toUsuario(dto,validRol));
+    }
+    private void validacionesDto(UsuarioDTO dto) {
+
         List<ApiValidationError> errors = new ArrayList<>();
 
         // Validar que el documento no esté repetido
@@ -102,22 +94,5 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new ConflictException("Campos duplicados o inválidos en el registro", errors);
         }
 
-        // Obtener el rol válido desde la BD
-        Rol validRol = rolRepository.findById(dto.idRol())
-                .orElseThrow(() -> new BadRequestException("El rol con ID " + dto.idRol() + " no existe"));
-
-        // Mapear el DTO a entidad
-        Usuario usuario = new Usuario();
-        usuario.setDocumento(dto.documento());
-        usuario.setNombres(dto.nombres());
-        usuario.setApellidos(dto.apellidos());
-        usuario.setGenero(dto.genero());
-        usuario.setFechaNacimiento(dto.fechaNacimiento());
-        usuario.setTelefono(dto.telefono());
-        usuario.setRol(validRol);
-        usuario.setEstado("ACTIVO");
-
-        return usuarioRepository.save(usuario);
     }
-
 }

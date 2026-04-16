@@ -2,6 +2,7 @@ package com.devops.backend.usuario.controller;
 
 
 import com.devops.backend.auth.dto.SignUpRequest;
+import com.devops.backend.usuario.dto.SignUpResponseUsuario;
 import com.devops.backend.usuario.entity.Usuario;
 import com.devops.backend.usuario.service.UsuarioService;
 import jakarta.validation.Valid;
@@ -24,7 +25,7 @@ public class UsuarioController {
     }
 
     @PostMapping()
-    public ResponseEntity<Usuario> add(@Valid @RequestBody SignUpRequest signUpRequest){
+    public ResponseEntity<SignUpResponseUsuario> add(@Valid @RequestBody SignUpRequest signUpRequest){
         return ResponseEntity.status(HttpStatus.CREATED).body(uService.saveUser(signUpRequest));
     }
 }
