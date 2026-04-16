@@ -53,5 +53,8 @@ public class UsuarioController {
         return ResponseEntity.ok(uService.findById(id));
     }
 
-
+    @GetMapping("/document/{document}")   // <-- separado para evitar colisión con /{id}
+    public ResponseEntity<UserListResponse> findByDocument(@PathVariable String document) {
+        return ResponseEntity.ok(uService.findByDocumento(document));
+    }
 }
