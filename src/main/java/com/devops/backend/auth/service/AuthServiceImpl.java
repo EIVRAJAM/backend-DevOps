@@ -159,6 +159,16 @@ public class AuthServiceImpl implements AuthService {
                 "Usuario no encontrado con el correo o username proporcionado"));
 
         if (!passwordEncoder.matches(loginRequest.password(), acceso.getClaveAcceso())) {
+            acceso.setIntentosFallidos(acceso.getIntentosFallidos() + 1);
+            accesoRepository.save(acceso);
+
+            // Se bloquea la cuenta si alcanza 5 intentos fallidos
+            if (acceso.getIntentosFallidos() >= 5) {
+                accesoService.bloquearCuenta(acceso.getIdUsuario());
+                throw new RuntimeException(
+                        "La cuenta ha sido bloqueada por exceso de intentos fallidos. Por favor contacte al soporte");
+            }
+
             throw new RuntimeException("Contraseña incorrecta");
         }
 
@@ -168,6 +178,10 @@ public class AuthServiceImpl implements AuthService {
         if ("BLOQUEADO".equalsIgnoreCase(acceso.getEstadoCuenta())) {
             throw new RuntimeException("La cuenta está bloqueada, por favor contacte al soporte");
         }
+
+        // Resetear intentos fallidos en login exitoso
+        acceso.setIntentosFallidos(0);
+        accesoRepository.save(acceso);
 
         String token = Jwts.builder()
                 .subject(acceso.getIdUsuario().toString())
