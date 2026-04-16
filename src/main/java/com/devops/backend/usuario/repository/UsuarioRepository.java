@@ -10,4 +10,6 @@ public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
 
     Optional<Usuario> findByDocumento(String documento);
     Optional<Usuario> findByIdUsuario(Long idUsuario);
+
+
 }

@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/accesos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/accesos/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/sign-in").permitAll() // ✅ Permitir la nueva ruta
+                        .requestMatchers(HttpMethod.POST, "/usuarios").permitAll() // Permito la nueva ruta usuarios
                         .anyRequest().authenticated())
                 .addFilter(jwtAuthenticationFilter)
                 .addFilter(jwtValidationFilter)
