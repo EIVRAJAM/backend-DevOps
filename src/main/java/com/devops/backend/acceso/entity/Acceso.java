@@ -60,7 +60,7 @@ public class Acceso {
     @PrePersist
     protected void onCreate() {
         creadoEn = LocalDateTime.now();
-        actualizadoEn = LocalDateTime.now();
+        // actualizadoEn = LocalDateTime.now();
 
         if (intentosFallidos == null)
             intentosFallidos = 0;
@@ -70,10 +70,5 @@ public class Acceso {
 
         if (uuidAcceso == null)
             uuidAcceso = UUID.randomUUID();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        actualizadoEn = LocalDateTime.now();
     }
 }

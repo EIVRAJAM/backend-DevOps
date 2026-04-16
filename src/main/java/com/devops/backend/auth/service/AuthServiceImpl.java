@@ -47,6 +47,9 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private IntentoService intentoService;
+
     @Autowired // revisarrrrrrrrrrr
     private SesionRepository sesionRepository;
 
@@ -148,6 +151,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public Map<String, String> login(LoginRequest loginRequest) {
         Optional<Acceso> optionalAcceso = accesoRepository.findByCorreoAcceso(loginRequest.usernameOrEmail());
 
@@ -158,19 +162,6 @@ public class AuthServiceImpl implements AuthService {
         Acceso acceso = optionalAcceso.orElseThrow(() -> new RuntimeException(
                 "Usuario no encontrado con el correo o username proporcionado"));
 
-        if (!passwordEncoder.matches(loginRequest.password(), acceso.getClaveAcceso())) {
-            acceso.setIntentosFallidos(acceso.getIntentosFallidos() + 1);
-            accesoRepository.save(acceso);
-
-            // Se bloquea la cuenta si alcanza 5 intentos fallidos
-            if (acceso.getIntentosFallidos() >= 5) {
-                accesoService.bloquearCuenta(acceso.getIdUsuario());
-                throw new RuntimeException(
-                        "La cuenta ha sido bloqueada por exceso de intentos fallidos. Por favor contacte al soporte");
-            }
-
-            throw new RuntimeException("Contraseña incorrecta");
-        }
 
         if ("INACTIVO".equalsIgnoreCase(acceso.getEstadoCuenta())) {
             throw new RuntimeException("La cuenta está  inactiva");
@@ -178,6 +169,28 @@ public class AuthServiceImpl implements AuthService {
         if ("BLOQUEADO".equalsIgnoreCase(acceso.getEstadoCuenta())) {
             throw new RuntimeException("La cuenta está bloqueada, por favor contacte al soporte");
         }
+
+        if (!passwordEncoder.matches(loginRequest.password(), acceso.getClaveAcceso())) {
+            // Registrar intento fallido en transacción independiente (REQUIRES_NEW)
+            try {
+                intentoService.registrarIntentoFallido(acceso.getIdUsuario());
+            } catch (Exception e) {
+                // Log pero continúa - no afecta el flujo principal
+                System.err.println("Error al registrar intento fallido: " + e.getMessage());
+            }
+
+            throw new RuntimeException("Contraseña incorrecta");
+        }
+        
+        if ("INACTIVO".equalsIgnoreCase(acceso.getEstadoCuenta())) {
+            throw new RuntimeException("La cuenta está  inactiva");
+        }
+        if ("BLOQUEADO".equalsIgnoreCase(acceso.getEstadoCuenta())) {
+            throw new RuntimeException("La cuenta está bloqueada, por favor contacte al soporte");
+        }
+
+        // Registrar último login exitoso
+        acceso.setUltimoLogin(java.time.LocalDateTime.now());
 
         // Resetear intentos fallidos en login exitoso
         acceso.setIntentosFallidos(0);
