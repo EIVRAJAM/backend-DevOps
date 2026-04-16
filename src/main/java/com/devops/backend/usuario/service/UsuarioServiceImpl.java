@@ -19,7 +19,10 @@ import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -90,14 +93,14 @@ public class UsuarioServiceImpl implements UsuarioService {
     public UserListResponse findById(Long id) {
         return usuarioRepository.findByIdUsuario(id)
                 .map(usuarioMapper::toListResponse)
-                .orElseThrow(() -> new BadRequestException("Usuario con ID " + id + " no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404),"Usuario con ID " + id + " no encontrado"));
     }
 
     @Override
     public UserListResponse findByDocumento(String documento) {
         return usuarioRepository.findByDocumento(documento)
                 .map(usuarioMapper::toListResponse)
-                .orElseThrow(() -> new BadRequestException("Usuario con documento " + documento + " no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404),"Usuario con documento " + documento + " no encontrado"));
     }
 
     @Override
