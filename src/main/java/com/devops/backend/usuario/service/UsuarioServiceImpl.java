@@ -24,6 +24,9 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final RolRepository rolRepository;
     private final AccesoRepository accesoRepository;
 
+    private static final String DEFAULT_ROLE = "ROLE_USER";
+    private static final short GENERO_MASCULINO_CODE = 1;
+    private static final short GENERO_FEMENINO_CODE = 2;
 
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository,
                               RolRepository rolRepository, AccesoRepository accesoRepository) {
@@ -36,25 +39,17 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public Usuario saveUser(SignUpRequest signupRequest) {
 
-        String defaultRoleName = "ROLE_USER";
-
-        Long idRol = rolRepository.findByNombreRol(defaultRoleName)
-                .orElseThrow(() -> new BadRequestException("El rol por defecto ROLE_USER no está disponible"))
-                .getIdRol();
-
-        List<ApiValidationError> signupErrors = validaciones(signupRequest);
-        if (!signupErrors.isEmpty()) {
-            throw new ValidationException("Errores en el registro", signupErrors);
-        }
+        Long idRol = obtenerRolPorDefecto();
+        validaciones(signupRequest);
 
         Short generoShort = signupRequest.genero().equalsIgnoreCase("masculino") ? (short) 1 : (short) 2;
+
 
         java.time.LocalDate fechaNacimiento = null;
         if (signupRequest.fechaNacimiento() != null) {
             fechaNacimiento = new java.sql.Date(signupRequest.fechaNacimiento().getTime()).toLocalDate();
         }
         // Aqui Construyo el UsuarioDTO y delego a save()
-
         UsuarioDTO dto = new UsuarioDTO(
                 signupRequest.documento(),
                 signupRequest.nombres(),
@@ -64,11 +59,10 @@ public class UsuarioServiceImpl implements UsuarioService {
                 signupRequest.telefono(),
                 idRol
         );
-
         return save(dto);
     }
 
-    private List<ApiValidationError> validaciones(SignUpRequest signupRequest) {
+    private void validaciones(SignUpRequest signupRequest) {
         List<ApiValidationError> errors = new ArrayList<>();
         if (accesoRepository.existsByUsername(signupRequest.username())) {
             errors.add(new ApiValidationError("username", "El username ya está en uso"));
@@ -79,7 +73,13 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (!errors.isEmpty()) {
             throw new ConflictException("Campos duplicados en el registro", errors);
         }
-        return errors;
+    }
+
+    private Long obtenerRolPorDefecto() {
+        return rolRepository.findByNombreRol(DEFAULT_ROLE)
+                .orElseThrow(() -> new BadRequestException(
+                        "El rol por defecto " + DEFAULT_ROLE + " no está disponible"))
+                .getIdRol();
     }
 
     @Override
