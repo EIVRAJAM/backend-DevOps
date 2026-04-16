@@ -15,12 +15,14 @@ import com.devops.backend.usuario.entity.Usuario;
 import com.devops.backend.usuario.mapper.UsuarioMapper;
 import com.devops.backend.usuario.repository.UsuarioRepository;
 import com.devops.backend.usuario.specification.UsuarioSpecification;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 
@@ -81,6 +83,21 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .orElseThrow(() -> new BadRequestException("El rol con ID " + dto.idRol() + " no existe"));
 
         return usuarioRepository.save(usuarioMapper.toUsuario(dto,validRol));
+    }
+
+
+    @Override
+    public UserListResponse findById(Long id) {
+        return usuarioRepository.findByIdUsuario(id)
+                .map(usuarioMapper::toListResponse)
+                .orElseThrow(() -> new BadRequestException("Usuario con ID " + id + " no encontrado"));
+    }
+
+    @Override
+    public UserListResponse findByDocumento(String documento) {
+        return usuarioRepository.findByDocumento(documento)
+                .map(usuarioMapper::toListResponse)
+                .orElseThrow(() -> new BadRequestException("Usuario con documento " + documento + " no encontrado"));
     }
 
     @Override

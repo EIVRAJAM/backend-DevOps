@@ -48,4 +48,10 @@ public class UsuarioController {
         );
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<UserListResponse> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(uService.findById(id));
+    }
+
+
 }
