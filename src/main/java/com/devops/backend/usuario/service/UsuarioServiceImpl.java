@@ -1,5 +1,8 @@
 package com.devops.backend.usuario.service;
 
+import com.devops.backend.acceso.repository.AccesoRepository;
+import com.devops.backend.auth.dto.SignUpRequest;
+import com.devops.backend.auth.dto.SignUpResponse;
 import com.devops.backend.exception.ApiValidationError;
 import com.devops.backend.exception.BadRequestException;
 import com.devops.backend.exception.ConflictException;
@@ -16,11 +19,48 @@ import java.util.List;
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final RolRepository rolRepository;
+    private final AccesoRepository accesoRepository;
 
-    @Autowired
-    private RolRepository RolRepository;
+
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository,
+                              RolRepository rolRepository, AccesoRepository accesoRepository) {
+
+        this.usuarioRepository = usuarioRepository;
+        this.rolRepository = rolRepository;
+        this.accesoRepository = accesoRepository;
+    }
+
+    @Override
+    public Usuario saveUser(SignUpRequest signupRequest) {
+
+        String defaultRoleName = "ROLE_USER";
+
+        Long idRol = rolRepository.findByNombreRol(defaultRoleName)
+                .orElseThrow(() -> new BadRequestException("El rol por defecto ROLE_USER no está disponible"))
+                .getIdRol();
+
+        Short generoShort = signupRequest.genero().equalsIgnoreCase("masculino") ? (short) 1 : (short) 2;
+
+        java.time.LocalDate fechaNacimiento = null;
+        if (signupRequest.fechaNacimiento() != null) {
+            fechaNacimiento = new java.sql.Date(signupRequest.fechaNacimiento().getTime()).toLocalDate();
+        }
+        // Aqui Construyo el UsuarioDTO y delego a save()
+
+        UsuarioDTO dto = new UsuarioDTO(
+                signupRequest.documento(),
+                signupRequest.nombres(),
+                signupRequest.apellidos(),
+                generoShort,
+                fechaNacimiento,
+                signupRequest.telefono(),
+                idRol
+        );
+
+        return save(dto);
+    }
 
     @Override
     public Usuario save(UsuarioDTO dto) {
@@ -43,7 +83,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
 
         // Obtener el rol válido desde la BD
-        Rol validRol = RolRepository.findById(dto.idRol())
+        Rol validRol = rolRepository.findById(dto.idRol())
                 .orElseThrow(() -> new BadRequestException("El rol con ID " + dto.idRol() + " no existe"));
 
         // Mapear el DTO a entidad
