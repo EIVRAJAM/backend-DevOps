@@ -6,6 +6,7 @@ import com.devops.backend.auth.dto.SignUpResponse;
 import com.devops.backend.exception.ApiValidationError;
 import com.devops.backend.exception.BadRequestException;
 import com.devops.backend.exception.ConflictException;
+import com.devops.backend.exception.ValidationException;
 import com.devops.backend.rol.entity.Rol;
 import com.devops.backend.rol.repository.RolRepository;
 import com.devops.backend.usuario.dto.UsuarioDTO;
@@ -41,6 +42,11 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .orElseThrow(() -> new BadRequestException("El rol por defecto ROLE_USER no está disponible"))
                 .getIdRol();
 
+        List<ApiValidationError> signupErrors = validaciones(signupRequest);
+        if (!signupErrors.isEmpty()) {
+            throw new ValidationException("Errores en el registro", signupErrors);
+        }
+
         Short generoShort = signupRequest.genero().equalsIgnoreCase("masculino") ? (short) 1 : (short) 2;
 
         java.time.LocalDate fechaNacimiento = null;
@@ -60,6 +66,20 @@ public class UsuarioServiceImpl implements UsuarioService {
         );
 
         return save(dto);
+    }
+
+    private List<ApiValidationError> validaciones(SignUpRequest signupRequest) {
+        List<ApiValidationError> errors = new ArrayList<>();
+        if (accesoRepository.existsByUsername(signupRequest.username())) {
+            errors.add(new ApiValidationError("username", "El username ya está en uso"));
+        }
+        if (accesoRepository.existsByCorreoAcceso(signupRequest.correoAcceso())) {
+            errors.add(new ApiValidationError("correoAcceso", "El correo ya está registrado"));
+        }
+        if (!errors.isEmpty()) {
+            throw new ConflictException("Campos duplicados en el registro", errors);
+        }
+        return errors;
     }
 
     @Override
