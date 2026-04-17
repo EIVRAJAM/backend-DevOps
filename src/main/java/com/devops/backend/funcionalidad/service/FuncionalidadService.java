@@ -1,4 +1,4 @@
-package com.devops.backend.funcionalidad.services;
+package com.devops.backend.funcionalidad.service;
 
 import com.devops.backend.funcionalidad.dto.FuncionalidadRequest;
 import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;

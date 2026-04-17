@@ -1,4 +1,4 @@
-package com.devops.backend.funcionalidad.services;
+package com.devops.backend.funcionalidad.service;
 
 import com.devops.backend.funcionalidad.dto.FuncionalidadRequest;
 import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
@@ -29,7 +29,16 @@ public class FuncionalidadServiceImp  implements FuncionalidadService{
     public FuncionalidadResponse save(FuncionalidadRequest request) {
 
         Funcionalidad padre = null;
-        validaciones(request,padre);
+        validaciones(request);
+
+        if (request.idPadre() != null) {
+            padre = funcionalidadRepository.findById(request.idPadre())
+                    .orElseGet(() -> {
+                        new ApiValidationError("idPadre", "La funcionalidad padre con ID " + request.idPadre() + " no existe");
+                        return null;
+                    });
+        }
+
 
         Funcionalidad saved = funcionalidadRepository.save(
                 funcionalidadMapper.toEntity(request, padre)
@@ -38,23 +47,16 @@ public class FuncionalidadServiceImp  implements FuncionalidadService{
         return funcionalidadMapper.toResponse(saved);
     }
 
-    private void validaciones(FuncionalidadRequest request, Funcionalidad padre){
+    private void validaciones(FuncionalidadRequest request){
         List<ApiValidationError> errors = new ArrayList<>();
 
         if (funcionalidadRepository.existsByNombreFuncionalidad(request.nombreFuncionalidad())) {
             errors.add(new ApiValidationError("nombreFuncionalidad", "Ya existe una funcionalidad con ese nombre"));
         }
 
-        if (request.idPadre() != null) {
-            padre = funcionalidadRepository.findById(request.idPadre())
-                    .orElseGet(() -> {
-                        errors.add(new ApiValidationError("idPadre", "La funcionalidad padre con ID " + request.idPadre() + " no existe"));
-                        return null;
-                    });
-        }
-
         if (!errors.isEmpty()) {
             throw new ConflictException("Campos inválidos en el registro", errors);
         }
+
     }
 }
