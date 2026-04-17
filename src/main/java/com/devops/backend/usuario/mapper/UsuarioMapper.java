@@ -2,8 +2,7 @@ package com.devops.backend.usuario.mapper;
 
 import com.devops.backend.auth.dto.SignUpRequest;
 import com.devops.backend.rol.entity.Rol;
-import com.devops.backend.usuario.dto.SignUpResponseUsuario;
-import com.devops.backend.usuario.dto.UsuarioDTO;
+import com.devops.backend.usuario.dto.*;
 import com.devops.backend.usuario.entity.Usuario;
 import org.springframework.stereotype.Component;
 
@@ -56,4 +55,29 @@ public class UsuarioMapper {
         usuario.setEstado("ACTIVO");
         return usuario;
     }
+
+    public UserListResponse toListResponse(Usuario u){
+        return new UserListResponse(u.getIdUsuario(),u.getNombres(),
+                                    u.getApellidos(), u.getDocumento(),
+                                    u.getRol().getNombreRol());
+    }
+
+    public void applyUpdate(Usuario usuario, UpdateUsuarioRequest dto, Rol rol) {
+        Short genero = dto.genero().equalsIgnoreCase("masculino")
+                ? (short) GENERO_MASCULINO_CODE : (short) GENERO_FEMENINO_CODE;
+
+        LocalDate fechaNacimiento = null;
+        if (dto.fechaNacimiento() != null) {
+            fechaNacimiento = new java.sql.Date(dto.fechaNacimiento().getTime()).toLocalDate();
+        }
+        usuario.setDocumento(dto.documento());
+        usuario.setNombres(dto.nombres());
+        usuario.setApellidos(dto.apellidos());
+        usuario.setGenero(genero);
+        usuario.setFechaNacimiento(fechaNacimiento);
+        usuario.setTelefono(dto.telefono());
+        usuario.setRol(rol);
+    }
+
+
 }
