@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface SesionRepository extends JpaRepository<Sesion, Long>, JpaSpecificationExecutor<Sesion> {
     Optional<Sesion> findByTokenJti(String tokenJti);
+
+    Optional<Sesion> findTopByUsuario_IdUsuarioOrderByFechaInicioDesc(Long idUsuario);
 }

@@ -35,4 +35,11 @@ public class UsuarioSesionController {
         SesionFilterRequest filter = new SesionFilterRequest(idUsuario, fechaInicio, fechaFin, null, page, size);
         return ResponseEntity.ok(sesionService.getAllSesiones(filter));
     }
+
+    @GetMapping("/{id}/sesiones/ultima")
+    public ResponseEntity<SesionResponseDto> findUltimaSesionByUsuario(@PathVariable("id") Long idUsuario) {
+        return sesionService.getUltimaSesionByUsuario(idUsuario)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

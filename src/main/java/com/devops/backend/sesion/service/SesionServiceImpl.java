@@ -6,6 +6,10 @@ import com.devops.backend.sesion.entity.Sesion;
 import com.devops.backend.sesion.mappers.SesionMapper;
 import com.devops.backend.sesion.repository.SesionRepository;
 import com.devops.backend.sesion.specification.SesionSpecification;
+import com.devops.backend.usuario.repository.UsuarioRepository;
+
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -17,10 +21,12 @@ public class SesionServiceImpl implements SesionService {
 
     private final SesionRepository sesionRepository;
     private final SesionMapper sesionMapper;
+    private final UsuarioRepository usuarioRepository;
 
-    public SesionServiceImpl(SesionRepository sesionRepository, SesionMapper sesionMapper) {
+    public SesionServiceImpl(SesionRepository sesionRepository, SesionMapper sesionMapper, UsuarioRepository usuarioRepository) {
         this.sesionRepository = sesionRepository;
         this.sesionMapper = sesionMapper;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
@@ -48,6 +54,16 @@ public class SesionServiceImpl implements SesionService {
         Specification<Sesion> specification = SesionSpecification.sesionesActivas();
 
         return sesionRepository.findAll(specification, PageRequest.of(page, size))
+                .map(sesionMapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<SesionResponseDto> getUltimaSesionByUsuario(Long idUsuario) {
+        if (!usuarioRepository.existsById(idUsuario)) {
+            throw new IllegalArgumentException("Usuario no encontrado");
+        }
+        return sesionRepository.findTopByUsuario_IdUsuarioOrderByFechaInicioDesc(idUsuario)
                 .map(sesionMapper::toResponse);
     }
 }
