@@ -28,14 +28,23 @@ public class FuncionalidadServiceImp  implements FuncionalidadService{
     @Override
     public FuncionalidadResponse save(FuncionalidadRequest request) {
 
+        Funcionalidad padre = null;
+        validaciones(request,padre);
+
+        Funcionalidad saved = funcionalidadRepository.save(
+                funcionalidadMapper.toEntity(request, padre)
+        );
+
+        return funcionalidadMapper.toResponse(saved);
+    }
+
+    private void validaciones(FuncionalidadRequest request, Funcionalidad padre){
         List<ApiValidationError> errors = new ArrayList<>();
 
         if (funcionalidadRepository.existsByNombreFuncionalidad(request.nombreFuncionalidad())) {
             errors.add(new ApiValidationError("nombreFuncionalidad", "Ya existe una funcionalidad con ese nombre"));
         }
 
-        // 2. Resolver el padre si viene idPadre
-        Funcionalidad padre = null;
         if (request.idPadre() != null) {
             padre = funcionalidadRepository.findById(request.idPadre())
                     .orElseGet(() -> {
@@ -47,16 +56,5 @@ public class FuncionalidadServiceImp  implements FuncionalidadService{
         if (!errors.isEmpty()) {
             throw new ConflictException("Campos inválidos en el registro", errors);
         }
-
-        // 3. Persistir
-        Funcionalidad saved = funcionalidadRepository.save(
-                funcionalidadMapper.toEntity(request, padre)
-        );
-
-        return funcionalidadMapper.toResponse(saved);
-    }
-
-    private void validaciones(FuncionalidadRequest request){
-
     }
 }
