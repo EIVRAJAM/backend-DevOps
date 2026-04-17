@@ -1,13 +1,14 @@
 package com.devops.backend.sesion.dto;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 public record SesionResponseDto(
         Long idSesion,
         Long idUsuario,
         String nombresUsuario,
         String apellidosUsuario,
-        LocalDate fechaSesion,
-        LocalTime horaSesion) {
+        LocalDateTime fechaInicio,
+        LocalDateTime fechaFin,
+        Boolean activa,
+        String tokenJti) {
 }

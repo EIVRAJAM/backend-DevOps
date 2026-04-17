@@ -14,12 +14,17 @@ import com.devops.backend.usuario.entity.*;
 import com.devops.backend.usuario.repository.UsuarioRepository;
 import com.devops.backend.usuario.service.*;
 import com.devops.backend.rol.repository.*;
+
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -196,11 +201,14 @@ public class AuthServiceImpl implements AuthService {
         acceso.setIntentosFallidos(0);
         accesoRepository.save(acceso);
 
+        String jti = java.util.UUID.randomUUID().toString(); // Generar un JTI único para cada token
+
         String token = Jwts.builder()
                 .subject(acceso.getIdUsuario().toString())
                 .claim("authorities",
                         java.util.List.of(Map.of("authority",
                                 acceso.getUsuario().getRol().getNombreRol())))
+                .id(jti)
                 .expiration(new Date(System.currentTimeMillis() + 3600000))
                 .issuedAt(new Date())
                 .signWith(SECRET_KEY)
@@ -209,9 +217,10 @@ public class AuthServiceImpl implements AuthService {
         // registrar la sesión
         Sesion sesion = new Sesion();
         sesion.setUsuario(acceso.getUsuario());
-        sesion.setFechaSesion(java.time.LocalDate.now());
-        sesion.setHoraSesion(java.time.LocalTime.now());
-        // sesion.setToken(token); // Not supported by DB
+        sesion.setFechaInicio(LocalDateTime.now());
+        sesion.setActiva(true);
+        sesion.setTokenJti(jti);
+
         sesionRepository.save(sesion);
 
         Map<String, String> response = new HashMap<>();
@@ -224,18 +233,24 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void logout(String token) {
-        /*
-         * Sesion sesion = sesionRepository.findByToken(token)
-         * .orElseThrow(() -> new
-         * RuntimeException("Sesión no encontrada para este token"));
-         *
-         * sesion.setActivo(false);
-         * sesion.setFechaLogout(LocalDateTime.now());
-         * sesionRepository.save(sesion);
-         */
-        // Logout logic not supported by current DB schema (no token storage in sessions
-        // table)
+
+        Claims claims = Jwts.parser()
+                .verifyWith(SECRET_KEY)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        String jti = claims.getId();
+
+        Sesion sesion = sesionRepository.findByTokenJti(jti)
+                .orElseThrow(() -> new RuntimeException("Sesión no encontrada"));
+
+        sesion.setActiva(false);
+        sesion.setFechaFin(LocalDateTime.now());
+
+        sesionRepository.save(sesion);
     }
 
 }

@@ -75,6 +75,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
+        
         if (header == null || !header.startsWith("Bearer ")) {
             return ResponseEntity.badRequest().body(Map.of("message", "Token no proporcionado"));
         }

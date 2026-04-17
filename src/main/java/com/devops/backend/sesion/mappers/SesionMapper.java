@@ -13,7 +13,9 @@ public class SesionMapper {
                 sesion.getUsuario().getIdUsuario(),
                 sesion.getUsuario().getNombres(),
                 sesion.getUsuario().getApellidos(),
-                sesion.getFechaSesion(),
-                sesion.getHoraSesion());
+                sesion.getFechaInicio(),
+                sesion.getFechaFin(),
+                sesion.getActiva(),
+                sesion.getTokenJti());
     }
 }

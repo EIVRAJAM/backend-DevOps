@@ -1,11 +1,11 @@
 package com.devops.backend.sesion.dto;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record SesionFilterRequest(
         Long idUsuario,
-        LocalDate fechaInicio,
-        LocalDate fechaFin,
+        LocalDateTime fechaInicio,
+        LocalDateTime fechaFin,
         int page,
         int size) {
 }
