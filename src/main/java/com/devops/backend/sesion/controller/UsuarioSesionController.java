@@ -32,7 +32,7 @@ public class UsuarioSesionController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        SesionFilterRequest filter = new SesionFilterRequest(idUsuario, fechaInicio, fechaFin, page, size);
+        SesionFilterRequest filter = new SesionFilterRequest(idUsuario, fechaInicio, fechaFin, null, page, size);
         return ResponseEntity.ok(sesionService.getAllSesiones(filter));
     }
 }

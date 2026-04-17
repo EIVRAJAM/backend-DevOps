@@ -32,7 +32,20 @@ public class SesionServiceImpl implements SesionService {
         Specification<Sesion> specification = Specification
                 .where(SesionSpecification.porIdUsuario(filter.idUsuario()))
                 .and(SesionSpecification.porFechaInicio(filter.fechaInicio()))
-                .and(SesionSpecification.porFechaFin(filter.fechaFin()));
+                .and(SesionSpecification.porFechaFin(filter.fechaFin()))
+                .and(SesionSpecification.porActiva(filter.activa()));
+
+        return sesionRepository.findAll(specification, PageRequest.of(page, size))
+                .map(sesionMapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<SesionResponseDto> getSesionesActivas(int page, int size) {
+        page = Math.max(page, 0);
+        size = Math.max(size, 1);
+
+        Specification<Sesion> specification = SesionSpecification.sesionesActivas();
 
         return sesionRepository.findAll(specification, PageRequest.of(page, size))
                 .map(sesionMapper::toResponse);

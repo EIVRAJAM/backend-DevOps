@@ -28,10 +28,19 @@ public class SesionController {
             @RequestParam(required = false, name = "id_usuario") Long idUsuario,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin,
+            @RequestParam(required = false) Boolean activa,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        SesionFilterRequest filter = new SesionFilterRequest(idUsuario, fechaInicio, fechaFin, page, size);
+        SesionFilterRequest filter = new SesionFilterRequest(idUsuario, fechaInicio, fechaFin, activa, page, size);
         return ResponseEntity.ok(sesionService.getAllSesiones(filter));
+    }
+
+    @GetMapping("/activas")
+    public ResponseEntity<Page<SesionResponseDto>> findSesionesActivas(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ResponseEntity.ok(sesionService.getSesionesActivas(page, size));
     }
 }

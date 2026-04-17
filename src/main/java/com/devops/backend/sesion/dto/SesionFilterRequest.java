@@ -6,6 +6,7 @@ public record SesionFilterRequest(
         Long idUsuario,
         LocalDateTime fechaInicio,
         LocalDateTime fechaFin,
+        Boolean activa,
         int page,
         int size) {
 }
