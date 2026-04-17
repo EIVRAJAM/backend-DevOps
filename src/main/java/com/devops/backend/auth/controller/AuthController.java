@@ -26,7 +26,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("auth")
-public class AuthController {
+public class AuthController {   
 
     @Autowired
     private AuthService authService;
