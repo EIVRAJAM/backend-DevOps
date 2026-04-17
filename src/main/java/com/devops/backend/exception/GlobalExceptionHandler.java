@@ -68,6 +68,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiError> handleResourceNotFound(ResourceNotFoundException ex, WebRequest request) {
+        ApiError apiError = buildError(HttpStatus.NOT_FOUND, ex.getMessage(), request, null);
+        return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex, WebRequest request) {
         ApiError apiError = buildError(HttpStatus.CONFLICT, "Database constraint violation", request,

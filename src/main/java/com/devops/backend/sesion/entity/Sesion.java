@@ -2,18 +2,19 @@ package com.devops.backend.sesion.entity;
 
 import com.devops.backend.usuario.entity.Usuario;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "sesiones")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Sesion {
 
     @Id
@@ -25,9 +26,15 @@ public class Sesion {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    @Column(name = "fecha_sesion", nullable = false)
-    private LocalDate fechaSesion;
+    @Column(name = "fecha_inicio", nullable = false)
+    private LocalDateTime fechaInicio;
 
-    @Column(name = "hora_sesion", nullable = false)
-    private LocalTime horaSesion;
+    @Column(name = "fecha_fin")
+    private LocalDateTime fechaFin;
+
+    @Column(name = "activa", nullable = false)
+    private Boolean activa = true;
+
+    @Column(name = "token_jti", nullable = false, unique = true)
+    private String tokenJti;
 }
