@@ -5,7 +5,7 @@ import com.devops.backend.acceso.repository.AccesoRepository;
 import com.devops.backend.auth.dto.ForgotPasswordRequest;
 import com.devops.backend.auth.dto.ResetPasswordRequest;
 import com.devops.backend.auth.entity.VerificationCode;
-import com.devops.backend.auth.repository.PasswordResetCodeRepository;
+import com.devops.backend.auth.repository.VerificationCodeRepository;
 import com.devops.backend.exception.BadRequestException;
 import com.devops.backend.usuario.entity.Usuario;
 import com.devops.backend.usuario.repository.UsuarioRepository;
@@ -25,7 +25,7 @@ import java.util.Random;
 public class PasswordResetServiceImpl implements PasswordResetService {
 
     @Autowired
-    private PasswordResetCodeRepository passwordResetCodeRepository;
+    private VerificationCodeRepository verificationCodeRepository;
 
     @Autowired
     private AccesoRepository accesoRepository;
@@ -70,7 +70,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
             }
 
             // 3. Invalidar códigos anteriores no usados
-            passwordResetCodeRepository.invalidateAllCodesForUser(usuario);
+            verificationCodeRepository.invalidateAllCodesForUserByType(usuario, "RESET_PASSWORD");;
 
             // 4. Generar código de 6 dígitos
             String codigo = generateResetCode();
@@ -84,7 +84,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
             resetCode.setIntentos(0);
             resetCode.setTipoCodigo("RESET_PASSWORD");
 
-            passwordResetCodeRepository.save(resetCode);
+            verificationCodeRepository.save(resetCode);
 
             // 6. Enviar correo con el código
             try {
@@ -138,7 +138,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
         // - Marcar código como usado
         resetCode.markAsUsed();
-        passwordResetCodeRepository.save(resetCode);
+        verificationCodeRepository.save(resetCode);
 
         log.info("Contraseña resetada exitosamente para usuario: {}", request.email());
     }
@@ -160,10 +160,10 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         Usuario usuario = accesoOpt.get().getUsuario();
 
         // 2. Buscar código válido
-        Optional<VerificationCode> resetCodeOpt = passwordResetCodeRepository.findValidCode(usuario, codigo);
+        Optional<VerificationCode> resetCodeOpt = verificationCodeRepository.findValidCode(usuario, codigo);
         if (resetCodeOpt.isEmpty()) {
             // Intentar encontrar el código aunque sea inválido para aumentar intentos
-            Optional<VerificationCode> anyCodeOpt = passwordResetCodeRepository.findByUsuarioAndCodigo(usuario,
+            Optional<VerificationCode> anyCodeOpt = verificationCodeRepository.findByUsuarioAndCodigo(usuario,
                     codigo);
 
             if (anyCodeOpt.isPresent()) {
@@ -184,7 +184,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
                 // Si no es ninguna de las anteriores, aumentar intentos
                 resetCode.incrementAttempts();
-                passwordResetCodeRepository.save(resetCode);
+                verificationCodeRepository.save(resetCode);
                 throw new BadRequestException("El código es inválido");
             }
 

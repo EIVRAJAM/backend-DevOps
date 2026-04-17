@@ -1,6 +1,6 @@
 package com.devops.backend.auth.scheduler;
 
-import com.devops.backend.auth.repository.PasswordResetCodeRepository;
+import com.devops.backend.auth.repository.VerificationCodeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class PasswordResetCodeCleanupScheduler {
 
     @Autowired
-    private PasswordResetCodeRepository passwordResetCodeRepository;
+    private VerificationCodeRepository passwordResetCodeRepository;
 
     /**
      * Limpia los códigos de reseteo expirados cada 30 minutos

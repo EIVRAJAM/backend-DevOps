@@ -12,6 +12,15 @@ public interface EmailService {
     void sendPasswordResetEmail(String email, String codigo, int minutos);
 
     /**
+     * Envía un correo electrónico de desbloqueo de cuenta
+     *
+     * @param email   Correo destino
+     * @param codigo  Código de 6 dígitos
+     * @param minutos Minutos de expiración del código
+     */
+    void sendAccountUnlockEmail(String email, String codigo, int minutos);
+
+    /**
      * Envía un correo electrónico genérico
      *
      * @param email  Correo destino
