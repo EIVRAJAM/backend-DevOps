@@ -2,10 +2,7 @@ package com.devops.backend.usuario.controller;
 
 
 import com.devops.backend.auth.dto.SignUpRequest;
-import com.devops.backend.usuario.dto.SignUpResponseUsuario;
-import com.devops.backend.usuario.dto.UpdateUsuarioRequest;
-import com.devops.backend.usuario.dto.UserListResponse;
-import com.devops.backend.usuario.dto.UsuarioFilterRequest;
+import com.devops.backend.usuario.dto.*;
 import com.devops.backend.usuario.entity.Usuario;
 import com.devops.backend.usuario.service.UsuarioService;
 import jakarta.validation.Valid;
@@ -65,5 +62,21 @@ public class UsuarioController {
             @Valid @RequestBody UpdateUsuarioRequest request) {
 
         return ResponseEntity.ok(uService.updateUser(id, request));
+    }
+
+    @PatchMapping("/{id}/activar")
+    public ResponseEntity<UserListResponse> activateUser(@PathVariable Long id) {
+
+        return ResponseEntity.ok(uService.activar(id));
+    }
+    @PatchMapping("/{id}/desactivar")
+    public ResponseEntity<UserListResponse> deactivateUser(@PathVariable Long id) {
+
+        return ResponseEntity.ok(uService.desactivar(id));
+    }
+    @PatchMapping("/{id}/bloquear")
+    public ResponseEntity<UserListResponse> blockUser(@PathVariable Long id) {
+
+        return ResponseEntity.ok(uService.bloquear(id));
     }
 }

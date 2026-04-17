@@ -160,6 +160,31 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioMapper.toListResponse(updated);
     }
 
+    @Override
+    public UserListResponse activar(Long id) {
+        return updateStatus(id,"ACTIVO");
+    }
+
+    @Override
+    public UserListResponse desactivar(Long id) {
+        return updateStatus(id,"INACTIVO");
+    }
+    @Override
+    public UserListResponse bloquear(Long id) {
+        return updateStatus(id,"BLOQUEADO");
+    }
+
+    private UserListResponse updateStatus(Long id, String status){
+
+        Usuario usuario = usuarioRepository.findByIdUsuario(id).
+                orElseThrow(() -> new ResponseStatusException(
+                        HttpStatusCode.valueOf(404), "Usuario con ID " + id + " no encontrado"));
+
+        usuario.setEstado(status);
+
+        return usuarioMapper.toListResponse(usuarioRepository.save(usuario));
+    }
+
     private void validacionesDto(UsuarioDTO dto) {
 
         List<ApiValidationError> errors = new ArrayList<>();

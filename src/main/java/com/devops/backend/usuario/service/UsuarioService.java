@@ -6,7 +6,6 @@ import com.devops.backend.usuario.entity.Usuario;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface UsuarioService {
 
@@ -17,5 +16,7 @@ public interface UsuarioService {
     List<UserListResponse> getAllUsers();
     Page<UserListResponse> getAllUsers(UsuarioFilterRequest dtoFilter);
     UserListResponse updateUser(Long id, UpdateUsuarioRequest request);
-
+    UserListResponse activar(Long id);
+    UserListResponse desactivar(Long id);
+    UserListResponse bloquear(Long id);
 }

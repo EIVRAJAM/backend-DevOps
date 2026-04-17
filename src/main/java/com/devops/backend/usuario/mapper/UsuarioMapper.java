@@ -2,10 +2,7 @@ package com.devops.backend.usuario.mapper;
 
 import com.devops.backend.auth.dto.SignUpRequest;
 import com.devops.backend.rol.entity.Rol;
-import com.devops.backend.usuario.dto.SignUpResponseUsuario;
-import com.devops.backend.usuario.dto.UpdateUsuarioRequest;
-import com.devops.backend.usuario.dto.UserListResponse;
-import com.devops.backend.usuario.dto.UsuarioDTO;
+import com.devops.backend.usuario.dto.*;
 import com.devops.backend.usuario.entity.Usuario;
 import org.springframework.stereotype.Component;
 
@@ -81,4 +78,6 @@ public class UsuarioMapper {
         usuario.setTelefono(dto.telefono());
         usuario.setRol(rol);
     }
+
+
 }
