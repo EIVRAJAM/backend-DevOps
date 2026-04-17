@@ -38,8 +38,13 @@ public class UsuarioSesionController {
 
     @GetMapping("/{id}/sesiones/ultima")
     public ResponseEntity<SesionResponseDto> findUltimaSesionByUsuario(@PathVariable("id") Long idUsuario) {
-        return sesionService.getUltimaSesionByUsuario(idUsuario)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        SesionResponseDto ultima = sesionService.getUltimaSesionByUsuario(idUsuario)
+                .orElse(null);
+
+        if (ultima == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(ultima);
     }
 }

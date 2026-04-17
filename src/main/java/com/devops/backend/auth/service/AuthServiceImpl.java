@@ -18,6 +18,7 @@ import com.devops.backend.rol.repository.*;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,6 +61,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private RolRepository rolRepository;
+
+    @Value("${jwt.expiration-minutes}")
+    private long jwtExpirationMinutes;
 
     @Override
     @Transactional
@@ -167,7 +171,6 @@ public class AuthServiceImpl implements AuthService {
         Acceso acceso = optionalAcceso.orElseThrow(() -> new RuntimeException(
                 "Usuario no encontrado con el correo o username proporcionado"));
 
-
         if ("INACTIVO".equalsIgnoreCase(acceso.getEstadoCuenta())) {
             throw new RuntimeException("La cuenta está  inactiva");
         }
@@ -186,7 +189,7 @@ public class AuthServiceImpl implements AuthService {
 
             throw new RuntimeException("Contraseña incorrecta");
         }
-        
+
         if ("INACTIVO".equalsIgnoreCase(acceso.getEstadoCuenta())) {
             throw new RuntimeException("La cuenta está  inactiva");
         }
@@ -209,7 +212,7 @@ public class AuthServiceImpl implements AuthService {
                         java.util.List.of(Map.of("authority",
                                 acceso.getUsuario().getRol().getNombreRol())))
                 .id(jti)
-                .expiration(new Date(System.currentTimeMillis() + 3600000))
+                .expiration(new Date(System.currentTimeMillis() + (jwtExpirationMinutes * 60 * 1000)))
                 .issuedAt(new Date())
                 .signWith(SECRET_KEY)
                 .compact();

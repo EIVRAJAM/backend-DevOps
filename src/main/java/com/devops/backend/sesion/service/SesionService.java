@@ -13,4 +13,6 @@ public interface SesionService {
     Page<SesionResponseDto> getSesionesActivas(int page, int size);
 
     Optional<SesionResponseDto> getUltimaSesionByUsuario(Long idUsuario);
+
+    void deleteSesion(Long idSesion);
 }

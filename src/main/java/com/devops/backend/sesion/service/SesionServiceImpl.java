@@ -7,6 +7,7 @@ import com.devops.backend.sesion.mappers.SesionMapper;
 import com.devops.backend.sesion.repository.SesionRepository;
 import com.devops.backend.sesion.specification.SesionSpecification;
 import com.devops.backend.usuario.repository.UsuarioRepository;
+import com.devops.backend.exception.ResourceNotFoundException;
 
 import java.util.Optional;
 
@@ -23,7 +24,8 @@ public class SesionServiceImpl implements SesionService {
     private final SesionMapper sesionMapper;
     private final UsuarioRepository usuarioRepository;
 
-    public SesionServiceImpl(SesionRepository sesionRepository, SesionMapper sesionMapper, UsuarioRepository usuarioRepository) {
+    public SesionServiceImpl(SesionRepository sesionRepository, SesionMapper sesionMapper,
+            UsuarioRepository usuarioRepository) {
         this.sesionRepository = sesionRepository;
         this.sesionMapper = sesionMapper;
         this.usuarioRepository = usuarioRepository;
@@ -61,9 +63,18 @@ public class SesionServiceImpl implements SesionService {
     @Transactional(readOnly = true)
     public Optional<SesionResponseDto> getUltimaSesionByUsuario(Long idUsuario) {
         if (!usuarioRepository.existsById(idUsuario)) {
-            throw new IllegalArgumentException("Usuario no encontrado");
+            throw new ResourceNotFoundException("Usuario con ID " + idUsuario + " no encontrado");
         }
         return sesionRepository.findTopByUsuario_IdUsuarioOrderByFechaInicioDesc(idUsuario)
                 .map(sesionMapper::toResponse);
+    }
+
+    @Override
+    @Transactional
+    public void deleteSesion(Long idSesion) {
+        if (!sesionRepository.existsById(idSesion)) {
+            throw new ResourceNotFoundException("Sesión con ID " + idSesion + " no encontrada");
+        }
+        sesionRepository.deleteById(idSesion);
     }
 }
