@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "password_reset_codes")
-public class PasswordResetCode {
+@Table(name = "verification_codes")
+public class VerificationCode {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +28,9 @@ public class PasswordResetCode {
 
     @Column(name = "codigo", nullable = false, length = 10)
     private String codigo;
+
+    @Column(name = "tipo_codigo")
+    private String tipoCodigo;
 
     @Column(name = "fecha_expiracion", nullable = false)
     private LocalDateTime fechaExpiracion;

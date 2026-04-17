@@ -2,7 +2,7 @@ package com.devops.backend.auth.service;
 
 import com.devops.backend.auth.dto.ForgotPasswordRequest;
 import com.devops.backend.auth.dto.ResetPasswordRequest;
-import com.devops.backend.auth.entity.PasswordResetCode;
+import com.devops.backend.auth.entity.VerificationCode;
 
 public interface PasswordResetService {
 
@@ -28,5 +28,5 @@ public interface PasswordResetService {
     /**
      * Valida un código de reseteo
      */
-    PasswordResetCode validateResetCode(String email, String codigo);
+    VerificationCode validateResetCode(String email, String codigo);
 }

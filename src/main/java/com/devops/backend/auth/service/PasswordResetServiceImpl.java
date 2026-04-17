@@ -4,7 +4,7 @@ import com.devops.backend.acceso.entity.Acceso;
 import com.devops.backend.acceso.repository.AccesoRepository;
 import com.devops.backend.auth.dto.ForgotPasswordRequest;
 import com.devops.backend.auth.dto.ResetPasswordRequest;
-import com.devops.backend.auth.entity.PasswordResetCode;
+import com.devops.backend.auth.entity.VerificationCode;
 import com.devops.backend.auth.repository.PasswordResetCodeRepository;
 import com.devops.backend.exception.BadRequestException;
 import com.devops.backend.usuario.entity.Usuario;
@@ -76,12 +76,13 @@ public class PasswordResetServiceImpl implements PasswordResetService {
             String codigo = generateResetCode();
 
             // 5. Guardar en BD con expiración
-            PasswordResetCode resetCode = new PasswordResetCode();
+            VerificationCode resetCode = new VerificationCode();
             resetCode.setUsuario(usuario);
             resetCode.setCodigo(codigo);
             resetCode.setFechaExpiracion(LocalDateTime.now().plusMinutes(codeExpirationMinutes));
             resetCode.setUsado(false);
             resetCode.setIntentos(0);
+            resetCode.setTipoCodigo("RESET_PASSWORD");
 
             passwordResetCodeRepository.save(resetCode);
 
@@ -118,7 +119,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         }
 
         Acceso acceso = accesoOpt.get();
-        //Usuario usuario = acceso.getUsuario();
+        // Usuario usuario = acceso.getUsuario();
 
         // 2.5 Verificar si la cuenta está bloqueada
         if ("BLOQUEADO".equalsIgnoreCase(acceso.getEstadoCuenta())) {
@@ -127,7 +128,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         }
 
         // 3. Buscar y validar el código
-        PasswordResetCode resetCode = validateResetCode(request.email(), request.code());
+        VerificationCode resetCode = validateResetCode(request.email(), request.code());
 
         // 4. Si el código es válido:
         // - Actualizar contraseña
@@ -149,7 +150,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     }
 
     @Override
-    public PasswordResetCode validateResetCode(String email, String codigo) {
+    public VerificationCode validateResetCode(String email, String codigo) {
         // 1. Buscar usuario por email
         Optional<Acceso> accesoOpt = accesoRepository.findByCorreoAcceso(email);
         if (accesoOpt.isEmpty()) {
@@ -159,14 +160,14 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         Usuario usuario = accesoOpt.get().getUsuario();
 
         // 2. Buscar código válido
-        Optional<PasswordResetCode> resetCodeOpt = passwordResetCodeRepository.findValidCode(usuario, codigo);
+        Optional<VerificationCode> resetCodeOpt = passwordResetCodeRepository.findValidCode(usuario, codigo);
         if (resetCodeOpt.isEmpty()) {
             // Intentar encontrar el código aunque sea inválido para aumentar intentos
-            Optional<PasswordResetCode> anyCodeOpt = passwordResetCodeRepository.findByUsuarioAndCodigo(usuario,
+            Optional<VerificationCode> anyCodeOpt = passwordResetCodeRepository.findByUsuarioAndCodigo(usuario,
                     codigo);
 
             if (anyCodeOpt.isPresent()) {
-                PasswordResetCode resetCode = anyCodeOpt.get();
+                VerificationCode resetCode = anyCodeOpt.get();
 
                 // Validar cada condición para dar mensajes específicos
                 if (resetCode.getUsado()) {
