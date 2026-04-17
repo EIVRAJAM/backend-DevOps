@@ -71,9 +71,4 @@ public class Acceso {
         if (uuidAcceso == null)
             uuidAcceso = UUID.randomUUID();
     }
-
-    @PreUpdate
-    protected void onUpdate() {
-        actualizadoEn = LocalDateTime.now();
-    }
 }

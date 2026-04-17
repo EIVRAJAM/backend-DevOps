@@ -2,6 +2,8 @@ package com.devops.backend.auth.controller;
 
 import com.devops.backend.auth.dto.*;
 import com.devops.backend.auth.service.AuthService;
+import com.devops.backend.auth.service.PasswordResetService;
+import com.devops.backend.auth.service.AccountUnlockService;
 import com.devops.backend.exception.ApiValidationError;
 import com.devops.backend.exception.ValidationException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +30,12 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private PasswordResetService passwordResetService;
+
+    @Autowired
+    private AccountUnlockService accountUnlockService;
 
     @Autowired
     private Validator validator;
@@ -75,6 +83,114 @@ public class AuthController {
         authService.logout(token);
 
         return ResponseEntity.ok(Map.of("message", "Sesión cerrada correctamente"));
+    }
+
+    /**
+     * Endpoint para solicitar recuperación de contraseña
+     * POST /auth/forgot-password
+     *
+     * @param request ForgotPasswordRequest con el email
+     * @return Mensaje de confirmación
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
+        try {
+            passwordResetService.requestPasswordReset(request);
+            return ResponseEntity.ok(new PasswordResetResponse(
+                    "Si el correo está registrado, recibirás un código de verificación",
+                    true));
+        } catch (com.devops.backend.exception.BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new PasswordResetResponse(
+                            e.getMessage(),
+                            false));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new PasswordResetResponse(
+                            "Error al procesar la solicitud",
+                            false));
+        }
+    }
+
+    /**
+     * Endpoint para resetear la contraseña
+     * POST /auth/reset-password
+     *
+     * @param request ResetPasswordRequest con email, código y nueva contraseña
+     * @return Mensaje de confirmación
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+        try {
+            passwordResetService.resetPassword(request);
+            return ResponseEntity.ok(new PasswordResetResponse(
+                    "Contraseña actualizada exitosamente",
+                    true));
+        } catch (com.devops.backend.exception.BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new PasswordResetResponse(
+                            e.getMessage(),
+                            false));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new PasswordResetResponse(
+                            "Error al resetear la contraseña",
+                            false));
+        }
+    }
+
+    /**
+     * Endpoint para solicitar desbloqueo de cuenta
+     * POST /auth/request-account-unlock
+     *
+     * @param request ForgotPasswordRequest con el email
+     * @return Mensaje de confirmación
+     */
+    @PostMapping("/request-account-unlock")
+    public ResponseEntity<?> requestAccountUnlock(@RequestBody @Valid ForgotPasswordRequest request) {
+        try {
+            accountUnlockService.requestAccountUnlock(request.email());
+            return ResponseEntity.ok(new PasswordResetResponse(
+                    "Si la cuenta está bloqueada, recibirás un código de verificación en tu correo",
+                    true));
+        } catch (com.devops.backend.exception.BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new PasswordResetResponse(
+                            e.getMessage(),
+                            false));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new PasswordResetResponse(
+                            "Error al procesar la solicitud de desbloqueo",
+                            false));
+        }
+    }
+
+    /**
+     * Endpoint para desbloquear la cuenta
+     * POST /auth/unlock-account
+     *
+     * @param request UnlockAccountRequest con email y código de verificación
+     * @return Mensaje de confirmación
+     */
+    @PostMapping("/unlock-account")
+    public ResponseEntity<?> unlockAccount(@RequestBody @Valid UnlockAccountRequest request) {
+        try {
+            accountUnlockService.unlockAccount(request);
+            return ResponseEntity.ok(new PasswordResetResponse(
+                    "Cuenta desbloqueada exitosamente",
+                    true));
+        } catch (com.devops.backend.exception.BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new PasswordResetResponse(
+                            e.getMessage(),
+                            false));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new PasswordResetResponse(
+                            "Error al desbloquear la cuenta",
+                            false));
+        }
     }
 
 }
