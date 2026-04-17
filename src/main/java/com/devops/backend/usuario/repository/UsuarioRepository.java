@@ -8,10 +8,13 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long>, JpaSpecificationExecutor<Usuario> {
-    boolean existsByDocumento(String documento);
 
+    boolean existsByDocumento(String documento);
     Optional<Usuario> findByDocumento(String documento);
     Optional<Usuario> findByIdUsuario(Long idUsuario);
 
+    // Verifica duplicado excluyendo el propio id
+    boolean existsByDocumentoAndIdUsuarioNot(String documento, Long idUsuario);
+    boolean existsByTelefonoAndIdUsuarioNot(String telefono, Long idUsuario);
 
 }

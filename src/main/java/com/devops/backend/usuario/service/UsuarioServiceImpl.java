@@ -7,10 +7,7 @@ import com.devops.backend.exception.BadRequestException;
 import com.devops.backend.exception.ConflictException;
 import com.devops.backend.rol.entity.Rol;
 import com.devops.backend.rol.repository.RolRepository;
-import com.devops.backend.usuario.dto.SignUpResponseUsuario;
-import com.devops.backend.usuario.dto.UserListResponse;
-import com.devops.backend.usuario.dto.UsuarioDTO;
-import com.devops.backend.usuario.dto.UsuarioFilterRequest;
+import com.devops.backend.usuario.dto.*;
 import com.devops.backend.usuario.entity.Usuario;
 import com.devops.backend.usuario.mapper.UsuarioMapper;
 import com.devops.backend.usuario.repository.UsuarioRepository;
@@ -124,6 +121,43 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         return usuarioRepository.findAll(spec, pageable)
                 .map(usuarioMapper::toListResponse); // sin .toList() para que no dañe los meta datos
+    }
+
+    @Override
+    public UserListResponse updateUser(Long id, UpdateUsuarioRequest request) {
+
+        Usuario usuario = usuarioRepository.findByIdUsuario(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatusCode.valueOf(404), "Usuario con ID " + id + " no encontrado"));
+
+        List<ApiValidationError> errors = new ArrayList<>();
+
+        //Buscame si otro tiene el documento, excluyendo al usuario a actualizar
+        if (usuarioRepository.existsByDocumentoAndIdUsuarioNot(request.documento(), id)) {
+            errors.add(new ApiValidationError("documento", "El documento ya está registrado por otro usuario"));
+        }
+
+        //Buscame si otro tiene el telefono , excluyendo al usuario a actualizar
+        if (usuarioRepository.existsByDocumentoAndIdUsuarioNot(request.telefono(),id)){
+            errors.add(new ApiValidationError("telefono", "El telefono ya está registrado por otro usuario"));
+        }
+
+        Rol rol = rolRepository.findById(request.idRol())
+                .orElseGet(() -> {
+                    errors.add(new ApiValidationError("idRol", "El rol con ID " + request.idRol() + " no existe"));
+                    return null;
+       });
+
+
+        if (!errors.isEmpty()) {
+            throw new ConflictException("Campos inválidos en la actualización", errors);
+        }
+
+        // 4. Aplicar cambios y persistir
+        usuarioMapper.applyUpdate(usuario, request, rol);
+        Usuario updated = usuarioRepository.save(usuario);
+
+        return usuarioMapper.toListResponse(updated);
     }
 
     private void validacionesDto(UsuarioDTO dto) {

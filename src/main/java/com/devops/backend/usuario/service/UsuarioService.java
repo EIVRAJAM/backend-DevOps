@@ -1,10 +1,7 @@
 package com.devops.backend.usuario.service;
 
 import com.devops.backend.auth.dto.SignUpRequest;
-import com.devops.backend.usuario.dto.SignUpResponseUsuario;
-import com.devops.backend.usuario.dto.UserListResponse;
-import com.devops.backend.usuario.dto.UsuarioDTO;
-import com.devops.backend.usuario.dto.UsuarioFilterRequest;
+import com.devops.backend.usuario.dto.*;
 import com.devops.backend.usuario.entity.Usuario;
 import org.springframework.data.domain.Page;
 
@@ -19,5 +16,6 @@ public interface UsuarioService {
     UserListResponse findByDocumento(String documento);
     List<UserListResponse> getAllUsers();
     Page<UserListResponse> getAllUsers(UsuarioFilterRequest dtoFilter);
+    UserListResponse updateUser(Long id, UpdateUsuarioRequest request);
 
 }
