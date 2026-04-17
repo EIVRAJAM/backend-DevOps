@@ -41,11 +41,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/v1/accesos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v1/accesos/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/usuarios/**").permitAll() // Cualquier POST en
-                                                                                      // /api/usuarios/
-                        .requestMatchers(HttpMethod.GET, "/v1/usuarios/**").permitAll() // Cualquier GET en /api/usuarios/
-                        .requestMatchers(HttpMethod.PUT, "/v1/usuarios/**").permitAll() // Cualquier GET en /api/usuarios/
+                                                                                         // /api/usuarios/
+                        .requestMatchers(HttpMethod.GET, "/v1/usuarios/*/sesiones").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/v1/usuarios/**").permitAll() // Cualquier GET en
+                                                                                        // /api/usuarios/
+                        .requestMatchers(HttpMethod.PUT, "/v1/usuarios/**").permitAll() // Cualquier GET en
+                                                                                        // /api/usuarios/
                         .requestMatchers(HttpMethod.PATCH, "/v1/usuarios/**").permitAll() // Cualquier GET en
-                                                                                       // /api/usuarios/
+                                                                                          // /api/usuarios/
                         .anyRequest().authenticated())
                 .addFilter(jwtAuthenticationFilter)
                 .addFilter(jwtValidationFilter)
