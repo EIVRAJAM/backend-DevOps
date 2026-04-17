@@ -36,14 +36,16 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(auth -> auth
                         // .requestMatchers(HttpMethod.GET, "/api/acceso/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/**").permitAll() // Cualquier cosa en /api/auth/
-                        .requestMatchers(HttpMethod.POST, "/api/v1/accesos/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/accesos/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/sign-in").permitAll() // ✅ Permitir la nueva ruta
-                        .requestMatchers(HttpMethod.POST, "/usuarios/**").permitAll() // Cualquier POST  en /api/usuarios/
-                        .requestMatchers(HttpMethod.GET, "/usuarios/**").permitAll() // Cualquier GET en /api/usuarios/
-                        .requestMatchers(HttpMethod.PUT, "/usuarios/**").permitAll() // Cualquier GET en /api/usuarios/
-                        .requestMatchers(HttpMethod.PATCH, "/usuarios/**").permitAll() // Cualquier GET en /api/usuarios/
+                        .requestMatchers(HttpMethod.POST, "/v1/auth/**").permitAll() // Cualquier cosa en
+                                                                                     // /api/auth/
+                        .requestMatchers(HttpMethod.POST, "/v1/accesos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/accesos/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/usuarios/**").permitAll() // Cualquier POST en
+                                                                                      // /api/usuarios/
+                        .requestMatchers(HttpMethod.GET, "/v1/usuarios/**").permitAll() // Cualquier GET en /api/usuarios/
+                        .requestMatchers(HttpMethod.PUT, "/v1/usuarios/**").permitAll() // Cualquier GET en /api/usuarios/
+                        .requestMatchers(HttpMethod.PATCH, "/v1/usuarios/**").permitAll() // Cualquier GET en
+                                                                                       // /api/usuarios/
                         .anyRequest().authenticated())
                 .addFilter(jwtAuthenticationFilter)
                 .addFilter(jwtValidationFilter)
