@@ -3,7 +3,6 @@ package com.devops.backend.usuario.controller;
 
 import com.devops.backend.auth.dto.SignUpRequest;
 import com.devops.backend.usuario.dto.*;
-import com.devops.backend.usuario.entity.Usuario;
 import com.devops.backend.usuario.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
