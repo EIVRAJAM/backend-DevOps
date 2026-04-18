@@ -45,4 +45,15 @@ public class FuncionalidadController {
 
         return ResponseEntity.ok(funcionalidadService.update(id, request));
     }
+
+    @PatchMapping("/{id}/desactivar")
+    public ResponseEntity<?> desactiveFuncionalidad(@PathVariable Long id){
+        return ResponseEntity.ok(funcionalidadService.desactive(id));
+    }
+
+    @PatchMapping("/{id}/activar")
+    public ResponseEntity<FuncionalidadResponse> activeFuncionalidad(@PathVariable Long id) {
+        return ResponseEntity.ok(funcionalidadService.activar(id));
+    }
+
 }

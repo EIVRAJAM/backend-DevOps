@@ -17,4 +17,7 @@ public interface FuncionalidadService {
     FuncionalidadResponse findById(Long id);
 
      FuncionalidadResponse update(Long id, @Valid FuncionalidadUpdateRequest request);
+
+    FuncionalidadResponse desactive(Long id);
+    public FuncionalidadResponse activar(Long id);
 }

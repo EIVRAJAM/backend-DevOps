@@ -8,6 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface FuncionalidadRepository extends JpaRepository<Funcionalidad,Long>, JpaSpecificationExecutor<Funcionalidad> {
 
     boolean existsByNombreFuncionalidad(String nombreFuncionalidad);
-
-
+    boolean existsByPadreIdFuncionalidadAndEstado(Long idPadre, String estado);
 }

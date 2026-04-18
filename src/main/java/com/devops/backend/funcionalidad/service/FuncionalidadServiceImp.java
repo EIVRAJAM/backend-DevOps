@@ -115,6 +115,47 @@ public class FuncionalidadServiceImp  implements FuncionalidadService{
         return funcionalidadMapper.toResponse(actualizada);
 
     }
+// FuncionalidadService o FuncionalidadServiceImpl.java
+
+    @Override
+    @Transactional
+    public FuncionalidadResponse desactive(Long id) {
+        Funcionalidad funcionalidad = funcionalidadRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatusCode.valueOf(404), "Funcionalidad con ID " + id + " no encontrada"));
+
+        boolean tieneHijosActivos = funcionalidadRepository
+                .existsByPadreIdFuncionalidadAndEstado(id, "ACTIVO");
+
+        if (tieneHijosActivos) {
+            throw new ConflictException(
+                    "No se puede desactivar la funcionalidad porque tiene hijos activos",
+                    List.of(new ApiValidationError("hijos", "Desactive primero las funcionalidades hijas"))
+            );
+        }
+
+        funcionalidad.setEstado("INACTIVO");
+        return funcionalidadMapper.toResponse(funcionalidadRepository.save(funcionalidad));
+    }
+
+    @Override
+    @Transactional
+    public FuncionalidadResponse activar(Long id) {
+        Funcionalidad funcionalidad = funcionalidadRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatusCode.valueOf(404), "Funcionalidad con ID " + id + " no encontrada"));
+
+        if (funcionalidad.getPadre() != null && !"ACTIVO".equals(funcionalidad.getPadre().getEstado())) {
+            throw new ConflictException(
+                    "No se puede activar la funcionalidad porque su padre está inactivo",
+                    List.of(new ApiValidationError("padre", "Active primero la funcionalidad padre"))
+            );
+        }
+
+        funcionalidad.setEstado("ACTIVO");
+        return funcionalidadMapper.toResponse(funcionalidadRepository.save(funcionalidad));
+    }
+
 
     private boolean esDescendiente(Funcionalidad posibleAncestro, Funcionalidad candidato) {
         Funcionalidad current = candidato.getPadre();

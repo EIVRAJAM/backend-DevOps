@@ -2,6 +2,7 @@ package com.devops.backend.usuario.controller;
 
 
 import com.devops.backend.auth.dto.SignUpRequest;
+import com.devops.backend.funcionalidad.service.FuncionalidadService;
 import com.devops.backend.usuario.dto.*;
 import com.devops.backend.usuario.service.UsuarioService;
 import jakarta.validation.Valid;
@@ -17,7 +18,7 @@ public class UsuarioController {
 
     private final UsuarioService uService;
 
-    public UsuarioController(UsuarioService uService) {
+    public UsuarioController(UsuarioService uService, FuncionalidadService funcionalidadService) {
         this.uService = uService;
     }
 
@@ -78,4 +79,6 @@ public class UsuarioController {
 
         return ResponseEntity.ok(uService.bloquear(id));
     }
+
+
 }
