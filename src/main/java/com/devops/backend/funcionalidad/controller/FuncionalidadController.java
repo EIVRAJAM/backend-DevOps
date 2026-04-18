@@ -33,4 +33,8 @@ public class FuncionalidadController {
         return ResponseEntity.ok(funcionalidadService.findAll(new FuncionalidadFilterRequest(status,id_padre)));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<FuncionalidadResponse> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(funcionalidadService.findById(id));
+    }
 }
