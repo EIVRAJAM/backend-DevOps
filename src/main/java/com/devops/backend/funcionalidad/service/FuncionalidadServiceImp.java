@@ -115,7 +115,6 @@ public class FuncionalidadServiceImp  implements FuncionalidadService{
         return funcionalidadMapper.toResponse(actualizada);
 
     }
-// FuncionalidadService o FuncionalidadServiceImpl.java
 
     @Override
     @Transactional
@@ -155,6 +154,7 @@ public class FuncionalidadServiceImp  implements FuncionalidadService{
         funcionalidad.setEstado("ACTIVO");
         return funcionalidadMapper.toResponse(funcionalidadRepository.save(funcionalidad));
     }
+
 
 
     private boolean esDescendiente(Funcionalidad posibleAncestro, Funcionalidad candidato) {
