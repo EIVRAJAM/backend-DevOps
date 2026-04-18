@@ -3,6 +3,7 @@ package com.devops.backend.funcionalidad.controller;
 import com.devops.backend.funcionalidad.dto.FuncionalidadFilterRequest;
 import com.devops.backend.funcionalidad.dto.FuncionalidadRequest;
 import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
+import com.devops.backend.funcionalidad.dto.FuncionalidadUpdateRequest;
 import com.devops.backend.funcionalidad.service.FuncionalidadService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -36,5 +37,12 @@ public class FuncionalidadController {
     @GetMapping("/{id}")
     public ResponseEntity<FuncionalidadResponse> findById(@PathVariable Long id) {
         return ResponseEntity.ok(funcionalidadService.findById(id));
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<FuncionalidadResponse> update(
+            @PathVariable Long id,
+            @Valid @RequestBody FuncionalidadUpdateRequest request) {
+
+        return ResponseEntity.ok(funcionalidadService.update(id, request));
     }
 }

@@ -5,6 +5,7 @@ import com.devops.backend.funcionalidad.dto.FuncionalidadRequest;
 import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
 import com.devops.backend.exception.ConflictException;
 import com.devops.backend.exception.ApiValidationError;
+import com.devops.backend.funcionalidad.dto.FuncionalidadUpdateRequest;
 import com.devops.backend.funcionalidad.entity.Funcionalidad;
 import com.devops.backend.funcionalidad.mapper.FuncionalidadMapper;
 import com.devops.backend.funcionalidad.repository.FuncionalidadRepository;
@@ -13,10 +14,12 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class FuncionalidadServiceImp  implements FuncionalidadService{
@@ -72,6 +75,62 @@ public class FuncionalidadServiceImp  implements FuncionalidadService{
 
         return funcionalidadMapper.toResponse(funcionalidad);
 
+    }
+
+    @Override
+    @Transactional
+    public FuncionalidadResponse update(Long id, FuncionalidadUpdateRequest request) {
+
+        Funcionalidad funcionalidad = funcionalidadRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Funcionalidad con id " + id + " no encontrada"));
+
+        if (request.idPadre() != null) {
+
+            if (request.idPadre().equals(id)) {
+                throw new IllegalArgumentException(
+                        "Una funcionalidad no puede ser su propio padre");
+            }
+
+            Funcionalidad nuevoPadre = funcionalidadRepository.findById(request.idPadre())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Padre con id " + request.idPadre() + " no encontrado"));
+
+            // No puede tener como padre a uno de sus propios descendientes
+            if (esDescendiente(funcionalidad, nuevoPadre)) {
+                throw new IllegalArgumentException(
+                        "No se puede asignar un descendiente como padre (referencia circular)");
+            }
+
+            funcionalidad.setPadre(nuevoPadre);
+
+        } else {
+            funcionalidad.setPadre(null); // Pasa a ser raíz
+        }
+
+        // 3. Actualiza los demás campos
+        funcionalidad.setNombreFuncionalidad(request.nombreFuncionalidad());
+        funcionalidad.setUrlFuncionalidad(request.urlFuncionalidad());
+        funcionalidad.setEstado(request.estado().toUpperCase());
+
+        Funcionalidad actualizada = funcionalidadRepository.save(funcionalidad);
+
+        return funcionalidadMapper.toResponse(actualizada);
+
+    }
+
+    //Recursividad para encontrar si un descendiente es el nuevo padre
+    private boolean esDescendiente(Funcionalidad posibleAncestro, Funcionalidad candidato) {
+        Set<Funcionalidad> hijos = candidato.getHijos();
+        if (hijos == null || hijos.isEmpty()) return false;
+
+        for (Funcionalidad hijo : hijos) {
+            if (hijo.getIdFuncionalidad().equals(posibleAncestro.getIdFuncionalidad())) {
+                return true;
+            }
+            if (esDescendiente(posibleAncestro, hijo)) return true;
+        }
+        return false;
     }
 
     private void validaciones(FuncionalidadRequest request){
