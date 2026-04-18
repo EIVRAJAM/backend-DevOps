@@ -35,6 +35,7 @@ public class Funcionalidad {
     @Column(name = "url_funcionalidad", length = 250)
     private String urlFuncionalidad;
 
+    @Column(name = "estado")
     private String estado;
 
     @Column(name = "creado_en")

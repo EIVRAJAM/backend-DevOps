@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/v1/funcionalidad")
 public class FuncionalidadController {
@@ -21,6 +23,13 @@ public class FuncionalidadController {
     @PostMapping
     public ResponseEntity<FuncionalidadResponse> crear(@Valid @RequestBody FuncionalidadRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(funcionalidadService.save(request));
+    }
+
+    @GetMapping
+    public ResponseEntity<?> findAll( @RequestParam(required = false) String status,
+                                      @RequestParam(required = false) Long id_padre){
+
+        return ResponseEntity.ok(funcionalidadService.findAll(status,id_padre));
     }
 
 }

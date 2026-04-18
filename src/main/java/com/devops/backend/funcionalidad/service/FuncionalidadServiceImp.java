@@ -7,6 +7,8 @@ import com.devops.backend.exception.ApiValidationError;
 import com.devops.backend.funcionalidad.entity.Funcionalidad;
 import com.devops.backend.funcionalidad.mapper.FuncionalidadMapper;
 import com.devops.backend.funcionalidad.repository.FuncionalidadRepository;
+import com.devops.backend.funcionalidad.specification.FuncionalidadSpecification;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -45,6 +47,17 @@ public class FuncionalidadServiceImp  implements FuncionalidadService{
         );
 
         return funcionalidadMapper.toResponse(saved);
+    }
+
+    @Override
+    public List<FuncionalidadResponse> findAll(String status, Long id_padre) {
+
+        Specification<Funcionalidad> spec = Specification
+                .where(FuncionalidadSpecification.porEstado(status))
+                .and(FuncionalidadSpecification.porPadreId(id_padre));
+
+        return funcionalidadRepository.findAll(spec).stream().
+                map(funcionalidadMapper::toResponse).toList();
     }
 
     private void validaciones(FuncionalidadRequest request){
