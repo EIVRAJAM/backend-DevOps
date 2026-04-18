@@ -1,5 +1,6 @@
 package com.devops.backend.funcionalidad.service;
 
+import com.devops.backend.funcionalidad.dto.FuncionalidadFilterRequest;
 import com.devops.backend.funcionalidad.dto.FuncionalidadRequest;
 import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
 import com.devops.backend.exception.ConflictException;
@@ -50,11 +51,11 @@ public class FuncionalidadServiceImp  implements FuncionalidadService{
     }
 
     @Override
-    public List<FuncionalidadResponse> findAll(String status, Long id_padre) {
+    public List<FuncionalidadResponse> findAll(FuncionalidadFilterRequest request) {
 
         Specification<Funcionalidad> spec = Specification
-                .where(FuncionalidadSpecification.porEstado(status))
-                .and(FuncionalidadSpecification.porPadreId(id_padre));
+                .where(FuncionalidadSpecification.porEstado(request.estado()))
+                .and(FuncionalidadSpecification.porPadreId(request.id_padre()));
 
         return funcionalidadRepository.findAll(spec).stream().
                 map(funcionalidadMapper::toResponse).toList();

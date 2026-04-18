@@ -1,5 +1,6 @@
 package com.devops.backend.funcionalidad.controller;
 
+import com.devops.backend.funcionalidad.dto.FuncionalidadFilterRequest;
 import com.devops.backend.funcionalidad.dto.FuncionalidadRequest;
 import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
 import com.devops.backend.funcionalidad.service.FuncionalidadService;
@@ -29,7 +30,7 @@ public class FuncionalidadController {
     public ResponseEntity<?> findAll( @RequestParam(required = false) String status,
                                       @RequestParam(required = false) Long id_padre){
 
-        return ResponseEntity.ok(funcionalidadService.findAll(status,id_padre));
+        return ResponseEntity.ok(funcionalidadService.findAll(new FuncionalidadFilterRequest(status,id_padre)));
     }
 
 }
