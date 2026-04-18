@@ -108,27 +108,22 @@ public class FuncionalidadServiceImp  implements FuncionalidadService{
             funcionalidad.setPadre(null); // Pasa a ser raíz
         }
 
-        // 3. Actualiza los demás campos
-        funcionalidad.setNombreFuncionalidad(request.nombreFuncionalidad());
-        funcionalidad.setUrlFuncionalidad(request.urlFuncionalidad());
-        funcionalidad.setEstado(request.estado().toUpperCase());
-
+        // Actualiza los demás campos
+        funcionalidadMapper.applyUpdate(funcionalidad,request);
         Funcionalidad actualizada = funcionalidadRepository.save(funcionalidad);
 
         return funcionalidadMapper.toResponse(actualizada);
 
     }
 
-    //Recursividad para encontrar si un descendiente es el nuevo padre
     private boolean esDescendiente(Funcionalidad posibleAncestro, Funcionalidad candidato) {
-        Set<Funcionalidad> hijos = candidato.getHijos();
-        if (hijos == null || hijos.isEmpty()) return false;
+        Funcionalidad current = candidato.getPadre();
 
-        for (Funcionalidad hijo : hijos) {
-            if (hijo.getIdFuncionalidad().equals(posibleAncestro.getIdFuncionalidad())) {
-                return true;
+        while (current != null) {
+            if (current.getIdFuncionalidad().equals(posibleAncestro.getIdFuncionalidad())) {
+                return true; // ciclo detectado
             }
-            if (esDescendiente(posibleAncestro, hijo)) return true;
+            current = current.getPadre();
         }
         return false;
     }

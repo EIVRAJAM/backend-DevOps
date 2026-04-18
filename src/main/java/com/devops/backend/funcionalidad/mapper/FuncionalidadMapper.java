@@ -2,6 +2,7 @@ package com.devops.backend.funcionalidad.mapper;
 
 import com.devops.backend.funcionalidad.dto.FuncionalidadRequest;
 import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
+import com.devops.backend.funcionalidad.dto.FuncionalidadUpdateRequest;
 import com.devops.backend.funcionalidad.entity.Funcionalidad;
 import org.springframework.stereotype.Component;
 
@@ -25,5 +26,10 @@ public class FuncionalidadMapper {
                 f.getEstado(),
                 f.getPadre() != null ? f.getPadre().getIdFuncionalidad() : null
         );
+    }
+    public void applyUpdate(Funcionalidad f, FuncionalidadUpdateRequest request){
+        f.setNombreFuncionalidad(request.nombreFuncionalidad());
+        f.setUrlFuncionalidad(request.urlFuncionalidad());
+        f.setEstado(request.estado().toUpperCase());
     }
 }
