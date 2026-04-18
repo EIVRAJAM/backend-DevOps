@@ -14,12 +14,18 @@ import com.devops.backend.usuario.entity.*;
 import com.devops.backend.usuario.repository.UsuarioRepository;
 import com.devops.backend.usuario.service.*;
 import com.devops.backend.rol.repository.*;
+
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -55,6 +61,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private RolRepository rolRepository;
+
+    @Value("${jwt.expiration-minutes}")
+    private long jwtExpirationMinutes;
 
     @Override
     @Transactional
@@ -162,7 +171,6 @@ public class AuthServiceImpl implements AuthService {
         Acceso acceso = optionalAcceso.orElseThrow(() -> new RuntimeException(
                 "Usuario no encontrado con el correo o username proporcionado"));
 
-
         if ("INACTIVO".equalsIgnoreCase(acceso.getEstadoCuenta())) {
             throw new RuntimeException("La cuenta está  inactiva");
         }
@@ -181,7 +189,7 @@ public class AuthServiceImpl implements AuthService {
 
             throw new RuntimeException("Contraseña incorrecta");
         }
-        
+
         if ("INACTIVO".equalsIgnoreCase(acceso.getEstadoCuenta())) {
             throw new RuntimeException("La cuenta está  inactiva");
         }
@@ -196,12 +204,15 @@ public class AuthServiceImpl implements AuthService {
         acceso.setIntentosFallidos(0);
         accesoRepository.save(acceso);
 
+        String jti = java.util.UUID.randomUUID().toString(); // Generar un JTI único para cada token
+
         String token = Jwts.builder()
                 .subject(acceso.getIdUsuario().toString())
                 .claim("authorities",
                         java.util.List.of(Map.of("authority",
                                 acceso.getUsuario().getRol().getNombreRol())))
-                .expiration(new Date(System.currentTimeMillis() + 3600000))
+                .id(jti)
+                .expiration(new Date(System.currentTimeMillis() + (jwtExpirationMinutes * 60 * 1000)))
                 .issuedAt(new Date())
                 .signWith(SECRET_KEY)
                 .compact();
@@ -209,9 +220,10 @@ public class AuthServiceImpl implements AuthService {
         // registrar la sesión
         Sesion sesion = new Sesion();
         sesion.setUsuario(acceso.getUsuario());
-        sesion.setFechaSesion(java.time.LocalDate.now());
-        sesion.setHoraSesion(java.time.LocalTime.now());
-        // sesion.setToken(token); // Not supported by DB
+        sesion.setFechaInicio(LocalDateTime.now());
+        sesion.setActiva(true);
+        sesion.setTokenJti(jti);
+
         sesionRepository.save(sesion);
 
         Map<String, String> response = new HashMap<>();
@@ -224,18 +236,24 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void logout(String token) {
-        /*
-         * Sesion sesion = sesionRepository.findByToken(token)
-         * .orElseThrow(() -> new
-         * RuntimeException("Sesión no encontrada para este token"));
-         *
-         * sesion.setActivo(false);
-         * sesion.setFechaLogout(LocalDateTime.now());
-         * sesionRepository.save(sesion);
-         */
-        // Logout logic not supported by current DB schema (no token storage in sessions
-        // table)
+
+        Claims claims = Jwts.parser()
+                .verifyWith(SECRET_KEY)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        String jti = claims.getId();
+
+        Sesion sesion = sesionRepository.findByTokenJti(jti)
+                .orElseThrow(() -> new RuntimeException("Sesión no encontrada"));
+
+        sesion.setActiva(false);
+        sesion.setFechaFin(LocalDateTime.now());
+
+        sesionRepository.save(sesion);
     }
 
 }
