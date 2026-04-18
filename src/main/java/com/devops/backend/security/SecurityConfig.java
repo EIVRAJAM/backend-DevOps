@@ -40,15 +40,17 @@ public class SecurityConfig {
                                                                                      // /api/auth/
                         .requestMatchers(HttpMethod.POST, "/v1/accesos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v1/accesos/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/v1/usuarios/**").permitAll() // Cualquier POST en
-                                                                                         // /api/usuarios/
-                        .requestMatchers(HttpMethod.GET, "/v1/usuarios/*/sesiones").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/v1/usuarios/**").permitAll() // Cualquier GET en
-                                                                                        // /api/usuarios/
-                        .requestMatchers(HttpMethod.PUT, "/v1/usuarios/**").permitAll() // Cualquier GET en
-                                                                                        // /api/usuarios/
+
+                        .requestMatchers(HttpMethod.POST, "/v1/usuarios/**").permitAll() // Cualquier POST en// /api/usuarios/
+                        .requestMatchers(HttpMethod.GET, "/v1/usuarios/**").permitAll() // Cualquier GET en /api/usuarios/
+                        .requestMatchers(HttpMethod.PUT, "/v1/usuarios/**").permitAll() // Cualquier GET en /api/usuarios/
                         .requestMatchers(HttpMethod.PATCH, "/v1/usuarios/**").permitAll() // Cualquier GET en
-                                                                                          // /api/usuarios/
+
+                        .requestMatchers(HttpMethod.POST, "/v1/funcionalidad/**").permitAll() // Cualquier POST en// /api/funcionalidad/
+                        .requestMatchers(HttpMethod.GET, "/v1/funcionalidad/**").permitAll() // Cualquier GET en /api/funcionalidad/
+                        .requestMatchers(HttpMethod.PUT, "/v1/funcionalidad/**").permitAll() // Cualquier PUT en /api/funcionalidad/
+                        .requestMatchers(HttpMethod.PATCH, "/v1/funcionalidad/**").permitAll() // Cualquier PATCH en /api/funcionalidad/
+
                         .anyRequest().authenticated())
                 .addFilter(jwtAuthenticationFilter)
                 .addFilter(jwtValidationFilter)

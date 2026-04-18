@@ -12,12 +12,12 @@ import com.devops.backend.usuario.entity.Usuario;
 import com.devops.backend.usuario.mapper.UsuarioMapper;
 import com.devops.backend.usuario.repository.UsuarioRepository;
 import com.devops.backend.usuario.specification.UsuarioSpecification;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -124,6 +124,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    @Transactional
     public UserListResponse updateUser(Long id, UpdateUsuarioRequest request) {
 
         Usuario usuario = usuarioRepository.findByIdUsuario(id)
