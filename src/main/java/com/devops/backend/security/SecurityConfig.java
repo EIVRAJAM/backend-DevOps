@@ -35,11 +35,16 @@ public class SecurityConfig {
 
         return http
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                            "/swagger-ui/**",
+                            "/swagger-ui.html",
+                            "/v3/api-docs/**"
+                        ).permitAll()
                         // .requestMatchers(HttpMethod.GET, "/api/acceso/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/auth/**").permitAll() // Cualquier cosa en
                                                                                      // /api/auth/
                         .requestMatchers(HttpMethod.POST, "/v1/accesos/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/v1/accesos/**").permitAll()
+                        //.requestMatchers(HttpMethod.GET, "/v1/accesos/**").permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/v1/usuarios/**").permitAll() // Cualquier POST en// /api/usuarios/
                         .requestMatchers(HttpMethod.GET, "/v1/usuarios/**").permitAll() // Cualquier GET en /api/usuarios/
