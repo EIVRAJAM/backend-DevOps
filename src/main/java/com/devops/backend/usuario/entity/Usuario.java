@@ -49,7 +49,7 @@ public class Usuario {
     @Column(name = "estado", nullable = false)
     private String estado;
 
-    @Column(name = "creado_en")
+    @Column(name = "creado_en", nullable = false, updatable = false)
     private LocalDateTime creadoEn;
 
     @Column(name = "actualizado_en")

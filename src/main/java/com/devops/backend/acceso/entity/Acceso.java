@@ -51,7 +51,7 @@ public class Acceso {
     @Column(name = "ultimo_login")
     private LocalDateTime ultimoLogin;
 
-    @Column(name = "creado_en")
+    @Column(name = "creado_en", nullable = false, updatable = false)
     private LocalDateTime creadoEn;
 
     @Column(name = "actualizado_en")

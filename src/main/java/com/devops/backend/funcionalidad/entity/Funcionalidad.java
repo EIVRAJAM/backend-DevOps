@@ -38,7 +38,7 @@ public class Funcionalidad {
     @Column(name = "estado")
     private String estado;
 
-    @Column(name = "creado_en")
+    @Column(name = "creado_en", nullable = false, updatable = false)
     private LocalDateTime creadoEn;
 
     @Column(name = "actualizado_en")
