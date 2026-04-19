@@ -28,8 +28,19 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
         String authHeader = request.getHeader(HEADER_AUTH);
+
+        String path = request.getServletPath();
+
+        if (path.startsWith("/swagger-ui") ||
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/api/swagger-ui") ||
+                path.startsWith("/api/v3/api-docs")) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         if (authHeader == null || !authHeader.startsWith(PREFIX_TOKEN)) {
             chain.doFilter(request, response);
