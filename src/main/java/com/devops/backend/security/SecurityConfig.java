@@ -2,10 +2,12 @@ package com.devops.backend.security;
 
 import com.devops.backend.security.filter.JwtAuthenticationFilter;
 import com.devops.backend.security.filter.JwtValidationFilter;
+
+import tools.jackson.databind.ObjectMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,12 +16,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
 
     @Autowired
     private AuthenticationConfiguration authenticationConfiguration;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Bean
     AuthenticationManager authenticationManager() throws Exception {
@@ -28,40 +34,21 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager());
-        jwtAuthenticationFilter.setFilterProcessesUrl("/api/auth/sign-in");
 
-        JwtValidationFilter jwtValidationFilter = new JwtValidationFilter(authenticationManager());
+        AuthenticationManager authManager = authenticationManager();
+
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authManager);
+
+        JwtValidationFilter jwtValidationFilter = new JwtValidationFilter(authManager, objectMapper);
 
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                            "/swagger-ui/**",
-                            "/swagger-ui.html",
-                            "/v3/api-docs/**"
-                        ).permitAll()
-                        // .requestMatchers(HttpMethod.GET, "/api/acceso/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/v1/auth/**").permitAll() // Cualquier cosa en
-                                                                                     // /api/auth/
-                        .requestMatchers(HttpMethod.POST, "/v1/accesos/**").permitAll()
-                        //.requestMatchers(HttpMethod.GET, "/v1/accesos/**").permitAll()
-
-                        .requestMatchers(HttpMethod.POST, "/v1/usuarios/**").permitAll() // Cualquier POST en// /api/usuarios/
-                        .requestMatchers(HttpMethod.GET, "/v1/usuarios/**").permitAll() // Cualquier GET en /api/usuarios/
-                        .requestMatchers(HttpMethod.PUT, "/v1/usuarios/**").permitAll() // Cualquier GET en /api/usuarios/
-                        .requestMatchers(HttpMethod.PATCH, "/v1/usuarios/**").permitAll() // Cualquier GET en
-
-                        .requestMatchers(HttpMethod.POST, "/v1/funcionalidad/**").permitAll() // Cualquier POST en// /api/funcionalidad/
-                        .requestMatchers(HttpMethod.GET, "/v1/funcionalidad/**").permitAll() // Cualquier GET en /api/funcionalidad/
-                        .requestMatchers(HttpMethod.PUT, "/v1/funcionalidad/**").permitAll() // Cualquier PUT en /api/funcionalidad/
-                        .requestMatchers(HttpMethod.PATCH, "/v1/funcionalidad/**").permitAll() // Cualquier PATCH en /api/funcionalidad/
-
-                        .anyRequest().authenticated())
-                .addFilter(jwtAuthenticationFilter)
-                .addFilter(jwtValidationFilter)
+                .requestMatchers(PublicRoutes.SECURITY_MATCHERS).permitAll()
+                .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtValidationFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(management -> management
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
 

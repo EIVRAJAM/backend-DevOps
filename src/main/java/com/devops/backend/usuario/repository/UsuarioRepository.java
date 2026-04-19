@@ -3,7 +3,6 @@ package com.devops.backend.usuario.repository;
 import com.devops.backend.usuario.entity.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;
 

@@ -8,7 +8,6 @@ import com.devops.backend.acceso.dto.ActualizarPasswordAdminDTO;
 import com.devops.backend.acceso.entity.Acceso;
 import com.devops.backend.acceso.mappers.AccesoMapper;
 import com.devops.backend.acceso.service.AccesoService;
-import com.devops.backend.exception.BadRequestException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

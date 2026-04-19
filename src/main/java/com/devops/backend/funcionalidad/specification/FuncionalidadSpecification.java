@@ -1,7 +1,6 @@
 package com.devops.backend.funcionalidad.specification;
 
 import com.devops.backend.funcionalidad.entity.Funcionalidad;
-import com.devops.backend.usuario.entity.Usuario;
 import org.springframework.data.jpa.domain.Specification;
 
 public class FuncionalidadSpecification {

@@ -16,8 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/v1/funcionalidad")
 @Tag(name = "Functionality Management", description = "Operaciones de gestión de funcionalidades del sistema. Soporta estructura jerárquica (árbol de funcionalidades padre-hijo) para menús y permisos anidados.")

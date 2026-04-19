@@ -16,6 +16,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import com.devops.backend.security.PublicRoutes;
+
 import static com.devops.backend.security.TokenJwtConfig.*;
 
 import java.io.IOException;
@@ -23,8 +25,11 @@ import java.util.*;
 
 public class JwtValidationFilter extends BasicAuthenticationFilter {
 
-    public JwtValidationFilter(AuthenticationManager authenticationManager) {
+    private final ObjectMapper objectMapper;
+
+    public JwtValidationFilter(AuthenticationManager authenticationManager, ObjectMapper objectMapper) {
         super(authenticationManager);
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -32,12 +37,10 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
             throws IOException, ServletException {
         String authHeader = request.getHeader(HEADER_AUTH);
 
-        String path = request.getServletPath();
-
-        if (path.startsWith("/swagger-ui") ||
-                path.startsWith("/v3/api-docs") ||
-                path.startsWith("/api/swagger-ui") ||
-                path.startsWith("/api/v3/api-docs")) {
+        String path = request.getRequestURI();
+        // System.out.println("PATH = " + path);
+        // System.out.println("PATH = " + path.startsWith("/api/v1/auth"));
+        if (isPublicRoute(path)) {
             chain.doFilter(request, response);
             return;
         }
@@ -61,7 +64,8 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
                     .map(m -> new SimpleGrantedAuthority(m.get("authority")))
                     .toList();
 
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(correoAcceso, null, authorities);
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(correoAcceso, null,
+                    authorities);
             SecurityContextHolder.getContext().setAuthentication(authToken);
             chain.doFilter(request, response);
 
@@ -71,9 +75,16 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
             body.put("error", e.getMessage());
             body.put("message", "El token JWT no es valido!");
 
-            response.getWriter().write(new ObjectMapper().writeValueAsString(body));
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(CONTENT_TYPE);
+            response.getWriter().write(objectMapper.writeValueAsString(body));
+
+            return;
         }
+    }
+
+    private boolean isPublicRoute(String path) {
+        return Arrays.stream(PublicRoutes.FILTER_PREFIXES)
+                .anyMatch(path::startsWith);
     }
 }

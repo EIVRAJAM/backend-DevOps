@@ -5,7 +5,6 @@ import com.devops.backend.funcionalidad.dto.FuncionalidadRequest;
 import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
 import com.devops.backend.funcionalidad.dto.FuncionalidadUpdateRequest;
 import jakarta.validation.Valid;
-import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 

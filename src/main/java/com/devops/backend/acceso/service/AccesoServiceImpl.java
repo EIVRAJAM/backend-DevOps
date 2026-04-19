@@ -10,7 +10,6 @@ import com.devops.backend.exception.BadRequestException;
 import com.devops.backend.exception.ConflictException;
 import com.devops.backend.usuario.entity.*;
 import com.devops.backend.usuario.repository.*;
-import com.devops.backend.rol.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
