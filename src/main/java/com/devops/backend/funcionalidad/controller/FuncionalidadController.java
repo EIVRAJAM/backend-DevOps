@@ -48,7 +48,7 @@ public class FuncionalidadController {
             @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado")
     })
     public ResponseEntity<?> findAll(
-            @RequestParam(required = false) @Parameter(description = "Filtro opcional por estado: ACTIVA o INACTIVA", example = "ACTIVA") String status,
+            @RequestParam(required = false) @Parameter(description = "Filtro opcional por estado: ACTIVO o INACTIVO", example = "ACTIVO") String status,
 
             @RequestParam(required = false, name = "id_padre") @Parameter(description = "Filtro opcional por ID de funcionalidad padre. Deja vacío o usa null para solo ver raíces", example = "null") Long id_padre) {
 
