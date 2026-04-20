@@ -1,6 +1,7 @@
 package com.devops.backend.evento.entity;
 
 import com.devops.backend.usuario.entity.Usuario;
+import com.devops.backend.evento.enums.EstadoEvento;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,11 +32,13 @@ public class HistorialEvento {
     @JoinColumn(name = "id_evento", nullable = false)
     private Evento evento;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado_anterior", length = 10)
-    private String estadoAnterior;
+    private EstadoEvento estadoAnterior;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado_nuevo", nullable = false, length = 10)
-    private String estadoNuevo;
+    private EstadoEvento estadoNuevo;
 
     @Column(name = "comentario", length = 500)
     private String comentario;

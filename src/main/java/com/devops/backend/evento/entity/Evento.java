@@ -1,6 +1,8 @@
 package com.devops.backend.evento.entity;
 
 import com.devops.backend.usuario.entity.Usuario;
+import com.devops.backend.evento.enums.Estado;
+import com.devops.backend.evento.enums.EstadoEvento;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -49,8 +51,9 @@ public class Evento {
     @Column(name = "imagen_url", length = 500)
     private String imagenUrl;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado_evento", nullable = false)
-    private String estadoEvento;
+    private EstadoEvento estadoEvento;
 
     @Column(name = "capacidad_maxima", nullable = false)
     private Integer capacidadMaxima;
@@ -61,8 +64,9 @@ public class Evento {
     @Column(name = "cupos_parqueadero")
     private Integer cuposParqueadero;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)
-    private String estado;
+    private Estado estado;
 
     @Column(name = "creado_en", nullable = false, updatable = false)
     private LocalDateTime creadoEn;
@@ -75,10 +79,10 @@ public class Evento {
         creadoEn = LocalDateTime.now();
         actualizadoEn = LocalDateTime.now();
         if (estadoEvento == null) {
-            estadoEvento = "BORRADOR";
+            estadoEvento = EstadoEvento.BORRADOR;
         }
         if (estado == null) {
-            estado = "ACTIVO";
+            estado = Estado.ACTIVO;
         }
         if (tieneParqueadero == null) {
             tieneParqueadero = false;
