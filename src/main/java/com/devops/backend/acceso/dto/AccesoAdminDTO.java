@@ -5,7 +5,7 @@ import java.util.UUID;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Información completa de acceso del usuario (vista administrativa con campos sensibles)")
-public record AccesoAdminDTO(
+public record   AccesoAdminDTO(
                 @Schema(description = "ID único del usuario propietario de este acceso", example = "123") Long idUsuario,
 
                 @Schema(description = "Nombre de usuario para inicio de sesión", example = "jperez") String username,
