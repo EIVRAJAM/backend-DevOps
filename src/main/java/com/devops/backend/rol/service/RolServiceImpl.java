@@ -12,10 +12,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 
 import com.devops.backend.rol.repository.RolRepository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.StreamSupport;
@@ -65,7 +68,17 @@ public class RolServiceImpl implements RolService {
     @Override
     public RolResponse findById(Long id) {
         Rol rol = rolRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Rol no encontrado con id: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404),
+                        "Rol no encontrado con el id: "+id));
+
+        return rolMapper.toResponse(rol);
+    }
+
+    @Override
+    public RolResponse findByName(String name) {
+        Rol rol = rolRepository.findByNombreRol(name).
+                orElseThrow(()-> new ResponseStatusException(HttpStatusCode.valueOf(404),
+                "Rol no encontrado con el nombre: "+name));
 
         return rolMapper.toResponse(rol);
     }

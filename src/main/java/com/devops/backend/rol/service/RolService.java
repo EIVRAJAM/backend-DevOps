@@ -13,5 +13,6 @@ public interface RolService {
     List<RolResponse> findAll();
     Page<RolResponse> findAllFilter(RolFilterRequest filter);
     RolResponse findById(Long id); // <-- nuevo
+    RolResponse findByName(String name); // <-- nuevo
 
 }

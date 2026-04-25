@@ -46,8 +46,13 @@ public class RolController {
         return ResponseEntity.ok(rolService.findAllFilter(new RolFilterRequest(idRol, nombreRol, estado, page, size)));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id){
         return ResponseEntity.ok(rolService.findById(id));
+    }
+
+    @GetMapping("/nombre({nombre}")
+    public ResponseEntity<?> findByName(@PathVariable String nombre){
+        return ResponseEntity.ok(rolService.findByName(nombre));
     }
 }
