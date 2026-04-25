@@ -10,15 +10,18 @@ import org.springframework.stereotype.Service;
 import com.devops.backend.rol.repository.RolRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.StreamSupport;
+
 @Service
 public class RolServiceImpl implements RolService {
 
     private final RolRepository rolRepository;
     private final RolMapper rolMapper;
 
-    public RolServiceImpl(RolRepository rolRepository) {
+    public RolServiceImpl(RolRepository rolRepository, RolMapper rolMapper) {
         this.rolRepository = rolRepository;
-        this.rolMapper = new RolMapper();
+        this.rolMapper = rolMapper;
     }
 
     @Override
@@ -32,5 +35,13 @@ public class RolServiceImpl implements RolService {
         Rol guardado = rolRepository.save(rol);
 
         return rolMapper.toResponse(guardado);
+    }
+
+    @Override
+    public List<RolResponse> findAll() {
+
+        return StreamSupport.stream(rolRepository.findAll().spliterator(),false).
+                map(rolMapper::toResponse).toList();
+
     }
 }

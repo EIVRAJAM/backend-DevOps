@@ -5,14 +5,23 @@ import com.devops.backend.funcionalidad.mapper.FuncionalidadMapper;
 import com.devops.backend.rol.entity.Rol;
 import com.devops.backend.rol.entity.dto.RolRequest;
 import com.devops.backend.rol.entity.dto.RolResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Component
 public class RolMapper {
 
+
+
     private FuncionalidadMapper funcionalidadMapper;
+
+    public RolMapper(FuncionalidadMapper funcionalidadMapper) {
+        this.funcionalidadMapper = funcionalidadMapper;
+    }
 
     public Rol toEntity(RolRequest request) {
         Rol rol = new Rol();
