@@ -12,5 +12,6 @@ public interface RolService {
     RolResponse save(RolRequest request);
     List<RolResponse> findAll();
     Page<RolResponse> findAllFilter(RolFilterRequest filter);
+    RolResponse findById(Long id); // <-- nuevo
 
 }

@@ -7,6 +7,7 @@ import com.devops.backend.rol.entity.dto.RolRequest;
 import com.devops.backend.rol.entity.dto.RolResponse;
 import com.devops.backend.rol.mapper.RolMapper;
 import com.devops.backend.rol.specification.RolSpecification;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -59,5 +60,13 @@ public class RolServiceImpl implements RolService {
 
         return rolRepository.findAll(spec, pageable)
                 .map(rolMapper::toResponse);
+    }
+
+    @Override
+    public RolResponse findById(Long id) {
+        Rol rol = rolRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Rol no encontrado con id: " + id));
+
+        return rolMapper.toResponse(rol);
     }
 }
