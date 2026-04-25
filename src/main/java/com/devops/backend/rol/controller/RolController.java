@@ -60,4 +60,9 @@ public class RolController {
         return ResponseEntity.ok(rolService.desactivarRol(id));
     }
 
+    @PatchMapping("/{id}/activar")
+    public ResponseEntity<?> activar(@PathVariable Long id) {
+        return ResponseEntity.ok(rolService.activarRol(id));
+    }
+
 }

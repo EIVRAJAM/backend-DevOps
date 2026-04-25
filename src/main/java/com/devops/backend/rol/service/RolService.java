@@ -15,4 +15,5 @@ public interface RolService {
     RolResponse findById(Long id); // <-- nuevo
     RolResponse findByName(String name); // <-- nuevo
     RolResponse desactivarRol(Long id);
+    RolResponse activarRol(Long id);
 }
