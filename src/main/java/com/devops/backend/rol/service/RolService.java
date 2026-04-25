@@ -14,5 +14,5 @@ public interface RolService {
     Page<RolResponse> findAllFilter(RolFilterRequest filter);
     RolResponse findById(Long id); // <-- nuevo
     RolResponse findByName(String name); // <-- nuevo
-
+    RolResponse desactivarRol(Long id);
 }

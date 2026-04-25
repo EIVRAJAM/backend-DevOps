@@ -55,4 +55,9 @@ public class RolController {
     public ResponseEntity<?> findByName(@PathVariable String nombre){
         return ResponseEntity.ok(rolService.findByName(nombre));
     }
+    @PatchMapping("/{id}/desactivar")
+    public ResponseEntity<?> desactivar(@PathVariable Long id) {
+        return ResponseEntity.ok(rolService.desactivarRol(id));
+    }
+
 }

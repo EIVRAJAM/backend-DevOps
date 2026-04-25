@@ -82,4 +82,20 @@ public class RolServiceImpl implements RolService {
 
         return rolMapper.toResponse(rol);
     }
+
+    @Override
+    @Transactional
+    public RolResponse desactivarRol(Long id) {
+        Rol rol = rolRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404),
+                        "Rol no encontrado con el id: "+id));
+
+        if ("INACTIVO".equals(rol.getEstado())) {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(409),"El rol ya se encuentra inactivo");
+        }
+
+        rol.setEstado("INACTIVO");
+        rolRepository.save(rol);
+        return rolMapper.toResponse(rol);
+    }
 }
