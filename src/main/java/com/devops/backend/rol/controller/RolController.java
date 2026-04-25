@@ -1,5 +1,6 @@
 package com.devops.backend.rol.controller;
 
+import com.devops.backend.rol.entity.dto.RolFilterRequest;
 import com.devops.backend.rol.entity.dto.RolRequest;
 import com.devops.backend.rol.service.RolService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -28,8 +29,20 @@ public class RolController {
 
     }
 
-    @GetMapping()
+    @GetMapping("/all")
     public ResponseEntity<?> findAll(){
         return ResponseEntity.ok(rolService.findAll());
+    }
+
+    @GetMapping
+    public ResponseEntity<?> findAllFilter(
+            @RequestParam(required = false) Long idRol,
+            @RequestParam(required = false) String nombreRol,
+            @RequestParam(required = false) String estado,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+
+        return ResponseEntity.ok(rolService.findAllFilter(new RolFilterRequest(idRol, nombreRol, estado, page, size)));
     }
 }

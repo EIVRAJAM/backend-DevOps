@@ -26,6 +26,7 @@ public class Rol {
     @Column(name = "nombre_rol", nullable = false, unique = true, length = 100)
     private String nombreRol;
 
+    @Column(name = "estado", nullable = false)
     private String estado;
 
     @Column(name = "creado_en", nullable = false, updatable = false)

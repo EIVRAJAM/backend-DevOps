@@ -2,9 +2,15 @@ package com.devops.backend.rol.service;
 
 import com.devops.backend.exception.RolDuplicadoException;
 import com.devops.backend.rol.entity.Rol;
+import com.devops.backend.rol.entity.dto.RolFilterRequest;
 import com.devops.backend.rol.entity.dto.RolRequest;
 import com.devops.backend.rol.entity.dto.RolResponse;
 import com.devops.backend.rol.mapper.RolMapper;
+import com.devops.backend.rol.specification.RolSpecification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.devops.backend.rol.repository.RolRepository;
@@ -43,5 +49,15 @@ public class RolServiceImpl implements RolService {
         return StreamSupport.stream(rolRepository.findAll().spliterator(),false).
                 map(rolMapper::toResponse).toList();
 
+    }
+
+    @Override
+    public Page<RolResponse> findAllFilter(RolFilterRequest filter) {
+
+        Pageable pageable = PageRequest.of(filter.page(), filter.size());
+        Specification<Rol> spec = RolSpecification.withFilters(filter);
+
+        return rolRepository.findAll(spec, pageable)
+                .map(rolMapper::toResponse);
     }
 }
