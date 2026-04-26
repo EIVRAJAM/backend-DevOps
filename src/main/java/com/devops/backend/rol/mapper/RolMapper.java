@@ -49,7 +49,6 @@ public class RolMapper {
     }
 
     public void applyUpdate(Rol rol, RolUpdateDto r){
-//        rol.setIdRol(r.idRol());
         rol.setNombreRol(r.nombreRol());
         rol.setEstado(r.estado());
     }

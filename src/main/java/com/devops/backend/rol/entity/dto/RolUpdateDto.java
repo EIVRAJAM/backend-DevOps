@@ -10,9 +10,6 @@ import jakarta.validation.constraints.Size;
 
 public record RolUpdateDto(
 
-//        @NotNull(message = "El id no puede estar vacío")
-//        @Size(max = 20)
-//        Long idRol,
 
         @NotBlank
         @Pattern(

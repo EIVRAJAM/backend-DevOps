@@ -137,10 +137,7 @@ public class RolServiceImpl implements RolService {
         if(!rolRepository.findByNombreRol(request.nombreRol()).isEmpty()){
             errors.add(new ApiValidationError("nombreRol", "El nombre ya lo tiene otro rol"));
         }
-//        if(request.estado() != Estado.ACTIVO ||
-//                request.estado() != Estado.INACTIVO){
-//           errors.add(new ApiValidationError("estado", "El rol tiene que ser ACTIVO o INACTIVO"));
-//        }
+
 
         if (!errors.isEmpty()) {
             throw new ConflictException("Campos duplicados en el registro", errors);
