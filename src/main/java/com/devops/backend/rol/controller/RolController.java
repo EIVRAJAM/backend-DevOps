@@ -1,13 +1,12 @@
 package com.devops.backend.rol.controller;
 
-import com.devops.backend.evento.enums.Estado;
+import com.devops.backend.rol.entity.dto.AsignarFuncionalidadesRequest;
 import com.devops.backend.rol.entity.dto.RolFilterRequest;
 import com.devops.backend.rol.entity.dto.RolRequest;
 import com.devops.backend.rol.entity.dto.RolUpdateDto;
 import com.devops.backend.rol.service.RolService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -70,6 +69,13 @@ public class RolController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateRol(@PathVariable Long id, @Valid @RequestBody RolUpdateDto request){
         return ResponseEntity.ok(rolService.updateRol(id,request));
+    }
+
+    @PutMapping("/{id}/funcionalidades")
+    public ResponseEntity<?> asignarFuncionalidades(
+            @PathVariable Long id,
+            @Valid @RequestBody AsignarFuncionalidadesRequest request) {
+        return ResponseEntity.ok(rolService.asignarFuncionalidades(id, request));
     }
 
 }
