@@ -77,5 +77,9 @@ public class RolController {
             @Valid @RequestBody AsignarFuncionalidadesRequest request) {
         return ResponseEntity.ok(rolService.asignarFuncionalidades(id, request));
     }
+    @GetMapping("/{id}/funcionalidades")
+    public ResponseEntity<?> findFuncionalidadesByRol(@PathVariable Long id) {
+        return ResponseEntity.ok(rolService.findFuncionalidadesByRol(id));
+    }
 
 }

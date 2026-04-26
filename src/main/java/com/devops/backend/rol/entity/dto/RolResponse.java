@@ -4,7 +4,7 @@ import com.devops.backend.rol.enums.Estado;
 import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
 
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
 public record RolResponse(
         Long idRol,
@@ -12,7 +12,7 @@ public record RolResponse(
         Estado estado,
         LocalDateTime creadoEn,
         LocalDateTime actualizadoEn,
-        Set<FuncionalidadResponse> funcionalidades
+        List<FuncionalidadResponse> funcionalidades
 ) {
 
 

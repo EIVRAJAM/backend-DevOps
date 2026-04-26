@@ -1,5 +1,6 @@
 package com.devops.backend.rol.service;
 
+import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
 import com.devops.backend.funcionalidad.entity.Funcionalidad;
 import com.devops.backend.funcionalidad.repository.FuncionalidadRepository;
 import com.devops.backend.rol.entity.dto.*;
@@ -176,6 +177,17 @@ public class RolServiceImpl implements RolService {
         Rol rolActualizado = rolRepository.save(rol);
 
         return rolMapper.toResponse(rolActualizado);
+    }
+
+    @Override
+    public List<FuncionalidadResponse> findFuncionalidadesByRol(Long idRol) {
+        Rol rol = findRol(idRol);
+
+        if (rol.getFuncionalidades() == null || rol.getFuncionalidades().isEmpty()) {
+            return List.of();
+        }
+
+        return rolMapper.getFuncionalidadByRol(rol);
     }
 
     private Rol findRol(Long id){

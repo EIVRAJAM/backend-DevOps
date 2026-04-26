@@ -10,6 +10,7 @@ import com.devops.backend.rol.entity.dto.RolUpdateDto;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,11 +33,7 @@ public class RolMapper {
     }
 
     public RolResponse toResponse(Rol rol) {
-        Set<FuncionalidadResponse> funcionalidades = rol.getFuncionalidades() == null
-                ? Collections.emptySet()
-                : rol.getFuncionalidades().stream()
-                .map(funcionalidadMapper::toResponse)
-                .collect(Collectors.toSet());
+        List<FuncionalidadResponse> funcionalidades = getFuncionalidadByRol(rol);
 
         return new RolResponse(
                 rol.getIdRol(),
@@ -46,6 +43,14 @@ public class RolMapper {
                 rol.getActualizadoEn(),
                 funcionalidades
         );
+    }
+
+    public List<FuncionalidadResponse> getFuncionalidadByRol(Rol rol){
+        return rol.getFuncionalidades() == null
+                ? List.of()
+                : rol.getFuncionalidades().stream()
+                .map(funcionalidadMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     public void applyUpdate(Rol rol, RolUpdateDto r){

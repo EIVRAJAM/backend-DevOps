@@ -1,9 +1,11 @@
 package com.devops.backend.rol.service;
 
+import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
 import com.devops.backend.rol.entity.dto.*;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Set;
 
 public interface RolService {
 
@@ -16,4 +18,5 @@ public interface RolService {
     RolResponse activarRol(Long id);
     RolResponse updateRol(Long id, RolUpdateDto request);
     RolResponse asignarFuncionalidades(Long idRol, AsignarFuncionalidadesRequest request);
+    List<FuncionalidadResponse> findFuncionalidadesByRol(Long idRol);
 }
