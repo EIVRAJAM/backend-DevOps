@@ -4,7 +4,6 @@ import com.devops.backend.funcionalidad.dto.FuncionalidadFilterRequest;
 import com.devops.backend.funcionalidad.dto.FuncionalidadRequest;
 import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
 import com.devops.backend.funcionalidad.dto.FuncionalidadUpdateRequest;
-import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -15,7 +14,7 @@ public interface FuncionalidadService {
 
     FuncionalidadResponse findById(Long id);
 
-     FuncionalidadResponse update(Long id, @Valid FuncionalidadUpdateRequest request);
+     FuncionalidadResponse update(Long id, FuncionalidadUpdateRequest request);
 
     FuncionalidadResponse desactive(Long id);
     public FuncionalidadResponse activar(Long id);

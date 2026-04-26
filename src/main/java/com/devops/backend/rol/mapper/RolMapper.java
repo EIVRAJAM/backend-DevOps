@@ -1,11 +1,12 @@
 package com.devops.backend.rol.mapper;
 
+import com.devops.backend.rol.enums.Estado;
 import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
 import com.devops.backend.funcionalidad.mapper.FuncionalidadMapper;
 import com.devops.backend.rol.entity.Rol;
 import com.devops.backend.rol.entity.dto.RolRequest;
 import com.devops.backend.rol.entity.dto.RolResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.devops.backend.rol.entity.dto.RolUpdateDto;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -26,7 +27,7 @@ public class RolMapper {
     public Rol toEntity(RolRequest request) {
         Rol rol = new Rol();
         rol.setNombreRol(request.nombreRol());
-        rol.setEstado("ACTIVO");
+        rol.setEstado(Estado.ACTIVO);
         return rol;
     }
 
@@ -47,4 +48,9 @@ public class RolMapper {
         );
     }
 
+    public void applyUpdate(Rol rol, RolUpdateDto r){
+//        rol.setIdRol(r.idRol());
+        rol.setNombreRol(r.nombreRol());
+        rol.setEstado(r.estado());
+    }
 }

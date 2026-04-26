@@ -1,6 +1,7 @@
 package com.devops.backend.rol.entity;
 
 import com.devops.backend.funcionalidad.entity.Funcionalidad;
+import com.devops.backend.rol.enums.Estado;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,8 +27,9 @@ public class Rol {
     @Column(name = "nombre_rol", nullable = false, unique = true, length = 100)
     private String nombreRol;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)
-    private String estado;
+    private Estado estado;
 
     @Column(name = "creado_en", nullable = false, updatable = false)
     private LocalDateTime creadoEn;
