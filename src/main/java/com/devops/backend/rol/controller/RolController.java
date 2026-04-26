@@ -1,8 +1,10 @@
 package com.devops.backend.rol.controller;
 
+import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
 import com.devops.backend.rol.entity.dto.AsignarFuncionalidadesRequest;
 import com.devops.backend.rol.entity.dto.RolFilterRequest;
 import com.devops.backend.rol.entity.dto.RolRequest;
+import com.devops.backend.rol.entity.dto.RolResponse;
 import com.devops.backend.rol.entity.dto.RolUpdateDto;
 import com.devops.backend.rol.service.RolService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,9 +14,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Role Management", description = "Operaciones relacionadas con roles y sus funcionalidades")
 @RestController
@@ -41,7 +46,7 @@ public class RolController {
             @ApiResponse(responseCode = "403", description = "Acceso denegado: solo administradores pueden crear roles"),
             @ApiResponse(responseCode = "409", description = "Conflicto: nombre del rol ya existe en el sistema")
     })
-    public ResponseEntity<?> save(@Valid @RequestBody RolRequest request) {
+    public ResponseEntity<RolResponse> save(@Valid @RequestBody RolRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(rolService.save(request));
     }
 
@@ -55,7 +60,7 @@ public class RolController {
             @ApiResponse(responseCode = "200", description = "Lista completa de roles recuperada exitosamente"),
             @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado")
     })
-    public ResponseEntity<?> findAll() {
+    public ResponseEntity<List<RolResponse>> findAll() {
         return ResponseEntity.ok(rolService.findAll());
     }
 
@@ -70,7 +75,7 @@ public class RolController {
             @ApiResponse(responseCode = "400", description = "Parámetros de paginación inválidos (page < 0 o size > 100)"),
             @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado")
     })
-    public ResponseEntity<?> findAllFilter(
+    public ResponseEntity<Page<RolResponse>> findAllFilter(
             @RequestParam(required = false)
             @Parameter(description = "Filtro opcional: ID único del rol", example = "1")
             Long idRol,
@@ -105,7 +110,7 @@ public class RolController {
             @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
             @ApiResponse(responseCode = "404", description = "Rol no encontrado en el sistema")
     })
-    public ResponseEntity<?> findById(
+    public ResponseEntity<RolResponse> findById(
             @PathVariable
             @Parameter(description = "ID único del rol", required = true, example = "1")
             Long id
@@ -124,7 +129,7 @@ public class RolController {
             @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
             @ApiResponse(responseCode = "404", description = "Rol con el nombre especificado no encontrado")
     })
-    public ResponseEntity<?> findByName(
+    public ResponseEntity<RolResponse> findByName(
             @PathVariable
             @Parameter(description = "Nombre exacto del rol", required = true, example = "ROLE_ADMIN")
             String nombre
@@ -145,7 +150,7 @@ public class RolController {
             @ApiResponse(responseCode = "404", description = "Rol no encontrado"),
             @ApiResponse(responseCode = "409", description = "Conflicto: rol ya está inactivo")
     })
-    public ResponseEntity<?> desactivar(
+    public ResponseEntity<RolResponse> desactivar(
             @PathVariable
             @Parameter(description = "ID único del rol a desactivar", required = true, example = "1")
             Long id
@@ -166,7 +171,7 @@ public class RolController {
             @ApiResponse(responseCode = "404", description = "Rol no encontrado"),
             @ApiResponse(responseCode = "409", description = "Conflicto: rol ya está activo")
     })
-    public ResponseEntity<?> activar(
+    public ResponseEntity<RolResponse> activar(
             @PathVariable
             @Parameter(description = "ID único del rol a activar", required = true, example = "1")
             Long id
@@ -188,7 +193,7 @@ public class RolController {
             @ApiResponse(responseCode = "404", description = "Rol no encontrado"),
             @ApiResponse(responseCode = "409", description = "Conflicto: nombre del rol ya existe en el sistema")
     })
-    public ResponseEntity<?> updateRol(
+    public ResponseEntity<RolResponse> updateRol(
             @PathVariable
             @Parameter(description = "ID único del rol a actualizar", required = true, example = "1")
             Long id,
@@ -211,7 +216,7 @@ public class RolController {
             @ApiResponse(responseCode = "403", description = "Acceso denegado: solo administradores pueden asignar funcionalidades"),
             @ApiResponse(responseCode = "404", description = "Rol o alguna funcionalidad especificada no encontrada")
     })
-    public ResponseEntity<?> asignarFuncionalidades(
+    public ResponseEntity<RolResponse> asignarFuncionalidades(
             @PathVariable
             @Parameter(description = "ID único del rol al que se asignan funcionalidades", required = true, example = "1")
             Long id,
@@ -232,7 +237,7 @@ public class RolController {
             @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
             @ApiResponse(responseCode = "404", description = "Rol no encontrado")
     })
-    public ResponseEntity<?> findFuncionalidadesByRol(
+    public ResponseEntity<List<FuncionalidadResponse>> findFuncionalidadesByRol(
             @PathVariable
             @Parameter(description = "ID único del rol a consultar", required = true, example = "1")
             Long id
@@ -252,7 +257,7 @@ public class RolController {
             @ApiResponse(responseCode = "403", description = "Acceso denegado: solo administradores pueden modificar funcionalidades de roles"),
             @ApiResponse(responseCode = "404", description = "Rol o funcionalidad no encontrada, o la funcionalidad no está asignada al rol")
     })
-    public ResponseEntity<?> eliminarFuncionalidad(
+    public ResponseEntity<RolResponse> eliminarFuncionalidad(
             @PathVariable
             @Parameter(description = "ID único del rol", required = true, example = "1")
             Long idRol,
