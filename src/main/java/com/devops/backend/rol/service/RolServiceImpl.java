@@ -190,10 +190,35 @@ public class RolServiceImpl implements RolService {
         return rolMapper.getFuncionalidadByRol(rol);
     }
 
+    @Override
+    @Transactional
+    public RolResponse eliminarFuncionalidad(Long idRol, Long idFuncionalidad) {
+
+        Rol rol = findRol(idRol);
+        Funcionalidad funcionalidad = findFun(idFuncionalidad);
+
+        if (rol.getFuncionalidades() == null || !rol.getFuncionalidades().contains(funcionalidad)) {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(409),
+                    "La funcionalidad '" + funcionalidad.getNombreFuncionalidad() + "' no está asignada a este rol");
+        }
+
+        rol.getFuncionalidades().remove(funcionalidad);
+        Rol rolActualizado = rolRepository.save(rol);
+
+        return rolMapper.toResponse(rolActualizado);
+
+    }
+
     private Rol findRol(Long id){
         return rolRepository.findById(id).
                 orElseThrow(()-> new ResponseStatusException(HttpStatusCode.valueOf(404)
                         ,"Rol no encontrado con el id: "+id));
+    }
+
+    private Funcionalidad findFun(Long id){
+        return funcionalidadRepository.findById(id).
+                orElseThrow(()-> new ResponseStatusException(HttpStatusCode.valueOf(404)
+                        ,"Funcion no encontrado con el id: "+id));
     }
 
     private void validation(RolUpdateDto request){

@@ -82,4 +82,11 @@ public class RolController {
         return ResponseEntity.ok(rolService.findFuncionalidadesByRol(id));
     }
 
+    @DeleteMapping("/{idRol}/funcionalidades/{idFuncionalidad}")
+    public ResponseEntity<?> eliminarFuncionalidad(
+            @PathVariable Long idRol,
+            @PathVariable Long idFuncionalidad) {
+        return ResponseEntity.ok(rolService.eliminarFuncionalidad(idRol, idFuncionalidad));
+    }
+
 }
