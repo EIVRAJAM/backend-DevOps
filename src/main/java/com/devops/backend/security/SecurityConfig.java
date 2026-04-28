@@ -2,6 +2,7 @@ package com.devops.backend.security;
 
 import com.devops.backend.security.filter.JwtAuthenticationFilter;
 import com.devops.backend.security.filter.JwtValidationFilter;
+import com.devops.backend.auth.handler.OAuth2SuccessHandler;
 
 import tools.jackson.databind.ObjectMapper;
 
@@ -31,6 +32,9 @@ public class SecurityConfig {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean
     AuthenticationManager authenticationManager() throws Exception {
@@ -64,12 +68,14 @@ public class SecurityConfig {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers(PublicRoutes.SECURITY_MATCHERS).permitAll()
-                .anyRequest().authenticated())
+                        .requestMatchers(PublicRoutes.SECURITY_MATCHERS).permitAll()
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtValidationFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oAuth2SuccessHandler))
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .build();
     }
 

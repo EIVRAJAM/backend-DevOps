@@ -1,20 +1,32 @@
 package com.devops.backend.security;
 
-import lombok.NoArgsConstructor;
+/**
+ * Rutas públicas que no requieren autenticación JWT.
+ * Utilizada por SecurityConfig para autorizar endpoints públicos.
+ */
+public final class PublicRoutes {
 
-@NoArgsConstructor
-public class PublicRoutes {
-    // Para SecurityConfig
-    public static final String[] SECURITY_MATCHERS = {
-            "/v1/auth/**",
-            "/swagger-ui/**",
-            "/v3/api-docs/**"
-    };
+        private PublicRoutes() {
+                // Clase de utilidad: no permitir instanciación
+        }
 
-    // Para JwtValidationFilter
-    public static final String[] FILTER_PREFIXES = {
-            "/api/v1/auth",
-            "/api/swagger-ui",
-            "/api/v3/api-docs"
-    };
+        // Para SecurityConfig
+        public static final String[] SECURITY_MATCHERS = {
+                        "/v1/auth/**",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/oauth2/**", // Rutas de redirección OAuth2 a Google
+                        "/login/oauth2/**", // Callback de OAuth2 desde Google
+                        "/login/oauth2/code/google" // Callback específico para Google (sin /api prefix)
+        };
+
+        // Para JwtValidationFilter
+        public static final String[] FILTER_PREFIXES = {
+                        "/v1/auth",
+                        "/swagger-ui",
+                        "/v3/api-docs",
+                        "/oauth2", // Rutas OAuth2 públicas (sin /api prefix)
+                        "/login/oauth2", // Callback OAuth2 público (sin /api prefix)
+                        "/login/oauth2/code/google" // Callback específico para Google (sin /api prefix)
+        };
 }
