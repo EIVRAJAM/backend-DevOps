@@ -29,7 +29,7 @@ import java.util.List;
 
 @Tag(name = "Event Management", description = "Operaciones relacionadas con la gestión de eventos del sistema")
 @RestController
-@RequestMapping("/v1/eventos")
+@RequestMapping("/api/v1/eventos")
 @SecurityRequirement(name = "bearerAuth")
 public class EventoController {
 
