@@ -37,4 +37,7 @@ public class Sesion {
 
     @Column(name = "token_jti", nullable = false, unique = true)
     private String tokenJti;
+
+    @Column(name = "tipo_login", nullable = false, length = 20)
+    private String tipoLogin = "LOCAL";
 }

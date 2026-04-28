@@ -36,7 +36,7 @@ public class Acceso {
     private String correoAcceso;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash", nullable = true)
     private String claveAcceso;
 
     @Column(name = "intentos_fallidos")
