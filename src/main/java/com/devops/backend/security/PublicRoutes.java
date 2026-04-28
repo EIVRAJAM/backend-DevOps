@@ -12,7 +12,7 @@ public final class PublicRoutes {
 
         // Para SecurityConfig
         public static final String[] SECURITY_MATCHERS = {
-                        "/v1/auth/**",
+                        "/api/v1/auth/**",
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
                         "/oauth2/**", // Rutas de redirección OAuth2 a Google
@@ -22,7 +22,7 @@ public final class PublicRoutes {
 
         // Para JwtValidationFilter
         public static final String[] FILTER_PREFIXES = {
-                        "/v1/auth",
+                        "/api/v1/auth",
                         "/swagger-ui",
                         "/v3/api-docs",
                         "/oauth2", // Rutas OAuth2 públicas (sin /api prefix)
