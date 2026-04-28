@@ -8,12 +8,25 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface SesionRepository extends JpaRepository<Sesion, Long>, JpaSpecificationExecutor<Sesion> {
     Optional<Sesion> findByTokenJti(String tokenJti);
 
     Optional<Sesion> findTopByUsuario_IdUsuarioOrderByFechaInicioDesc(Long idUsuario);
+
+    /**
+     * Busca todas las sesiones de un usuario ordenadas por fecha de inicio
+     * descendente
+     * Para obtener la última sesión OAuth o filtrar por tipo_login
+     */
+    List<Sesion> findAllByUsuarioIdUsuarioOrderByFechaInicioDesc(Long idUsuario);
+
+    /**
+     * Busca todas las sesiones por tipo de login ordenadas por fecha descendente
+     */
+    List<Sesion> findAllByTipoLoginOrderByFechaInicioDesc(String tipoLogin);
 
     @Modifying
     @Query("""

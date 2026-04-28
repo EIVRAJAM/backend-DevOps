@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("/v1/usuarios")
+@RequestMapping("/api/v1/usuarios")
 public class UsuarioSesionController {
 
     private final SesionService sesionService;

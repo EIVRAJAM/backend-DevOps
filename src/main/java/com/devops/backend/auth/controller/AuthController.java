@@ -6,29 +6,32 @@ import com.devops.backend.auth.service.PasswordResetService;
 import com.devops.backend.auth.service.AccountUnlockService;
 import com.devops.backend.exception.ApiValidationError;
 import com.devops.backend.exception.ValidationException;
+import com.devops.backend.sesion.entity.Sesion;
+import com.devops.backend.sesion.repository.SesionRepository;
+import com.devops.backend.security.TokenJwtConfig;
+import com.devops.backend.usuario.entity.Usuario;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @RestController
-@RequestMapping("/v1/auth")
+@RequestMapping("/api/v1/auth")
+@Slf4j
 @Tag(name = "Authentication", description = "Operaciones de autenticación y recuperación de credenciales. Incluye registro, inicio/cierre de sesión, recuperación de contraseña y desbloqueo de cuentas.")
 public class AuthController {
 
@@ -43,6 +46,9 @@ public class AuthController {
 
     @Autowired
     private Validator validator;
+
+    @Autowired
+    private SesionRepository sesionRepository;
 
     @PostMapping("/signup")
     @Operation(summary = "Registrar nuevo usuario", description = "Crea una nueva cuenta de usuario en el sistema. Se valida que el documento y username sean únicos. El usuario debe proporcionarse con todos los datos personales y credenciales requeridas.")
@@ -212,6 +218,122 @@ public class AuthController {
                     .body(new PasswordResetResponse(
                             "Error al desbloquear la cuenta",
                             false));
+        }
+    }
+
+    @GetMapping("/oauth/success")
+    @Operation(summary = "Obtener JWT después de autenticación OAuth2", description = "Endpoint seguro para obtener el JWT del sistema tras autenticarse con Google OAuth2. "
+            +
+            "El frontend redirige aquí después del callback OAuth2. Devuelve el token y datos del usuario. " +
+            "Este endpoint REQUIERE estar autenticado (Spring Security establece contexto tras OAuth2 callback).")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "JWT obtenido exitosamente. Retorna token y datos del usuario."),
+            @ApiResponse(responseCode = "401", description = "No autenticado. Usuario no tiene sesión válida de OAuth2."),
+            @ApiResponse(responseCode = "500", description = "Error interno al obtener el JWT.")
+    })
+    public ResponseEntity<?> getOAuthSuccess() {
+        try {
+            // Obtener usuario autenticado del SecurityContext (establecido por
+            // OAuth2SuccessHandler)
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            if (authentication == null || !authentication.isAuthenticated()) {
+                log.warn("OAuth2 success endpoint: usuario no autenticado");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "No autenticado", "message", "No hay sesión OAuth activa"));
+            }
+
+            // Extraer email del OAuth2User (verificado por Google)
+            final String email;
+            Object principal = authentication.getPrincipal();
+
+            if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User) {
+                org.springframework.security.oauth2.core.user.OAuth2User oAuth2User = (org.springframework.security.oauth2.core.user.OAuth2User) principal;
+                email = (String) oAuth2User.getAttribute("email");
+            } else {
+                email = null;
+            }
+
+            if (email == null || email.isEmpty()) {
+                log.warn("OAuth2 success endpoint: email no disponible en OAuth2User");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "No autenticado", "message", "Email no disponible en OAuth2"));
+            }
+
+            log.info("OAuth2 success: buscando usuario por email {}", email);
+
+            // Buscar usuario por correo (verificado por Google)
+            Optional<Usuario> usuarioOpt = sesionRepository
+                    .findAllByTipoLoginOrderByFechaInicioDesc("GOOGLE")
+                    .stream()
+                    .filter(sesion -> sesion.getUsuario() != null &&
+                            sesion.getUsuario().getAcceso() != null &&
+                            email.equalsIgnoreCase(sesion.getUsuario().getAcceso().getCorreoAcceso()) &&
+                            sesion.getActiva())
+                    .map(Sesion::getUsuario)
+                    .findFirst();
+
+            if (usuarioOpt.isEmpty()) {
+                log.warn("OAuth2 success endpoint: usuario no encontrado para email {}", email);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "No autenticado", "message", "Usuario no encontrado"));
+            }
+
+            Usuario usuario = usuarioOpt.get();
+            log.info("Usuario encontrado: {} (ID: {})", usuario.getNombres(), usuario.getIdUsuario());
+
+            // Buscar última sesión GOOGLE activa para obtener JTI
+            Optional<Sesion> lastOAuthSession = sesionRepository
+                    .findAllByUsuarioIdUsuarioOrderByFechaInicioDesc(usuario.getIdUsuario())
+                    .stream()
+                    .filter(s -> "GOOGLE".equals(s.getTipoLogin()) && s.getActiva())
+                    .findFirst();
+
+            if (lastOAuthSession.isEmpty()) {
+                log.warn("OAuth2 success endpoint: no hay sesión GOOGLE activa para usuario {}",
+                        usuario.getIdUsuario());
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "No autenticado", "message", "No hay sesión OAuth activa"));
+            }
+
+            Sesion sesion = lastOAuthSession.get();
+            String jti = sesion.getTokenJti();
+
+            // Generar JWT usando nuestro idUsuario del backend
+            long jwtExpirationMillis = 30 * 60 * 1000; // 30 minutos default
+            List<Map<String, String>> authorities = usuario.getRol() != null
+                    ? List.of(Map.of("authority", usuario.getRol().getNombreRol()))
+                    : List.of(Map.of("authority", "ROLE_USER"));
+
+            String token = Jwts.builder()
+                    .subject(usuario.getIdUsuario().toString())
+                    .claim("authorities", authorities)
+                    .id(jti)
+                    .issuedAt(new Date())
+                    .expiration(new Date(System.currentTimeMillis() + jwtExpirationMillis))
+                    .signWith(TokenJwtConfig.SECRET_KEY)
+                    .compact();
+
+            log.info("JWT obtenido exitosamente para usuario OAuth: {} (email: {})", usuario.getIdUsuario(), email);
+
+            // Extraer roles del usuario
+            List<String> roles = usuario.getRol() != null
+                    ? Collections.singletonList("ROLE_USER")
+                    : Collections.emptyList();
+
+            OAuth2SuccessResponse response = new OAuth2SuccessResponse(
+                    token,
+                    usuario.getAcceso() != null ? usuario.getAcceso().getUsername() : "user",
+                    usuario.getAcceso() != null ? usuario.getAcceso().getCorreoAcceso() : "",
+                    usuario.getIdUsuario(),
+                    roles);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception ex) {
+            log.error("Error en OAuth2 success endpoint", ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error interno", "message", ex.getMessage()));
         }
     }
 
