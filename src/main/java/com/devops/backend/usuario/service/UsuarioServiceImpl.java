@@ -160,7 +160,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     @Transactional
-    public UserListResponse updateUserAdmin(Long id, UserUpdateAdminDto request) {
+    public UserUpdateAdminResponse updateUserAdmin(Long id, UserUpdateAdminDto request) {
 
         Usuario usuario = usuarioRepository.findByIdUsuario(id)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -193,7 +193,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioMapper.applyUpdateAdmin(usuario, request, rol);
         Usuario updated = usuarioRepository.save(usuario);
 
-        return usuarioMapper.toListResponse(updated);
+        return usuarioMapper.toUpdateAdminResponse(updated);
     }
 
     private boolean isEstadoValido(String estado) {

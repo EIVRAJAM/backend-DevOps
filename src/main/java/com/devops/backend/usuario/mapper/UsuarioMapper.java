@@ -62,6 +62,22 @@ public class UsuarioMapper {
                                     u.getRol().getNombreRol());
     }
 
+    public UserUpdateAdminResponse toUpdateAdminResponse(Usuario u) {
+        return new UserUpdateAdminResponse(
+                u.getIdUsuario(),
+                u.getDocumento(),
+                u.getNombres(),
+                u.getApellidos(),
+                u.getGenero(),
+                u.getFechaNacimiento(),
+                u.getTelefono(),
+                u.getEstado(),
+                u.getRol().getNombreRol(),
+                u.getCreadoEn(),
+                u.getActualizadoEn()
+        );
+    }
+
     public void applyUpdate(Usuario usuario, UpdateUsuarioRequest dto, Rol rol) {
         Short genero = dto.genero().equalsIgnoreCase("masculino")
                 ? (short) GENERO_MASCULINO_CODE : (short) GENERO_FEMENINO_CODE;
