@@ -132,12 +132,10 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         List<ApiValidationError> errors = new ArrayList<>();
 
-        //Buscame si otro tiene el documento, excluyendo al usuario a actualizar
         if (usuarioRepository.existsByDocumentoAndIdUsuarioNot(request.documento(), id)) {
             errors.add(new ApiValidationError("documento", "El documento ya está registrado por otro usuario"));
         }
 
-        //Buscame si otro tiene el telefono , excluyendo al usuario a actualizar
         if (usuarioRepository.existsByDocumentoAndIdUsuarioNot(request.telefono(),id)){
             errors.add(new ApiValidationError("telefono", "El telefono ya está registrado por otro usuario"));
         }
@@ -158,6 +156,48 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario updated = usuarioRepository.save(usuario);
 
         return usuarioMapper.toListResponse(updated);
+    }
+
+    @Override
+    @Transactional
+    public UserListResponse updateUserAdmin(Long id, UserUpdateAdminDto request) {
+
+        Usuario usuario = usuarioRepository.findByIdUsuario(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatusCode.valueOf(404), "Usuario con ID " + id + " no encontrado"));
+
+        List<ApiValidationError> errors = new ArrayList<>();
+
+        if (usuarioRepository.existsByDocumentoAndIdUsuarioNot(request.documento(), id)) {
+            errors.add(new ApiValidationError("documento", "El documento ya está registrado por otro usuario"));
+        }
+
+        if (request.telefono() != null && usuarioRepository.existsByTelefonoAndIdUsuarioNot(request.telefono(), id)) {
+            errors.add(new ApiValidationError("telefono", "El teléfono ya está registrado por otro usuario"));
+        }
+
+        Rol rol = rolRepository.findById(request.idRol())
+                .orElseGet(() -> {
+                    errors.add(new ApiValidationError("idRol", "El rol con ID " + request.idRol() + " no existe"));
+                    return null;
+        });
+
+        if (!isEstadoValido(request.estado())) {
+            errors.add(new ApiValidationError("estado", "El estado debe ser ACTIVO, INACTIVO o BLOQUEADO"));
+        }
+
+        if (!errors.isEmpty()) {
+            throw new ConflictException("Campos inválidos en la actualización", errors);
+        }
+
+        usuarioMapper.applyUpdateAdmin(usuario, request, rol);
+        Usuario updated = usuarioRepository.save(usuario);
+
+        return usuarioMapper.toListResponse(updated);
+    }
+
+    private boolean isEstadoValido(String estado) {
+        return estado != null && (estado.equals("ACTIVO") || estado.equals("INACTIVO") || estado.equals("BLOQUEADO"));
     }
 
     @Override

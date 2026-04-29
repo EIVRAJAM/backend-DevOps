@@ -14,6 +14,8 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 public class UsuarioController {
 
         private final UsuarioService uService;
-
         public UsuarioController(UsuarioService uService, FuncionalidadService funcionalidadService) {
                 this.uService = uService;
         }
@@ -117,6 +118,32 @@ public class UsuarioController {
                         @Valid @RequestBody UpdateUsuarioRequest request) {
 
                 return ResponseEntity.ok(uService.updateUser(id, request));
+        }
+
+        @PutMapping("/{id}/admin")
+        @Operation(summary = "Actualizar usuario (admin)", description = "Actualiza todos los atributos de un usuario incluyendo su estado y rol. Solo administradores pueden usar este endpoint. Permite cambiar el estado del usuario (ACTIVO, INACTIVO, BLOQUEADO).")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Usuario actualizado exitosamente"),
+                        @ApiResponse(responseCode = "400", description = "Validación fallida: datos incompletos, formato inválido, o estado no válido"),
+                        @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
+                        @ApiResponse(responseCode = "403", description = "Acceso denegado: solo administradores pueden usar este endpoint"),
+                        @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+                        @ApiResponse(responseCode = "409", description = "Conflicto: documento o teléfono ya registrado a otro usuario")
+        })
+        public ResponseEntity<UserListResponse> updateUserAdmin(
+                        @PathVariable @Parameter(description = "ID del usuario a actualizar\", required = true, example = \"123\"") Long id,
+                        @Valid @RequestBody UserUpdateAdminDto request,
+                        Authentication authentication) {
+
+                // Validar que solo administradores puedan usar este endpoint
+                boolean isAdmin = authentication.getAuthorities().stream()
+                                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+
+                if (!isAdmin) {
+                        throw new AccessDeniedException("Acceso denegado: solo administradores pueden usar este endpoint");
+                }
+
+                return ResponseEntity.ok(uService.updateUserAdmin(id, request));
         }
 
         @PatchMapping("/{id}/activar")

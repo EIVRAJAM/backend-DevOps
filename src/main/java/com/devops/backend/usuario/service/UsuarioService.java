@@ -16,6 +16,7 @@ public interface UsuarioService {
     List<UserListResponse> getAllUsers();
     Page<UserListResponse> getAllUsers(UsuarioFilterRequest dtoFilter);
     UserListResponse updateUser(Long id, UpdateUsuarioRequest request);
+    UserListResponse updateUserAdmin(Long id, UserUpdateAdminDto request);
     UserListResponse activar(Long id);
     UserListResponse desactivar(Long id);
     UserListResponse bloquear(Long id);
