@@ -1,6 +1,5 @@
 package com.devops.backend.evento.controller;
 
-import com.devops.backend.evento.dto.ChangeEstadoDTO;
 import com.devops.backend.evento.dto.ComentarioRequest;
 import com.devops.backend.evento.dto.CreateEventoDTO;
 import com.devops.backend.evento.dto.EventoResponseDTO;
