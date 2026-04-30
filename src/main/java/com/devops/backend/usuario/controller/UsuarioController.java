@@ -131,7 +131,7 @@ public class UsuarioController {
                         @ApiResponse(responseCode = "409", description = "Conflicto: documento o teléfono ya registrado a otro usuario")
         })
         public ResponseEntity<UserUpdateAdminResponse> updateUserAdmin(
-                        @PathVariable @Parameter(description = "ID del usuario a actualizar\", required = true, example = \"123\"") Long id,
+                        @PathVariable @Parameter(description = "ID del usuario a actualizar", required = true, example = "123") Long id,
                         @Valid @RequestBody UserUpdateAdminDto request,
                         Authentication authentication) {
 

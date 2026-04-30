@@ -5,6 +5,7 @@ import com.devops.backend.auth.dto.SignUpRequest;
 import com.devops.backend.exception.ApiValidationError;
 import com.devops.backend.exception.BadRequestException;
 import com.devops.backend.exception.ConflictException;
+import com.devops.backend.exception.ResourceNotFoundException;
 import com.devops.backend.rol.entity.Rol;
 import com.devops.backend.rol.repository.RolRepository;
 import com.devops.backend.usuario.dto.*;
@@ -136,7 +137,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             errors.add(new ApiValidationError("documento", "El documento ya está registrado por otro usuario"));
         }
 
-        if (usuarioRepository.existsByDocumentoAndIdUsuarioNot(request.telefono(),id)){
+        if (usuarioRepository.existsByTelefonoAndIdUsuarioNot(request.telefono(),id)){
             errors.add(new ApiValidationError("telefono", "El telefono ya está registrado por otro usuario"));
         }
 
@@ -163,8 +164,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     public UserUpdateAdminResponse updateUserAdmin(Long id, UserUpdateAdminDto request) {
 
         Usuario usuario = usuarioRepository.findByIdUsuario(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatusCode.valueOf(404), "Usuario con ID " + id + " no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario con ID " + id + " no encontrado"));
 
         List<ApiValidationError> errors = new ArrayList<>();
 
