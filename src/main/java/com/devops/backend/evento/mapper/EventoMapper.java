@@ -42,6 +42,10 @@ public class EventoMapper {
                 evento.getCapacidadMaxima(),
                 evento.getTieneParqueadero(),
                 evento.getCuposParqueadero(),
+                evento.getEsDePago(),
+                evento.getPrecio(),
+                evento.getMoneda(),
+                evento.getCapacidadDisponible(),
                 evento.getEstado(),
                 evento.getCreadoEn(),
                 evento.getActualizadoEn());
@@ -71,6 +75,9 @@ public class EventoMapper {
         evento.setCapacidadMaxima(dto.capacidadMaxima());
         evento.setTieneParqueadero(dto.tieneParqueadero());
         evento.setCuposParqueadero(dto.cuposParqueadero());
+        evento.setEsDePago(dto.esDePago());
+        evento.setPrecio(dto.precio());
+        evento.setMoneda(dto.moneda());
 
         // Estados por defecto (se asignan en @PrePersist)
         evento.setEstadoEvento(EstadoEvento.BORRADOR);
@@ -129,6 +136,18 @@ public class EventoMapper {
 
         if (dto.cuposParqueadero() != null) {
             evento.setCuposParqueadero(dto.cuposParqueadero());
+        }
+
+        if (dto.esDePago() != null) {
+            evento.setEsDePago(dto.esDePago());
+        }
+
+        if (dto.precio() != null) {
+            evento.setPrecio(dto.precio());
+        }
+
+        if (dto.moneda() != null) {
+            evento.setMoneda(dto.moneda());
         }
 
         return evento;

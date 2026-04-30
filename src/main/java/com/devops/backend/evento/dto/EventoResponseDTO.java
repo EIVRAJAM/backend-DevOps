@@ -2,8 +2,10 @@ package com.devops.backend.evento.dto;
 
 import com.devops.backend.evento.enums.Estado;
 import com.devops.backend.evento.enums.EstadoEvento;
+import com.devops.backend.evento.enums.Moneda;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -40,9 +42,8 @@ public record EventoResponseDTO(
         @Schema(description = "URL de la imagen promocional", example = "https://example.com/evento-banner.jpg") 
         String imagenUrl,
 
-        @Schema(description = "Estado del evento", example = "PUBLICADO", allowableValues = {
-                "BORRADOR", "PUBLICADO", "CERRADO", "CANCELADO" }
-        ) 
+        @Schema(description = "Estado del evento", example = "PUBLICADO", 
+        allowableValues = {"BORRADOR", "PUBLICADO", "CERRADO", "CANCELADO" }) 
         EstadoEvento estadoEvento,
 
         @Schema(description = "Capacidad máxima de asistentes", example = "500") 
@@ -54,9 +55,21 @@ public record EventoResponseDTO(
         @Schema(description = "Cupos de parqueadero disponibles", example = "100") 
         Integer cuposParqueadero,
 
-        @Schema(description = "Estado del registro (ACTIVO/INACTIVO)", example = "ACTIVO", allowableValues = {
-                "ACTIVO",
-                "INACTIVO" }) 
+        @Schema(description = "Indica si el evento requiere pago", example = "false")
+        Boolean esDePago,
+
+        @Schema(description = "Precio del evento (en la moneda especificada)", example = "50000") 
+        BigDecimal precio,
+
+        @Schema(description = "Moneda del precio", example = "COP", 
+        allowableValues = { "USD", "COP", "EUR", "MXN" }) 
+        Moneda moneda,
+
+        @Schema(description = "Capacidad disponible (cupos restantes)", example = "500") 
+        Integer capacidadDisponible,
+
+        @Schema(description = "Estado del registro (ACTIVO/INACTIVO)", example = "ACTIVO", 
+        allowableValues = {"ACTIVO", "INACTIVO" }) 
         Estado estado,
 
         @Schema(description = "Fecha de creación del registro (ISO-8601)", example = "2026-04-20T10:00:00") 
