@@ -22,7 +22,7 @@ ALTER TABLE eventos
             CHECK (precio IS NULL OR precio >= 0),
     ADD COLUMN moneda               VARCHAR(3)   NOT NULL DEFAULT 'USD'
     CONSTRAINT chk_monedas_iso
-            CHECK (moneda IN ('USD', 'COP', 'EUR', 'MXN')),,
+            CHECK (moneda IN ('USD', 'COP', 'EUR', 'MXN')),
     ADD COLUMN capacidad_disponible INTEGER
         CONSTRAINT chk_eventos_cap_disp
             CHECK (capacidad_disponible >= 0);
