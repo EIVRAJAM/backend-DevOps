@@ -32,7 +32,7 @@ public class UsuarioController {
 
         @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
         @PostMapping()
-        @Operation(summary = "Crear nuevo usuario - ADMIN", description = "Crea un nuevo usuario en el sistema. Se valida que el documento y username sean únicos. Los usuarios creados por esta ruta requieren que se cree su acceso luego en el módulo de Acceso.")
+        @Operation(summary = "Crear nuevo usuario - ADMIN", description = "Crea un nuevo usuario en el sistema. Se valida que el documento sea únicos. Los usuarios creados por esta ruta requieren que se cree su acceso luego en el módulo de Acceso.")
         @ApiResponses({
                         @ApiResponse(responseCode = "201", description = "Usuario creado exitosamente"),
                         @ApiResponse(responseCode = "400", description = "Validación fallida: campos requeridos vacíos, formato inválido, documento o username duplicados"),
