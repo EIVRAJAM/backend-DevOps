@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -94,7 +95,7 @@ public class UsuarioController {
                 return ResponseEntity.ok(uService.findByDocumento(document));
         }
 
-        @PutMapping("/{id}")
+        @PutMapping("")
         @Operation(summary = "Actualizar información de usuario", description = "Actualiza datos personales de un usuario (nombres, apellidos, teléfono, género, fecha nacimiento, rol). Solo administradores pueden actualizar usuarios de otros; usuarios normales solo pueden actualizar sus propios datos.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Usuario actualizado exitosamente"),
@@ -104,11 +105,13 @@ public class UsuarioController {
                         @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
                         @ApiResponse(responseCode = "409", description = "Conflicto: documento ya registrado a otro usuario")
         })
-        public ResponseEntity<UserListResponse> update(
-                        @PathVariable @Parameter(description = "ID del usuario a actualizar\", required = true, example = \"123\"") Long id,
-                        @Valid @RequestBody UpdateUsuarioRequest request) {
+        public ResponseEntity<UserListResponse> update(@Valid @RequestBody UpdateUsuarioRequest request) {
 
-                return ResponseEntity.ok(uService.updateUser(id, request));
+                Authentication aut = SecurityContextHolder.getContext().getAuthentication();
+                Long idUsuario = Long.parseLong(aut.getName());
+                System.out.println("Id del usuario autenticado: " + idUsuario);
+                
+                return ResponseEntity.ok(uService.updateUser(idUsuario, request));
         }
 
         @PutMapping("/{id}/admin")

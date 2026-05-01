@@ -122,8 +122,6 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
 
 
-
-
         if (!errors.isEmpty()) {
             throw new ConflictException("Campos inválidos en la actualización", errors);
         }
