@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Pattern;
 import java.util.Date;
 
 public record SignUpUserRequest(
+
         @NotBlank @Schema(description = "Número de documento de identificación del usuario", example = "1234567890") String documento,
 
         @NotBlank @Schema(description = "Nombres del usuario", example = "Juan") String nombres,
@@ -19,7 +20,6 @@ public record SignUpUserRequest(
         @Past @Schema(description = "Fecha de nacimiento (formato: 1990-05-15)", example = "1990-05-15") Date fechaNacimiento,
 
         @NotBlank @Schema(description = "Número de teléfono de contacto", example = "+57 3001234567") String telefono
-
 
 
         ) {

@@ -79,7 +79,7 @@ public class UsuarioMapper {
         );
     }
 
-    public void applyUpdate(Usuario usuario, UpdateUsuarioRequest dto, Rol rol) {
+    public void applyUpdate(Usuario usuario, UpdateUsuarioRequest dto) {
         Short genero = dto.genero().equalsIgnoreCase("masculino")
                 ? (short) GENERO_MASCULINO_CODE : (short) GENERO_FEMENINO_CODE;
 
@@ -93,7 +93,6 @@ public class UsuarioMapper {
         usuario.setGenero(genero);
         usuario.setFechaNacimiento(fechaNacimiento);
         usuario.setTelefono(dto.telefono());
-        usuario.setRol(rol);
     }
 
     public void applyUpdateAdmin(Usuario usuario, UserUpdateAdminDto dto, Rol rol) {

@@ -121,11 +121,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             errors.add(new ApiValidationError("telefono", "El telefono ya está registrado por otro usuario"));
         }
 
-        Rol rol = rolRepository.findById(request.idRol())
-                .orElseGet(() -> {
-                    errors.add(new ApiValidationError("idRol", "El rol con ID " + request.idRol() + " no existe"));
-                    return null;
-       });
+
 
 
         if (!errors.isEmpty()) {
@@ -133,7 +129,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
 
         // 4. Aplicar cambios y persistir
-        usuarioMapper.applyUpdate(usuario, request, rol);
+        usuarioMapper.applyUpdate(usuario, request);
         Usuario updated = usuarioRepository.save(usuario);
 
         return usuarioMapper.toListResponse(updated);
