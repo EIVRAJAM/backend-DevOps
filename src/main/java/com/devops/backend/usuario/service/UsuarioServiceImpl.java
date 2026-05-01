@@ -86,6 +86,11 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404),"Usuario con documento " + documento + " no encontrado"));
     }
 
+    @Override
+    public UserListResponse findByIdUser(Long idUsuario) {
+        return usuarioRepository.findByIdUsuario(idUsuario).map(usuarioMapper::toListResponse)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404),"Usuario con ID " + idUsuario + " no encontrado"));
+    }
 
 
     @Override
@@ -187,6 +192,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     public UserResponseAdmin bloquear(Long id) {
         return updateStatus(id,"BLOQUEADO");
     }
+
 
     private UserResponseAdmin updateStatus(Long id, String status){
 

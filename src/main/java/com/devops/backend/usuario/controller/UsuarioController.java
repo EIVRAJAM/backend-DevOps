@@ -87,6 +87,22 @@ public class UsuarioController {
                 return ResponseEntity.ok(uService.findById(id));
         }
 
+        @GetMapping("/id")
+        @Operation(summary = "Obtener usuario por ID", description = "Recupera información completa del usuario de la sesión activa .")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Usuario encontrado exitosamente"),
+                        @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
+                        @ApiResponse(responseCode = "403", description = "Acceso denegado: usuario solo puede ver su propio perfil"),
+                        @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+        })
+        public ResponseEntity<UserListResponse> findByIdUser() {
+
+                Authentication aut = SecurityContextHolder.getContext().getAuthentication();
+                Long idUsuario = Long.parseLong(aut.getName());
+                System.out.println("Id del usuario autenticado: " + idUsuario);
+                return ResponseEntity.ok(uService.findByIdUser(idUsuario));
+        }
+
         @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
         @GetMapping("/document/{document}")
         @Operation(summary = "Obtener usuario por documento - ADMIN   ", description = "Recupera información de un usuario usando su número de documento de identificación (búsqueda exacta).")

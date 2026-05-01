@@ -2,6 +2,7 @@ package com.devops.backend.usuario.service;
 
 import com.devops.backend.usuario.dto.*;
 import com.devops.backend.usuario.entity.Usuario;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -18,4 +19,5 @@ public interface UsuarioService {
     UserResponseAdmin activar(Long id);
     UserResponseAdmin desactivar(Long id);
     UserResponseAdmin bloquear(Long id);
+    UserListResponse findByIdUser(Long idUsuario);
 }
