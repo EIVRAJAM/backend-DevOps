@@ -14,45 +14,25 @@ public class UsuarioMapper {
     private static final short GENERO_MASCULINO_CODE = 1;
     private static final short GENERO_FEMENINO_CODE = 2;
 
-    public UsuarioDTO toDTO(SignUpRequest request, Long idRol) {
-        Short genero = request.genero().equalsIgnoreCase("masculino")
-                ? (short) GENERO_MASCULINO_CODE : (short) GENERO_FEMENINO_CODE;
 
-        LocalDate fechaNacimiento = null;
-        if (request.fechaNacimiento() != null) {
-            fechaNacimiento = new java.sql.Date(
-                    request.fechaNacimiento().getTime()).toLocalDate();
-        }
 
-        return new UsuarioDTO(
-                request.documento(),
-                request.nombres(),
-                request.apellidos(),
-                genero,
-                fechaNacimiento,
-                request.telefono(),
-                idRol
-        );
+    public UsuarioDTO toDTOUser(SignUpUserRequest request, Long idRol) {
+        return buildUsuarioDTO(request.documento(), request.nombres(), request.apellidos(),
+                request.genero(), request.fechaNacimiento(), request.telefono(), idRol);
     }
-public UsuarioDTO toDTOUser(SignUpUserRequest request, Long idRol) {
-        Short genero = request.genero().equalsIgnoreCase("masculino")
+
+    private UsuarioDTO buildUsuarioDTO(String documento, String nombres, String apellidos,
+                                       String genero, java.util.Date fechaNacimientoDate,
+                                       String telefono, Long idRol) {
+        Short generoCode = genero.equalsIgnoreCase("masculino")
                 ? (short) GENERO_MASCULINO_CODE : (short) GENERO_FEMENINO_CODE;
 
         LocalDate fechaNacimiento = null;
-        if (request.fechaNacimiento() != null) {
-            fechaNacimiento = new java.sql.Date(
-                    request.fechaNacimiento().getTime()).toLocalDate();
+        if (fechaNacimientoDate != null) {
+            fechaNacimiento = new java.sql.Date(fechaNacimientoDate.getTime()).toLocalDate();
         }
 
-        return new UsuarioDTO(
-                request.documento(),
-                request.nombres(),
-                request.apellidos(),
-                genero,
-                fechaNacimiento,
-                request.telefono(),
-                idRol
-        );
+        return new UsuarioDTO(documento, nombres, apellidos, generoCode, fechaNacimiento, telefono, idRol);
     }
 
     public SignUpResponseUsuario toResponse(Usuario usuario) {

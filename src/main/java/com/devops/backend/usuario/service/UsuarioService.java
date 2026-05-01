@@ -12,7 +12,6 @@ public interface UsuarioService {
     Usuario save(UsuarioDTO usuarioDTO);
     UserListResponse findById(Long id);
     UserListResponse findByDocumento(String documento);
-    List<UserListResponse> getAllUsers();
     Page<UserListResponse> getAllUsers(UsuarioFilterRequest dtoFilter);
     UserListResponse updateUser(Long id, UpdateUsuarioRequest request);
     UserUpdateAdminResponse updateUserAdmin(Long id, UserUpdateAdminDto request);

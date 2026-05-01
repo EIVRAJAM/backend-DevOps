@@ -41,16 +41,7 @@ public class UsuarioController {
                 return ResponseEntity.status(HttpStatus.CREATED).body(uService.saveUser(signUpRequest));
         }
 
-        @GetMapping("/all")
-        @Operation(summary = "Obtener todos los usuarios (sin paginación)", description = "Recupera lista completa de usuarios sin paginación. ADVERTENCIA: puede retornar muchos registros. Preferir usar GET / con paginación para producción.")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Lista completa de usuarios recuperada"),
-                        @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
-                        @ApiResponse(responseCode = "403", description = "Acceso denegado: solo administradores")
-        })
-        public ResponseEntity<?> findAllNoPage() {
-                return ResponseEntity.ok(uService.getAllUsers());
-        }
+
 
         @GetMapping()
         @Operation(summary = "Listar usuarios con paginación y filtros", description = "Obtiene lista paginada de usuarios. Soporta filtros por documento, nombres, apellidos y rol. Todos los parámetros de filtro son opcionales.")
@@ -76,6 +67,7 @@ public class UsuarioController {
                                 uService.getAllUsers(new UsuarioFilterRequest(documento, nombres, apellidos, nombreRol,
                                                 page, size)));
         }
+
 
         @GetMapping("/{id}")
         @Operation(summary = "Obtener usuario por ID", description = "Recupera información completa de un usuario específico por su ID. Solo administradores pueden ver datos de otros usuarios; usuarios normales solo ven su propio perfil.")

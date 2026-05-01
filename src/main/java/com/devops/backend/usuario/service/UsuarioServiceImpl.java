@@ -86,13 +86,7 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404),"Usuario con documento " + documento + " no encontrado"));
     }
 
-    @Override
-    public List<UserListResponse> getAllUsers() {
 
-        return StreamSupport.stream(usuarioRepository.findAll().spliterator(),false).
-                //    Nota: Aclarar con el equipo si lo dejamos la lista modificable o sin modifical .collect(Collectors.toList()
-                map(usuarioMapper::toListResponse).toList();
-    }
 
     @Override
     public Page<UserListResponse> getAllUsers(UsuarioFilterRequest f) {
