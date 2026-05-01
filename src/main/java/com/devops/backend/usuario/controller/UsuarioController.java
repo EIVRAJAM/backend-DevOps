@@ -1,6 +1,5 @@
 package com.devops.backend.usuario.controller;
 
-import com.devops.backend.auth.dto.SignUpRequest;
 import com.devops.backend.funcionalidad.service.FuncionalidadService;
 import com.devops.backend.usuario.dto.*;
 import com.devops.backend.usuario.service.UsuarioService;
@@ -38,7 +37,7 @@ public class UsuarioController {
                         @ApiResponse(responseCode = "403", description = "Acceso denegado: solo administradores pueden crear usuarios"),
                         @ApiResponse(responseCode = "409", description = "Conflicto: documento o username ya existen")
         })
-        public ResponseEntity<SignUpResponseUsuario> add(@Valid @RequestBody SignUpRequest signUpRequest) {
+        public ResponseEntity<SignUpResponseUsuario> add(@Valid @RequestBody SignUpUserRequest signUpRequest) {
                 return ResponseEntity.status(HttpStatus.CREATED).body(uService.saveUser(signUpRequest));
         }
 

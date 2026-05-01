@@ -1,7 +1,6 @@
 package com.devops.backend.usuario.service;
 
 import com.devops.backend.acceso.repository.AccesoRepository;
-import com.devops.backend.auth.dto.SignUpRequest;
 import com.devops.backend.exception.ApiValidationError;
 import com.devops.backend.exception.BadRequestException;
 import com.devops.backend.exception.ConflictException;
@@ -35,7 +34,6 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final UsuarioMapper usuarioMapper;
     private static final String DEFAULT_ROLE = "ROLE_USER";
 
-
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository,
                               RolRepository rolRepository, AccesoRepository accesoRepository, UsuarioMapper usuarioMapper) {
         this.usuarioRepository = usuarioRepository;
@@ -45,27 +43,15 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public SignUpResponseUsuario saveUser(SignUpRequest signupRequest) {
+    public SignUpResponseUsuario saveUser(SignUpUserRequest signupRequest) {
 
         Long idRol = obtenerRolPorDefecto();
-        validaciones(signupRequest);
-        Usuario usuario = save(usuarioMapper.toDTO(signupRequest,idRol));
+        Usuario usuario = save(usuarioMapper.toDTOUser(signupRequest,idRol));
 
         return  usuarioMapper.toResponse(usuario);
     }
 
-    private void validaciones(SignUpRequest signupRequest) {
-        List<ApiValidationError> errors = new ArrayList<>();
-        if (accesoRepository.existsByUsername(signupRequest.username())) {
-            errors.add(new ApiValidationError("username", "El username ya está en uso"));
-        }
-        if (accesoRepository.existsByCorreoAcceso(signupRequest.correoAcceso())) {
-            errors.add(new ApiValidationError("correoAcceso", "El correo ya está registrado"));
-        }
-        if (!errors.isEmpty()) {
-            throw new ConflictException("Campos duplicados en el registro", errors);
-        }
-    }
+
 
     private Long obtenerRolPorDefecto() {
         return rolRepository.findByNombreRol(DEFAULT_ROLE)

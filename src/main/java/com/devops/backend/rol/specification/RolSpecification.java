@@ -1,7 +1,7 @@
 package com.devops.backend.rol.specification;
 
 import com.devops.backend.rol.entity.Rol;
-import com.devops.backend.rol.entity.dto.RolFilterRequest;
+import com.devops.backend.rol.dto.RolFilterRequest;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 

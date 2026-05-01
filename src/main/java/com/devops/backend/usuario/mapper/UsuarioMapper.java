@@ -1,6 +1,7 @@
 package com.devops.backend.usuario.mapper;
 
 import com.devops.backend.auth.dto.SignUpRequest;
+import com.devops.backend.usuario.dto.SignUpUserRequest;
 import com.devops.backend.rol.entity.Rol;
 import com.devops.backend.usuario.dto.*;
 import com.devops.backend.usuario.entity.Usuario;
@@ -14,6 +15,26 @@ public class UsuarioMapper {
     private static final short GENERO_FEMENINO_CODE = 2;
 
     public UsuarioDTO toDTO(SignUpRequest request, Long idRol) {
+        Short genero = request.genero().equalsIgnoreCase("masculino")
+                ? (short) GENERO_MASCULINO_CODE : (short) GENERO_FEMENINO_CODE;
+
+        LocalDate fechaNacimiento = null;
+        if (request.fechaNacimiento() != null) {
+            fechaNacimiento = new java.sql.Date(
+                    request.fechaNacimiento().getTime()).toLocalDate();
+        }
+
+        return new UsuarioDTO(
+                request.documento(),
+                request.nombres(),
+                request.apellidos(),
+                genero,
+                fechaNacimiento,
+                request.telefono(),
+                idRol
+        );
+    }
+public UsuarioDTO toDTOUser(SignUpUserRequest request, Long idRol) {
         Short genero = request.genero().equalsIgnoreCase("masculino")
                 ? (short) GENERO_MASCULINO_CODE : (short) GENERO_FEMENINO_CODE;
 

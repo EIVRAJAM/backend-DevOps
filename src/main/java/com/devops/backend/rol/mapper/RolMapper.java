@@ -4,14 +4,12 @@ import com.devops.backend.rol.enums.Estado;
 import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
 import com.devops.backend.funcionalidad.mapper.FuncionalidadMapper;
 import com.devops.backend.rol.entity.Rol;
-import com.devops.backend.rol.entity.dto.RolRequest;
-import com.devops.backend.rol.entity.dto.RolResponse;
-import com.devops.backend.rol.entity.dto.RolUpdateDto;
+import com.devops.backend.rol.dto.RolRequest;
+import com.devops.backend.rol.dto.RolResponse;
+import com.devops.backend.rol.dto.RolUpdateDto;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
