@@ -15,6 +15,8 @@ public record UserListResponse(
 
         @Schema(description = "Fecha de nacimiento del usuario", example = "1990-05-15") String fechaNacimiento,
 
-        @Schema(description = "Número de teléfono del usuario", example = "+57 3001234567") String telefono
+        @Schema(description = "Número de teléfono del usuario", example = "+57 3001234567") String telefono,
+        @Schema(description = "Número de teléfono del usuario", example = "+57 3001234567") String estado
+
         ) {
 }

@@ -63,7 +63,8 @@ public class UsuarioMapper {
                                     u.getDocumento(),
                                     genero,
                                     u.getFechaNacimiento().toString(),
-                                    u.getTelefono());
+                                    u.getTelefono(),
+                                    u.getEstado());
     }    
     public UserResponseAdmin toUserResponseAdmin(Usuario u){
         String genero = toGeneroFromCode(u.getGenero());
