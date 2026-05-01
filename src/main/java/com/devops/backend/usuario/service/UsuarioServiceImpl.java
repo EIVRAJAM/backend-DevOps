@@ -30,15 +30,13 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final RolRepository rolRepository;
-    private final AccesoRepository accesoRepository;
     private final UsuarioMapper usuarioMapper;
     private static final String DEFAULT_ROLE = "ROLE_USER";
 
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository,
-                              RolRepository rolRepository, AccesoRepository accesoRepository, UsuarioMapper usuarioMapper) {
+                              RolRepository rolRepository, UsuarioMapper usuarioMapper) {
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRepository;
-        this.accesoRepository = accesoRepository;
         this.usuarioMapper = usuarioMapper;
     }
 
