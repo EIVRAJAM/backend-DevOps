@@ -80,9 +80,9 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public UserListResponse findByDocumento(String documento) {
+    public UserResponseAdmin findByDocumento(String documento) {
         return usuarioRepository.findByDocumento(documento)
-                .map(usuarioMapper::toListResponse)
+                .map(usuarioMapper::toUserResponseAdmin)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404),"Usuario con documento " + documento + " no encontrado"));
     }
 
@@ -175,20 +175,20 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public UserListResponse activar(Long id) {
+    public UserResponseAdmin activar(Long id) {
         return updateStatus(id,"ACTIVO");
     }
 
     @Override
-    public UserListResponse desactivar(Long id) {
+    public UserResponseAdmin desactivar(Long id) {
         return updateStatus(id,"INACTIVO");
     }
     @Override
-    public UserListResponse bloquear(Long id) {
+    public UserResponseAdmin bloquear(Long id) {
         return updateStatus(id,"BLOQUEADO");
     }
 
-    private UserListResponse updateStatus(Long id, String status){
+    private UserResponseAdmin updateStatus(Long id, String status){
 
         Usuario usuario = usuarioRepository.findByIdUsuario(id).
                 orElseThrow(() -> new ResponseStatusException(
@@ -196,7 +196,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         usuario.setEstado(status);
 
-        return usuarioMapper.toListResponse(usuarioRepository.save(usuario));
+        return usuarioMapper.toUserResponseAdmin(usuarioRepository.save(usuario));
     }
 
     private void validacionesDto(UsuarioDTO dto) {

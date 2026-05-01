@@ -1,6 +1,5 @@
 package com.devops.backend.usuario.mapper;
 
-import com.devops.backend.auth.dto.SignUpRequest;
 import com.devops.backend.usuario.dto.SignUpUserRequest;
 import com.devops.backend.rol.entity.Rol;
 import com.devops.backend.usuario.dto.*;
@@ -24,8 +23,7 @@ public class UsuarioMapper {
     private UsuarioDTO buildUsuarioDTO(String documento, String nombres, String apellidos,
                                        String genero, java.util.Date fechaNacimientoDate,
                                        String telefono, Long idRol) {
-        Short generoCode = genero.equalsIgnoreCase("masculino")
-                ? (short) GENERO_MASCULINO_CODE : (short) GENERO_FEMENINO_CODE;
+        Short generoCode = toCodeFromGenero(genero);
 
         LocalDate fechaNacimiento = null;
         if (fechaNacimientoDate != null) {
@@ -58,12 +56,17 @@ public class UsuarioMapper {
     }
 
     public UserListResponse toListResponse(Usuario u){
-        return new UserListResponse(u.getIdUsuario(),u.getNombres(),
-                                    u.getApellidos(), u.getDocumento(),
-                                    u.getRol().getNombreRol());
+        String genero = toGeneroFromCode(u.getGenero());
+        return new UserListResponse(u.getIdUsuario(),
+                                    u.getNombres(),
+                                    u.getApellidos(),
+                                    u.getDocumento(),
+                                    genero,
+                                    u.getFechaNacimiento().toString(),
+                                    u.getTelefono());
     }    
     public UserResponseAdmin toUserResponseAdmin(Usuario u){
-        String genero = u.getGenero()==1  ? "masculino" : "femenino";
+        String genero = toGeneroFromCode(u.getGenero());
         return new UserResponseAdmin(
                 u.getIdUsuario(),
                 u.getNombres(),
@@ -79,8 +82,9 @@ public class UsuarioMapper {
         );
     }
 
+
     public UserUpdateAdminResponse toUpdateAdminResponse(Usuario u) {
-        String genero = u.getGenero()==1  ? "masculino" : "femenino";
+        String genero = toGeneroFromCode(u.getGenero());
 
         return new UserUpdateAdminResponse(
                 u.getIdUsuario(),
@@ -98,8 +102,7 @@ public class UsuarioMapper {
     }
 
     public void applyUpdate(Usuario usuario, UpdateUsuarioRequest dto) {
-        Short genero = dto.genero().equalsIgnoreCase("masculino")
-                ? (short) GENERO_MASCULINO_CODE : (short) GENERO_FEMENINO_CODE;
+        Short genero = toCodeFromGenero(dto.genero());
 
         LocalDate fechaNacimiento = null;
         if (dto.fechaNacimiento() != null) {
@@ -114,8 +117,7 @@ public class UsuarioMapper {
     }
 
     public void applyUpdateAdmin(Usuario usuario, UserUpdateAdminDto dto, Rol rol) {
-        Short genero = dto.genero().equalsIgnoreCase("masculino")
-                ? (short) GENERO_MASCULINO_CODE : (short) GENERO_FEMENINO_CODE;
+        Short genero = toCodeFromGenero(dto.genero());
 
         usuario.setDocumento(dto.documento());
         usuario.setNombres(dto.nombres());
@@ -126,6 +128,15 @@ public class UsuarioMapper {
         usuario.setRol(rol);
         usuario.setEstado(dto.estado());
     }
-
+    private String toGeneroFromCode(Short genero) {
+        if (genero == null) {
+            return null;
+        }
+        return genero == GENERO_MASCULINO_CODE ? "masculino" : "femenino";
+    }
+    private short toCodeFromGenero(String genero) {
+        return genero.equalsIgnoreCase("masculino")
+                ? (short) GENERO_MASCULINO_CODE : (short) GENERO_FEMENINO_CODE;
+    }
 
 }

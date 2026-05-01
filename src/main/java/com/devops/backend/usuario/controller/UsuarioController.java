@@ -30,8 +30,9 @@ public class UsuarioController {
                 this.uService = uService;
         }
 
+        @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
         @PostMapping()
-        @Operation(summary = "Crear nuevo usuario", description = "Crea un nuevo usuario en el sistema. Se valida que el documento y username sean únicos. Los usuarios creados por esta ruta requieren que se cree su acceso luego en el módulo de Acceso.")
+        @Operation(summary = "Crear nuevo usuario - ADMIN", description = "Crea un nuevo usuario en el sistema. Se valida que el documento y username sean únicos. Los usuarios creados por esta ruta requieren que se cree su acceso luego en el módulo de Acceso.")
         @ApiResponses({
                         @ApiResponse(responseCode = "201", description = "Usuario creado exitosamente"),
                         @ApiResponse(responseCode = "400", description = "Validación fallida: campos requeridos vacíos, formato inválido, documento o username duplicados"),
@@ -44,9 +45,9 @@ public class UsuarioController {
         }
 
 
-
+        @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
         @GetMapping()
-        @Operation(summary = "Listar usuarios con paginación y filtros", description = "Obtiene lista paginada de usuarios. Soporta filtros por documento, nombres, apellidos y rol. Todos los parámetros de filtro son opcionales.")
+        @Operation(summary = "Listar usuarios con paginación y filtros - ADMIN", description = "Obtiene lista paginada de usuarios. Soporta filtros por documento, nombres, apellidos y rol. Todos los parámetros de filtro son opcionales.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Página de usuarios recuperada exitosamente"),
                         @ApiResponse(responseCode = "400", description = "Validación fallida: parámetros de paginación inválidos (page < 0, size > 100)"),
@@ -73,7 +74,7 @@ public class UsuarioController {
 
         @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
         @GetMapping("/{id}")
-        @Operation(summary = "Obtener usuario por ID", description = "Recupera información completa de un usuario específico por su ID. Solo administradores pueden ver datos de otros usuario.")
+        @Operation(summary = "Obtener usuario por ID - ADMIN", description = "Recupera información completa de un usuario específico por su ID. Solo administradores pueden ver datos de otros usuario.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Usuario encontrado exitosamente"),
                         @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
@@ -86,14 +87,15 @@ public class UsuarioController {
                 return ResponseEntity.ok(uService.findById(id));
         }
 
+        @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
         @GetMapping("/document/{document}")
-        @Operation(summary = "Obtener usuario por documento", description = "Recupera información de un usuario usando su número de documento de identificación (búsqueda exacta).")
+        @Operation(summary = "Obtener usuario por documento - ADMIN   ", description = "Recupera información de un usuario usando su número de documento de identificación (búsqueda exacta).")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Usuario encontrado exitosamente"),
                         @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
                         @ApiResponse(responseCode = "404", description = "Usuario no encontrado para el documento especificado")
         })
-        public ResponseEntity<UserListResponse> findByDocument(
+        public ResponseEntity<UserResponseAdmin> findByDocument(
                         @PathVariable @Parameter(description = "Número de documento de identificación", required = true, example = "1234567890") String document) {
                 return ResponseEntity.ok(uService.findByDocumento(document));
         }
@@ -117,8 +119,9 @@ public class UsuarioController {
                 return ResponseEntity.ok(uService.updateUser(idUsuario, request));
         }
 
+        @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
         @PutMapping("/{id}/admin")
-        @Operation(summary = "Actualizar usuario (admin)", description = "Actualiza todos los atributos de un usuario incluyendo su estado y rol. Solo administradores pueden usar este endpoint. Permite cambiar el estado del usuario (ACTIVO, INACTIVO, BLOQUEADO).")
+        @Operation(summary = "Actualizar usuario - ADMIN", description = "Actualiza todos los atributos de un usuario incluyendo su estado y rol. Solo administradores pueden usar este endpoint. Permite cambiar el estado del usuario (ACTIVO, INACTIVO, BLOQUEADO).")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Usuario actualizado exitosamente"),
                         @ApiResponse(responseCode = "400", description = "Validación fallida: datos incompletos, formato inválido, o estado no válido"),
@@ -129,22 +132,14 @@ public class UsuarioController {
         })
         public ResponseEntity<UserUpdateAdminResponse> updateUserAdmin(
                         @PathVariable @Parameter(description = "ID del usuario a actualizar", required = true, example = "123") Long id,
-                        @Valid @RequestBody UserUpdateAdminDto request,
-                        Authentication authentication) {
-
-                // Validar que solo administradores puedan usar este endpoint
-                boolean isAdmin = authentication.getAuthorities().stream()
-                                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-
-                if (!isAdmin) {
-                        throw new AccessDeniedException("Acceso denegado: solo administradores pueden usar este endpoint");
-                }
+                        @Valid @RequestBody UserUpdateAdminDto request) {
 
                 return ResponseEntity.ok(uService.updateUserAdmin(id, request));
         }
 
+        @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
         @PatchMapping("/{id}/activar")
-        @Operation(summary = "Activar usuario", description = "Cambia el estado del usuario a ACTIVO. Solo administradores pueden realizar esta operación. Usuarios activos pueden iniciar sesión y acceder al sistema.")
+        @Operation(summary = "Activar usuario - ADMIN", description = "Cambia el estado del usuario a ACTIVO. Solo administradores pueden realizar esta operación. Usuarios activos pueden iniciar sesión y acceder al sistema.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Usuario activado exitosamente"),
                         @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
@@ -152,14 +147,15 @@ public class UsuarioController {
                         @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
                         @ApiResponse(responseCode = "409", description = "Conflicto: usuario ya está activo")
         })
-        public ResponseEntity<UserListResponse> activateUser(
+        public ResponseEntity<UserResponseAdmin> activateUser(
                         @PathVariable @Parameter(description = "ID del usuario a activar", required = true, example = "123") Long id) {
 
                 return ResponseEntity.ok(uService.activar(id));
         }
 
+        @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
         @PatchMapping("/{id}/desactivar")
-        @Operation(summary = "Desactivar usuario", description = "Cambia el estado del usuario a INACTIVO. Solo administradores pueden realizar esta operación. Usuarios inactivos no pueden iniciar sesión.")
+        @Operation(summary = "Desactivar usuario - ADMIN", description = "Cambia el estado del usuario a INACTIVO. Solo administradores pueden realizar esta operación. Usuarios inactivos no pueden iniciar sesión.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Usuario desactivado exitosamente"),
                         @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
@@ -167,14 +163,15 @@ public class UsuarioController {
                         @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
                         @ApiResponse(responseCode = "409", description = "Conflicto: usuario ya está inactivo")
         })
-        public ResponseEntity<UserListResponse> deactivateUser(
+        public ResponseEntity<UserResponseAdmin> deactivateUser(
                         @PathVariable @Parameter(description = "ID del usuario a desactivar", required = true, example = "123") Long id) {
 
                 return ResponseEntity.ok(uService.desactivar(id));
         }
 
+        @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
         @PatchMapping("/{id}/bloquear")
-        @Operation(summary = "Bloquear usuario", description = "Cambia el estado del usuario a BLOQUEADO. Solo administradores pueden realizar esta operación. Usuarios bloqueados no pueden iniciar sesión hasta ser desbloqueados.")
+        @Operation(summary = "Bloquear usuario - ADMIN", description = "Cambia el estado del usuario a BLOQUEADO. Solo administradores pueden realizar esta operación. Usuarios bloqueados no pueden iniciar sesión hasta ser desbloqueados.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Usuario bloqueado exitosamente"),
                         @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
@@ -182,7 +179,7 @@ public class UsuarioController {
                         @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
                         @ApiResponse(responseCode = "409", description = "Conflicto: usuario ya está bloqueado")
         })
-        public ResponseEntity<UserListResponse> blockUser(
+        public ResponseEntity<UserResponseAdmin> blockUser(
                         @PathVariable @Parameter(description = "ID del usuario a bloquear", required = true, example = "123") Long id) {
 
                 return ResponseEntity.ok(uService.bloquear(id));

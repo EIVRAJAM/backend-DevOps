@@ -11,11 +11,11 @@ public interface UsuarioService {
     SignUpResponseUsuario saveUser(SignUpUserRequest signupRequest);
     Usuario save(UsuarioDTO usuarioDTO);
     UserResponseAdmin findById(Long id);
-    UserListResponse findByDocumento(String documento);
+    UserResponseAdmin findByDocumento(String documento);
     Page<UserListResponse> getAllUsers(UsuarioFilterRequest dtoFilter);
     UserListResponse updateUser(Long id, UpdateUsuarioRequest request);
     UserUpdateAdminResponse updateUserAdmin(Long id, UserUpdateAdminDto request);
-    UserListResponse activar(Long id);
-    UserListResponse desactivar(Long id);
-    UserListResponse bloquear(Long id);
+    UserResponseAdmin activar(Long id);
+    UserResponseAdmin desactivar(Long id);
+    UserResponseAdmin bloquear(Long id);
 }
