@@ -4,6 +4,7 @@ import com.devops.backend.security.filter.JwtAuthenticationFilter;
 import com.devops.backend.security.filter.JwtValidationFilter;
 import com.devops.backend.auth.handler.OAuth2SuccessHandler;
 
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired

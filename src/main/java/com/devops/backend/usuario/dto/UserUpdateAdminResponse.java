@@ -15,7 +15,7 @@ public record UserUpdateAdminResponse(
 
         @Schema(description = "Apellidos del usuario", example = "Pérez García") String apellidos,
 
-        @Schema(description = "Género del usuario (1=Masculino, 2=Femenino)", example = "1") Short genero,
+        @Schema(description = "Género del usuario", example = "masculino|femenino") String genero,
 
         @Schema(description = "Fecha de nacimiento (ISO-8601)", example = "1990-05-15") LocalDate fechaNacimiento,
 

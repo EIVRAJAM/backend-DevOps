@@ -73,10 +73,10 @@ public class UsuarioServiceImpl implements UsuarioService {
 
 
     @Override
-    public UserListResponse findById(Long id) {
+    public UserResponseAdmin findById(Long id) {
         return usuarioRepository.findByIdUsuario(id)
-                .map(usuarioMapper::toListResponse)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404),"Usuario con ID " + id + " no encontrado"));
+                .map(usuarioMapper::toUserResponseAdmin)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario con ID " + id + " no encontrado"));
     }
 
     @Override

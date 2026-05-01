@@ -61,15 +61,33 @@ public class UsuarioMapper {
         return new UserListResponse(u.getIdUsuario(),u.getNombres(),
                                     u.getApellidos(), u.getDocumento(),
                                     u.getRol().getNombreRol());
+    }    
+    public UserResponseAdmin toUserResponseAdmin(Usuario u){
+        String genero = u.getGenero()==1  ? "masculino" : "femenino";
+        return new UserResponseAdmin(
+                u.getIdUsuario(),
+                u.getNombres(),
+                u.getApellidos(),
+                u.getDocumento(),
+                genero,
+                u.getFechaNacimiento() != null ? u.getFechaNacimiento().toString() : null,
+                u.getTelefono(),
+                u.getEstado(),
+                u.getRol().getNombreRol(),
+                u.getCreadoEn() != null ? u.getCreadoEn().toString() : null,
+                u.getActualizadoEn() != null ? u.getActualizadoEn().toString() : null
+        );
     }
 
     public UserUpdateAdminResponse toUpdateAdminResponse(Usuario u) {
+        String genero = u.getGenero()==1  ? "masculino" : "femenino";
+
         return new UserUpdateAdminResponse(
                 u.getIdUsuario(),
                 u.getDocumento(),
                 u.getNombres(),
                 u.getApellidos(),
-                u.getGenero(),
+                genero,
                 u.getFechaNacimiento(),
                 u.getTelefono(),
                 u.getEstado(),

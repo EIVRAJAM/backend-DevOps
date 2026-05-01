@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -52,17 +53,17 @@ public class UsuarioController {
                         @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado")
         })
         public ResponseEntity<Page<UserListResponse>> findAll(
-                        @RequestParam(required = false) @Parameter(description = "Filtro opcional: número de documento (búsqueda exacta)\", example = \"1234567890\"") String documento,
+                        @RequestParam(required = false) @Parameter(description = "Filtro opcional: número de documento (búsqueda exacta)", example = "1234567890") String documento,
 
-                        @RequestParam(required = false) @Parameter(description = "Filtro opcional: nombres del usuario (búsqueda parcial)\", example = \"Juan\"") String nombres,
+                        @RequestParam(required = false) @Parameter(description = "Filtro opcional: nombres del usuario (búsqueda parcial)", example = "Juan") String nombres,
 
-                        @RequestParam(required = false) @Parameter(description = "Filtro opcional: apellidos del usuario (búsqueda parcial)\", example = \"Pérez\"") String apellidos,
+                        @RequestParam(required = false) @Parameter(description = "Filtro opcional: apellidos del usuario (búsqueda parcial)", example = "Pérez") String apellidos,
 
-                        @RequestParam(required = false) @Parameter(description = "Filtro opcional: nombre del rol\", example = \"ADMIN\"") String nombreRol,
+                        @RequestParam(required = false) @Parameter(description = "Filtro opcional: nombre del rol", example = "ADMIN") String nombreRol,
 
-                        @RequestParam(defaultValue = "0") @Parameter(description = "Número de página (comienza en 0)\", example = \"0\"") int page,
+                        @RequestParam(defaultValue = "0") @Parameter(description = "Número de página (comienza en 0)", example = "0") int page,
 
-                        @RequestParam(defaultValue = "10") @Parameter(description = "Cantidad de registros por página (máximo 100)\", example = \"10\"") int size) {
+                        @RequestParam(defaultValue = "10") @Parameter(description = "Cantidad de registros por página (máximo 100)", example = "10") int size) {
 
                 return ResponseEntity.ok(
                                 uService.getAllUsers(new UsuarioFilterRequest(documento, nombres, apellidos, nombreRol,
@@ -70,16 +71,18 @@ public class UsuarioController {
         }
 
 
+        @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
         @GetMapping("/{id}")
-        @Operation(summary = "Obtener usuario por ID", description = "Recupera información completa de un usuario específico por su ID. Solo administradores pueden ver datos de otros usuarios; usuarios normales solo ven su propio perfil.")
+        @Operation(summary = "Obtener usuario por ID", description = "Recupera información completa de un usuario específico por su ID. Solo administradores pueden ver datos de otros usuario.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Usuario encontrado exitosamente"),
                         @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
                         @ApiResponse(responseCode = "403", description = "Acceso denegado: usuario solo puede ver su propio perfil"),
                         @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
         })
-        public ResponseEntity<UserListResponse> findById(
-                        @PathVariable @Parameter(description = "ID único del usuario\", required = true, example = \"123\"") Long id) {
+        public ResponseEntity<UserResponseAdmin> findById(
+                        @PathVariable @Parameter(description = "ID único del usuario", required = true, example = "\"123\"") Long id) {
+
                 return ResponseEntity.ok(uService.findById(id));
         }
 
@@ -91,12 +94,12 @@ public class UsuarioController {
                         @ApiResponse(responseCode = "404", description = "Usuario no encontrado para el documento especificado")
         })
         public ResponseEntity<UserListResponse> findByDocument(
-                        @PathVariable @Parameter(description = "Número de documento de identificación\", required = true, example = \"1234567890\"") String document) {
+                        @PathVariable @Parameter(description = "Número de documento de identificación", required = true, example = "1234567890") String document) {
                 return ResponseEntity.ok(uService.findByDocumento(document));
         }
 
         @PutMapping("")
-        @Operation(summary = "Actualizar información de usuario", description = "Actualiza datos personales de un usuario (nombres, apellidos, teléfono, género, fecha nacimiento, rol). Solo administradores pueden actualizar usuarios de otros; usuarios normales solo pueden actualizar sus propios datos.")
+        @Operation(summary = "Actualizar información de usuario", description = "Actualiza datos personales de un usuario (nombres, apellidos, teléfono, género, fecha nacimiento,). Usuarios normales solo pueden actualizar sus propios datos.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Usuario actualizado exitosamente"),
                         @ApiResponse(responseCode = "400", description = "Validación fallida: datos incompletos o formato inválido"),
@@ -110,7 +113,7 @@ public class UsuarioController {
                 Authentication aut = SecurityContextHolder.getContext().getAuthentication();
                 Long idUsuario = Long.parseLong(aut.getName());
                 System.out.println("Id del usuario autenticado: " + idUsuario);
-                
+
                 return ResponseEntity.ok(uService.updateUser(idUsuario, request));
         }
 
@@ -150,7 +153,7 @@ public class UsuarioController {
                         @ApiResponse(responseCode = "409", description = "Conflicto: usuario ya está activo")
         })
         public ResponseEntity<UserListResponse> activateUser(
-                        @PathVariable @Parameter(description = "ID del usuario a activar\", required = true, example = \"123\"") Long id) {
+                        @PathVariable @Parameter(description = "ID del usuario a activar", required = true, example = "123") Long id) {
 
                 return ResponseEntity.ok(uService.activar(id));
         }
@@ -165,7 +168,7 @@ public class UsuarioController {
                         @ApiResponse(responseCode = "409", description = "Conflicto: usuario ya está inactivo")
         })
         public ResponseEntity<UserListResponse> deactivateUser(
-                        @PathVariable @Parameter(description = "ID del usuario a desactivar\", required = true, example = \"123\"") Long id) {
+                        @PathVariable @Parameter(description = "ID del usuario a desactivar", required = true, example = "123") Long id) {
 
                 return ResponseEntity.ok(uService.desactivar(id));
         }
@@ -180,7 +183,7 @@ public class UsuarioController {
                         @ApiResponse(responseCode = "409", description = "Conflicto: usuario ya está bloqueado")
         })
         public ResponseEntity<UserListResponse> blockUser(
-                        @PathVariable @Parameter(description = "ID del usuario a bloquear\", required = true, example = \"123\"") Long id) {
+                        @PathVariable @Parameter(description = "ID del usuario a bloquear", required = true, example = "123") Long id) {
 
                 return ResponseEntity.ok(uService.bloquear(id));
         }

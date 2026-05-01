@@ -10,7 +10,7 @@ public interface UsuarioService {
 
     SignUpResponseUsuario saveUser(SignUpUserRequest signupRequest);
     Usuario save(UsuarioDTO usuarioDTO);
-    UserListResponse findById(Long id);
+    UserResponseAdmin findById(Long id);
     UserListResponse findByDocumento(String documento);
     Page<UserListResponse> getAllUsers(UsuarioFilterRequest dtoFilter);
     UserListResponse updateUser(Long id, UpdateUsuarioRequest request);
