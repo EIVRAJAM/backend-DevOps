@@ -19,12 +19,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Determine security policy
         id: policy
         shell: bash
         run: |
           STRICT="false"
+          BASELINE=""
 
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
             STRICT="true"
@@ -34,7 +37,12 @@ jobs:
             STRICT="true"
           fi
 
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.base_ref }}" = "develop" ]; then
+            BASELINE="--baseline-ref=origin/develop"
+          fi
+
           echo "strict=$STRICT" >> "$GITHUB_OUTPUT"
+          echo "baseline=$BASELINE" >> "$GITHUB_OUTPUT"
 
       - name: Run Semgrep
         shell: bash
@@ -50,6 +58,7 @@ jobs:
             --config=p/java \
             --config=p/spring \
             --config=p/secrets \
+            ${{ steps.policy.outputs.baseline }} \
             $STRICT_FLAGS \
             --sarif --output=results.sarif \
             ./src
