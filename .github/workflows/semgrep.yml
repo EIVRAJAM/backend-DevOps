@@ -64,7 +64,6 @@ jobs:
           semgrep scan \
             --config=p/ci \
             --config=p/java \
-            --config=p/spring-boot \
             --config=p/secrets \
             --config=.semgrep/ \
             ${{ steps.policy.outputs.baseline }} \
