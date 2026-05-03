@@ -17,7 +17,8 @@ public final class PublicRoutes {
                         "/v3/api-docs/**",
                         "/oauth2/**", // Rutas de redirección OAuth2 a Google
                         "/login/oauth2/**", // Callback de OAuth2 desde Google
-                        "/login/oauth2/code/google" // Callback específico para Google (sin /api prefix)
+                        "/login/oauth2/code/google", // Callback específico para Google (sin /api prefix)
+                        "/api/v1/stripe/**" // Webhooks de Stripe
         };
 
         // Para JwtValidationFilter
@@ -27,6 +28,7 @@ public final class PublicRoutes {
                         "/v3/api-docs",
                         "/oauth2", // Rutas OAuth2 públicas (sin /api prefix)
                         "/login/oauth2", // Callback OAuth2 público (sin /api prefix)
-                        "/login/oauth2/code/google" // Callback específico para Google (sin /api prefix)
+                        "/login/oauth2/code/google", // Callback específico para Google (sin /api prefix)
+                        "/api/v1/stripe" // Prefijo para Webhooks de Stripe
         };
 }

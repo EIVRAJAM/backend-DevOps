@@ -1,8 +1,10 @@
 package com.devops.backend.evento.dto;
 
+import com.devops.backend.evento.enums.Moneda;
 import jakarta.validation.constraints.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -51,7 +53,20 @@ public record CreateEventoDTO(
         @Schema(description = "Indica si el evento cuenta con servicio de parqueadero", example = "true")
         Boolean tieneParqueadero,
 
-        @Min(value = 0, message = "Los cupos de parqueadero no pueden ser negativos")
-        @Schema(description = "Número de cupos de parqueadero disponibles (solo si tieneParqueadero=true)", example = "100")
-        Integer cuposParqueadero) {
-}
+        @Min(value = 0, message = "Los cupos de parqueadero no pueden ser negativos") 
+        @Schema(description = "Número de cupos de parqueadero disponibles (solo si tieneParqueadero=true)", example = "100") 
+        Integer cuposParqueadero,
+
+        @NotNull(message = "Debe indicar si el evento es de pago")
+        @Schema(description = "Indica si el evento requiere pago de entrada", example = "false") 
+        Boolean esDePago,
+
+        @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser mayor a 0 para eventos de pago") 
+        @Schema(description = "Precio del evento (requerido si esDePago=true)", example = "50000") 
+        BigDecimal precio,
+
+        @NotNull(message = "Debe especificar la moneda si el evento es de pago") 
+        @Schema(description = "Moneda del precio del evento (USD, COP, EUR, MXN)", example = "COP", 
+        allowableValues = {"USD", "COP", "EUR", "MXN" }) 
+        Moneda moneda
+ ) {}
