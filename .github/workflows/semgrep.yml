@@ -10,6 +10,10 @@ on:
   pull_request:
     branches: [develop, main]
 
+permissions:
+  security-events: write
+  contents: read
+
 jobs:
   semgrep:
     name: Semgrep scan
