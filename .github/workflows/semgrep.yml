@@ -1,0 +1,61 @@
+name: Semgrep SAST
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  semgrep:
+    name: Semgrep Scan
+    runs-on: ubuntu-latest
+    container: semgrep/semgrep
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Determine security policy
+        id: policy
+        shell: bash
+        run: |
+          STRICT="false"
+
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            STRICT="true"
+          fi
+
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.base_ref }}" = "main" ]; then
+            STRICT="true"
+          fi
+
+          echo "strict=$STRICT" >> "$GITHUB_OUTPUT"
+
+      - name: Run Semgrep
+        shell: bash
+        run: |
+          STRICT_FLAGS=""
+
+          if [ "${{ steps.policy.outputs.strict }}" = "true" ]; then
+            STRICT_FLAGS="--error --severity=ERROR"
+          fi
+
+          semgrep scan \
+            --config=p/ci \
+            --config=p/java \
+            --config=p/spring \
+            --config=p/secrets \
+            $STRICT_FLAGS \
+            --sarif --output=results.sarif \
+            ./src
+
+      - name: Upload SARIF report
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
