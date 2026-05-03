@@ -10,5 +10,8 @@ public record SignUpResponseUsuario(
 
                 @Schema(description = "Apellidos del usuario", example = "Pérez García") String apellidos,
 
-                @Schema(description = "Número de teléfono de contacto", example = "+57 3001234567") String telefono) {
+                @Schema(description = "Número de teléfono de contacto", example = "+57 3001234567") String telefono,
+
+                @Schema(description = "Nombre del rol del usuario", example = "ADMIN") String nombreRol
+) {
 }

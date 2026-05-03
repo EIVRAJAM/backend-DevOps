@@ -38,7 +38,8 @@ public class UsuarioMapper {
                 usuario.getIdUsuario(),
                 usuario.getNombres(),
                 usuario.getApellidos(),
-                usuario.getTelefono()
+                usuario.getTelefono(),
+                usuario.getRol().getNombreRol()
         );
     }
 
