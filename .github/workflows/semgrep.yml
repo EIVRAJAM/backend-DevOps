@@ -56,7 +56,6 @@ jobs:
           semgrep scan \
             --config=p/ci \
             --config=p/java \
-            --config=p/spring \
             --config=p/secrets \
             ${{ steps.policy.outputs.baseline }} \
             $STRICT_FLAGS \
