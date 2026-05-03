@@ -18,6 +18,9 @@ jobs:
       image: returntocorp/semgrep
 
     steps:
+      - name: Fix git ownership
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # historia completa para baseline diff
@@ -43,7 +46,7 @@ jobs:
 
           # PR a develop -> baseline scan, reporta solo findings nuevos
           if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.base_ref }}" = "develop" ]; then
-            BASELINE="--baseline-ref=origin/develop"
+            BASELINE="--baseline-commit=origin/develop"
           fi
 
           echo "strict=$STRICT"     >> $GITHUB_OUTPUT
@@ -71,6 +74,6 @@ jobs:
 
       - name: Publicar SARIF en Security tab
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: results.sarif
