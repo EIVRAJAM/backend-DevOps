@@ -31,7 +31,6 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final RolRepository rolRepository;
     private final UsuarioMapper usuarioMapper;
-    private static final String DEFAULT_ROLE = "ROLE_ORGANIZER";
 
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository,
                               RolRepository rolRepository, UsuarioMapper usuarioMapper) {
@@ -43,7 +42,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public SignUpResponseUsuario saveUser(SignUpUserRequest signupRequest) {
 
-        Long idRol = obtenerRolPorDefecto();
+        Long idRol = validacionRol(signupRequest.nombreRol());
         Usuario usuario = save(usuarioMapper.toDTOUser(signupRequest,idRol));
 
         return  usuarioMapper.toResponse(usuario);
@@ -51,10 +50,10 @@ public class UsuarioServiceImpl implements UsuarioService {
 
 
 
-    private Long obtenerRolPorDefecto() {
-        return rolRepository.findByNombreRol(DEFAULT_ROLE)
+    private Long validacionRol(String rol) {
+        return rolRepository.findByNombreRol(rol)
                 .orElseThrow(() -> new BadRequestException(
-                        "El rol por defecto " + DEFAULT_ROLE + " no está disponible"))
+                        "El rol por defecto " + rol + " no está disponible"))
                 .getIdRol();
     }
 

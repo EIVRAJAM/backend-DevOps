@@ -36,6 +36,7 @@ public class UsuarioMapper {
     public SignUpResponseUsuario toResponse(Usuario usuario) {
         return new SignUpResponseUsuario(
                 usuario.getIdUsuario(),
+                usuario.getDocumento(),
                 usuario.getNombres(),
                 usuario.getApellidos(),
                 usuario.getTelefono(),
