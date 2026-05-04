@@ -64,7 +64,7 @@ public class UsuarioMapper {
                                     u.getApellidos(),
                                     u.getDocumento(),
                                     genero,
-                                    u.getFechaNacimiento().toString(),
+                                    u.getFechaNacimiento() != null ? u.getFechaNacimiento().toString() : null,
                                     u.getTelefono(),
                                     u.getEstado());
     }    
