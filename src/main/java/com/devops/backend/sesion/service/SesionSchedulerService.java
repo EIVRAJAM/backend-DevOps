@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +16,9 @@ import java.time.LocalDateTime;
 public class SesionSchedulerService {
 
     private final SesionRepository sesionRepository;
+
+    private static final Logger log = LoggerFactory.getLogger(SesionSchedulerService.class);
+
 
     @Value("${jwt.expiration-minutes}")
     private long jwtExpirationMinutes;
@@ -37,8 +42,7 @@ public class SesionSchedulerService {
                 System.out.println("[SCHEDULER] Sesiones cerradas automáticamente por expiración: " + actualizadas);
             }
         } catch (Exception e) {
-            System.err.println("[SCHEDULER ERROR] Error al cerrar sesiones expiradas: " + e.getMessage());
-            e.printStackTrace();
+            log.error("[SCHEDULER ERROR] Error al cerrar sesiones expiradas", e);
         }
     }
 }
