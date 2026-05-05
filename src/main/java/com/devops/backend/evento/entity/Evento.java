@@ -3,12 +3,14 @@ package com.devops.backend.evento.entity;
 import com.devops.backend.usuario.entity.Usuario;
 import com.devops.backend.evento.enums.Estado;
 import com.devops.backend.evento.enums.EstadoEvento;
+import com.devops.backend.evento.enums.Moneda;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -64,6 +66,19 @@ public class Evento {
     @Column(name = "cupos_parqueadero")
     private Integer cuposParqueadero;
 
+    @Column(name = "es_de_pago", nullable = false)
+    private Boolean esDePago;
+
+    @Column(name = "precio", precision = 10, scale = 2)
+    private BigDecimal precio;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "moneda", nullable = false, length = 3)
+    private Moneda moneda;
+
+    @Column(name = "capacidad_disponible")
+    private Integer capacidadDisponible;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)
     private Estado estado;
@@ -89,6 +104,15 @@ public class Evento {
         }
         if (tieneParqueadero && cuposParqueadero == null) {
             cuposParqueadero = 0;
+        }
+        if (esDePago == null) {
+            esDePago = false;
+        }
+        if (moneda == null) {
+            moneda = Moneda.USD;
+        }
+        if (capacidadMaxima != null) {
+            capacidadDisponible = capacidadMaxima;
         }
     }
 

@@ -1,0 +1,6 @@
+rules:
+  - id: placeholder-rule
+    pattern: System.out.println(...)
+    message: "Evitar System.out.println en produccion, usar logger"
+    languages: [java]
+    severity: WARNING

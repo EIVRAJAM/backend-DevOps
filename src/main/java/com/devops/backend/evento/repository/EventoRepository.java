@@ -100,6 +100,42 @@ public interface EventoRepository extends JpaRepository<Evento, Long>, JpaSpecif
     long countByUsuarioCreador_IdUsuarioAndEstado(Long idUsuario, Estado estado);
 
     /**
+     * Busca eventos de pago activos
+     */
+    List<Evento> findByEsDePagoTrueAndEstado(Estado estado);
+
+    /**
+     * Busca eventos de pago activos y publicados
+     */
+    List<Evento> findByEsDePagoTrueAndEstadoAndEstadoEvento(Estado estado, EstadoEvento estadoEvento);
+
+    /**
+     * Busca eventos de pago por usuario creador y estado
+     */
+    List<Evento> findByEsDePagoTrueAndUsuarioCreador_IdUsuarioAndEstado(Long idUsuario, Estado estado);
+
+    /**
+     * Busca eventos de pago por moneda
+     */
+    List<Evento> findByEsDePagoTrueAndMonedaAndEstado(com.devops.backend.evento.enums.Moneda moneda, Estado estado);
+
+    /**
+     * Busca eventos de pago con cupos disponibles
+     */
+    List<Evento> findByEsDePagoTrueAndCapacidadDisponibleGreaterThanAndEstadoAndEstadoEvento(
+            Integer capacidadMinima, Estado estado, EstadoEvento estadoEvento);
+
+    /**
+     * Cuenta eventos de pago activos
+     */
+    long countByEsDePagoTrueAndEstado(Estado estado);
+
+    /**
+     * Busca eventos gratuitos activos y publicados
+     */
+    List<Evento> findByEsDePagoFalseAndEstadoAndEstadoEvento(Estado estado, EstadoEvento estadoEvento);
+
+    /**
      * Busca eventos publicados y activos ordenados por fecha
      */
     @Query("SELECT e FROM Evento e WHERE e.estadoEvento = com.devops.backend.evento.enums.EstadoEvento.PUBLICADO " +

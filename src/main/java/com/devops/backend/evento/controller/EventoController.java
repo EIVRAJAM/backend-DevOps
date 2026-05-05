@@ -1,6 +1,5 @@
 package com.devops.backend.evento.controller;
 
-import com.devops.backend.evento.dto.ChangeEstadoDTO;
 import com.devops.backend.evento.dto.ComentarioRequest;
 import com.devops.backend.evento.dto.CreateEventoDTO;
 import com.devops.backend.evento.dto.EventoResponseDTO;
@@ -36,15 +35,6 @@ public class EventoController {
         @Autowired
         private EventoService eventoService;
 
-        /**
-         * TASK-BE-EVE-03: Crear un nuevo evento
-         * POST /v1/eventos
-         *
-         * @param createEventoDTO datos del evento a crear (todos los campos son
-         *                        requeridos excepto descripción, referencia de
-         *                        ubicación e imagen)
-         * @return 201 Created con EventoResponseDTO
-         */
         @Operation(summary = "Crear un nuevo evento", description = "Registra un nuevo evento en el sistema en estado BORRADOR. El usuario creador se obtiene automáticamente del contexto de seguridad. El evento no será visible para otros usuarios hasta que sea publicado.")
         @ApiResponses({
                         @ApiResponse(responseCode = "201", description = "Evento creado exitosamente en estado BORRADOR"),
@@ -53,27 +43,11 @@ public class EventoController {
                         @ApiResponse(responseCode = "404", description = "Usuario creador no encontrado en el sistema")
         })
         @PostMapping
-        public ResponseEntity<EventoResponseDTO> crearEvento(
-                        @Valid @RequestBody CreateEventoDTO createEventoDTO) {
+        public ResponseEntity<EventoResponseDTO> crearEvento(@Valid @RequestBody CreateEventoDTO createEventoDTO) {
                 EventoResponseDTO eventoCreado = eventoService.crearEvento(createEventoDTO);
                 return ResponseEntity.status(HttpStatus.CREATED).body(eventoCreado);
         }
 
-        /**
-         * TASK-BE-EVE-04: Listar eventos con filtros y paginación
-         * GET /v1/eventos
-         *
-         * @param pageable       configuración de paginación (page, size, sort)
-         * @param estadoEvento   filtro por estado del evento (BORRADOR, PUBLICADO,
-         *                       CERRADO, CANCELADO)
-         * @param estado         filtro por estado general (ACTIVO, INACTIVO)
-         * @param nombre         filtro por nombre del evento (búsqueda parcial)
-         * @param lugar          filtro por lugar del evento (búsqueda parcial)
-         * @param usuarioCreador filtro por ID del usuario creador
-         * @param fechaInicio    filtro por fecha inicio (formato ISO-8601)
-         * @param fechaFin       filtro por fecha fin (formato ISO-8601)
-         * @return 200 OK con Page de EventoResponseDTO
-         */
         @Operation(summary = "Listar eventos con paginación y filtros", description = "Obtiene una lista paginada de eventos. Soporta filtros por estado de evento (BORRADOR, PUBLICADO, CERRADO, CANCELADO), estado general (ACTIVO/INACTIVO), nombre, lugar, usuario creador y rango de fechas. Máximo 100 registros por página.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Lista de eventos obtenida exitosamente"),
@@ -107,13 +81,6 @@ public class EventoController {
                 return ResponseEntity.ok(eventos);
         }
 
-        /**
-         * TASK-BE-EVE-05: Obtener un evento por ID
-         * GET /v1/eventos/{id}
-         *
-         * @param id ID del evento
-         * @return 200 OK con EventoResponseDTO o 404 si no existe
-         */
         @Operation(summary = "Obtener evento por ID", description = "Obtiene los detalles completos de un evento específico, incluyendo información de creación, estado, capacidad y ubicación.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Evento obtenido exitosamente"),
@@ -127,14 +94,6 @@ public class EventoController {
                 return ResponseEntity.ok(evento);
         }
 
-        /**
-         * TASK-BE-EVE-06: Actualizar un evento
-         * PUT /v1/eventos/{id}
-         *
-         * @param id              ID del evento a actualizar
-         * @param updateEventoDTO datos a actualizar (todos los campos son opcionales)
-         * @return 200 OK con EventoResponseDTO actualizado
-         */
         @Operation(summary = "Actualizar evento", description = "Modifica los datos de un evento existente (contenido, fecha, hora, ubicación, capacidad, etc.). Solo el creador o un admin puede actualizar. "
                         +
                         "No se pueden actualizar eventos en estado CERRADO o CANCELADO. Todos los campos en el request son opcionales.")
@@ -154,15 +113,6 @@ public class EventoController {
                 return ResponseEntity.ok(eventoActualizado);
         }
 
-        /**
-         * TASK-BE-EVE-08: Listar eventos de un usuario
-         * GET /v1/usuarios/{idUsuario}/eventos
-         *
-         * @param idUsuario ID del usuario
-         * @param page      número de página (comienza en 0)
-         * @param size      cantidad de registros por página (máximo 100)
-         * @return 200 OK con Page de EventoResponseDTO
-         */
         @Operation(summary = "Listar eventos de un usuario", description = "Obtiene una lista paginada de eventos creados por un usuario específico. Útil para ver el historial de eventos de un usuario.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Lista de eventos del usuario obtenida exitosamente"),
@@ -181,13 +131,6 @@ public class EventoController {
                 return ResponseEntity.ok(eventos);
         }
 
-        /**
-         * TASK-BE-EVE-09: Obtener historial de cambios de estado de un evento
-         * GET /v1/eventos/{id}/historial
-         *
-         * @param id ID del evento
-         * @return 200 OK con List de HistorialEventoDTO
-         */
         @Operation(summary = "Obtener historial del evento", description = "Obtiene el historial completo de cambios de estado de un evento, incluyendo: quién realizó el cambio, cuándo se realizó, qué estado anterior/nuevo, y comentarios asociados. Útil para auditoría.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Historial obtenido exitosamente"),
@@ -201,14 +144,6 @@ public class EventoController {
                 return ResponseEntity.ok(historial);
         }
 
-        /**
-         * ACCIÓN: Publicar evento
-         * PATCH /v1/eventos/{id}/publicar
-         * Transición: BORRADOR → PUBLICADO
-         *
-         * @param id ID del evento
-         * @return 200 OK con EventoResponseDTO
-         */
         @Operation(summary = "Publicar evento", description = "Publica un evento, permitiendo que otros usuarios lo vean (transición BORRADOR → PUBLICADO). Solo el creador o un administrador puede realizar esta acción.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Evento publicado exitosamente y ahora visible para otros usuarios"),
@@ -224,15 +159,6 @@ public class EventoController {
                 return ResponseEntity.ok(eventoActualizado);
         }
 
-        /**
-         * ACCIÓN: Cancelar evento
-         * PATCH /v1/eventos/{id}/cancelar
-         * Transición: BORRADOR/PUBLICADO → CANCELADO
-         *
-         * @param id                ID del evento
-         * @param comentarioRequest motivo de cancelación (requerido)
-         * @return 200 OK con EventoResponseDTO
-         */
         @Operation(summary = "Cancelar evento", description = "Cancela un evento sin posibilidad de reapertura (transición BORRADOR/PUBLICADO → CANCELADO). Requiere comentario con el motivo de cancelación. Solo el creador o un administrador puede realizar esta acción.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Evento cancelado exitosamente. Los cambios son irreversibles."),
@@ -250,14 +176,6 @@ public class EventoController {
                 return ResponseEntity.ok(eventoActualizado);
         }
 
-        /**
-         * ACCIÓN: Cerrar evento
-         * PATCH /v1/eventos/{id}/cerrar
-         * Transición: PUBLICADO → CERRADO
-         *
-         * @param id ID del evento
-         * @return 200 OK con EventoResponseDTO
-         */
         @Operation(summary = "Cerrar evento", description = "Cierra un evento una vez finalizado, registrando el cierre en el historial (transición PUBLICADO → CERRADO). Solo el creador o un administrador puede realizar esta acción.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Evento cerrado exitosamente y no puede ser editado"),
@@ -273,14 +191,6 @@ public class EventoController {
                 return ResponseEntity.ok(eventoActualizado);
         }
 
-        /**
-         * ACCIÓN: Activar evento
-         * PATCH /v1/eventos/{id}/activar
-         * Transición: estado INACTIVO → ACTIVO
-         *
-         * @param id ID del evento
-         * @return 200 OK con EventoResponseDTO
-         */
         @Operation(summary = "Activar evento", description = "Activa un evento desactivado, permitiendo que vuelva a aparecer en listados (transición estado INACTIVO → ACTIVO). Solo el creador o un administrador puede realizar esta acción.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Evento activado exitosamente y ahora visible en listados"),
@@ -296,15 +206,6 @@ public class EventoController {
                 return ResponseEntity.ok(eventoActualizado);
         }
 
-        /**
-         * ACCIÓN: Desactivar evento
-         * PATCH /v1/eventos/{id}/desactivar
-         * Transición: estado ACTIVO → INACTIVO
-         *
-         * @param id                ID del evento
-         * @param comentarioRequest motivo de desactivación (requerido)
-         * @return 200 OK con EventoResponseDTO
-         */
         @Operation(summary = "Desactivar evento", description = "Desactiva un evento, ocultándolo de los listados pero sin eliminarlo (transición estado ACTIVO → INACTIVO). Requiere comentario con el motivo. Solo el creador o un administrador puede realizar esta acción.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Evento desactivado exitosamente y no aparecerá en listados normales"),

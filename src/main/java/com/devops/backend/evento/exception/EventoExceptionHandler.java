@@ -49,6 +49,24 @@ public class EventoExceptionHandler {
     }
 
     /**
+     * Maneja intento de doble inscripción al mismo evento (409 Conflict)
+     */
+    @ExceptionHandler(TicketDuplicadoException.class)
+    public ResponseEntity<ApiError> handleTicketDuplicado(TicketDuplicadoException ex, WebRequest request) {
+        ApiError apiError = buildError(HttpStatus.CONFLICT, ex.getMessage(), request);
+        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
+    }
+
+    /**
+     * Maneja inscripción gratuita sobre evento de pago (400 Bad Request)
+     */
+    @ExceptionHandler(EventoNoGratisException.class)
+    public ResponseEntity<ApiError> handleEventoNoGratis(EventoNoGratisException ex, WebRequest request) {
+        ApiError apiError = buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
      * Construye un objeto ApiError estándar
      */
     private ApiError buildError(HttpStatus status, String message, WebRequest request) {
