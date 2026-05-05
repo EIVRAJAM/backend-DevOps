@@ -14,9 +14,32 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@OpenAPIDefinition(info = @Info(title = "DevOps Backend API", version = "1.0.0", description = "API REST para la gestión de usuarios, autenticación, accesos, roles, funcionalidades y procesos de seguridad del sistema.", contact = @Contact(name = "Backend Team", email = "backend@devops.com", url = "https://devops-backend.com"), license = @License(name = "Apache 2.0", url = "https://www.apache.org/licenses/LICENSE-2.0")), servers = {
-                @Server(url = "http://localhost:3020", description = "Local Development Server")
-})
+@OpenAPIDefinition(
+        info = @Info(
+                title = "DevOps Backend API",
+                version = "1.0.0",
+                description = "API REST para la gestión de usuarios, autenticación, accesos, roles, funcionalidades y procesos de seguridad del sistema.",
+                contact = @Contact(
+                        name = "Backend Team",
+                        email = "backend@devops.com",
+                        url = "https://devops-backend.com"
+                ),
+                license = @License(
+                        name = "Apache 2.0",
+                        url = "https://www.apache.org/licenses/LICENSE-2.0"
+                )
+        ),
+        servers = {
+                @Server(
+                        url = "https://back-seuma-ede9exbagychaabf.eastus-01.azurewebsites.net",
+                        description = "Azure Develop Server"
+                ),
+                @Server(
+                        url = "http://localhost:3020",
+                        description = "Local Development Server"
+                )
+        }
+)
 @Configuration
 public class OpenApiConfig {
 
