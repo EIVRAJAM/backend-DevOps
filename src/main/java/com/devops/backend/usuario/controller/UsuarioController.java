@@ -87,7 +87,7 @@ public class UsuarioController {
         }
 
         @GetMapping("/id")
-        @Operation(summary = "Obtener usuario por ID", description = "Recupera información completa del usuario de la sesión activa .")
+        @Operation(summary = "Obtener usuario actual", description = "Recupera información completa del usuario de la sesión activa .")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Usuario encontrado exitosamente"),
                         @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
@@ -198,6 +198,24 @@ public class UsuarioController {
                         @PathVariable @Parameter(description = "ID del usuario a bloquear", required = true, example = "123") Long id) {
 
                 return ResponseEntity.ok(uService.bloquear(id));
+        }
+
+        @GetMapping("/complete-status")
+        @Operation(
+                summary = "Verificar si el usuario debe completar su registro",
+                description = "Retorna si el usuario autenticado tiene campos obligatorios incompletos (caso OAuth)."
+        )
+        @ApiResponses({
+                @ApiResponse(responseCode = "200", description = "Estado de completitud obtenido exitosamente"),
+                @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
+                @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+        })
+        public ResponseEntity<CompleteStatusResponse> getCompleteStatus() {
+
+           Authentication aut = SecurityContextHolder.getContext().getAuthentication();
+           Long idUsuario = Long.parseLong(aut.getName());
+
+            return ResponseEntity.ok(uService.getCompleteStatus(idUsuario));
         }
 
 }

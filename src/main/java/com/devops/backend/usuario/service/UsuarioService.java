@@ -20,4 +20,6 @@ public interface UsuarioService {
     UserResponseAdmin desactivar(Long id);
     UserResponseAdmin bloquear(Long id);
     UserListResponse findByIdUser(Long idUsuario);
+    CompleteStatusResponse getCompleteStatus(Long userId);
+
 }

@@ -89,6 +89,32 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404),"Usuario con ID " + idUsuario + " no encontrado"));
     }
 
+    @Override
+    public CompleteStatusResponse getCompleteStatus(Long userId) {
+
+        Usuario usuario = findUser(userId);
+
+        List<String> missingFields = new ArrayList<>();
+
+        // Verificamos si el documento es  OAuth?
+        if (usuario.getDocumento() != null && usuario.getDocumento().startsWith("OAUTH_")) {
+            missingFields.add("documento_usuario");
+        }
+        if (usuario.getGenero() == null) {
+            missingFields.add("genero_usuario");
+        }
+
+        if (usuario.getFechaNacimiento() == null) {
+            missingFields.add("fecha_nacimiento_usuario");
+        }
+
+        if (usuario.getTelefono() == null) {
+            missingFields.add("telefono_usuario");
+        }
+
+        return new CompleteStatusResponse(!missingFields.isEmpty(), missingFields);
+    }
+
 
     @Override
     public Page<UserListResponse> getAllUsers(UsuarioFilterRequest f) {
@@ -109,9 +135,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public UserListResponse updateUser(Long id, UpdateUsuarioRequest request) {
 
-        Usuario usuario = usuarioRepository.findByIdUsuario(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatusCode.valueOf(404), "Usuario con ID " + id + " no encontrado"));
+        Usuario usuario = findUser(id);
 
         List<ApiValidationError> errors = new ArrayList<>();
 
@@ -139,8 +163,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public UserUpdateAdminResponse updateUserAdmin(Long id, UserUpdateAdminDto request) {
 
-        Usuario usuario = usuarioRepository.findByIdUsuario(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario con ID " + id + " no encontrado"));
+        Usuario usuario = findUser(id);
 
         List<ApiValidationError> errors = new ArrayList<>();
 
@@ -193,9 +216,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private UserResponseAdmin updateStatus(Long id, String status){
 
-        Usuario usuario = usuarioRepository.findByIdUsuario(id).
-                orElseThrow(() -> new ResponseStatusException(
-                        HttpStatusCode.valueOf(404), "Usuario con ID " + id + " no encontrado"));
+        Usuario usuario =findUser(id);
 
         usuario.setEstado(status);
 
@@ -222,5 +243,12 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new ConflictException("Campos duplicados o inválidos en el registro", errors);
         }
 
+    }
+
+
+    private Usuario findUser(Long id){
+        return usuarioRepository.findByIdUsuario(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Usuario con ID " + id + " no encontrado"));
     }
 }
