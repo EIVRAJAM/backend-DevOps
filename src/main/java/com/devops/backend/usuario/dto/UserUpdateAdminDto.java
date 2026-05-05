@@ -22,7 +22,7 @@ public record UserUpdateAdminDto(
 
                 @Schema(description = "Fecha de nacimiento (ISO-8601)", example = "1990-05-15") LocalDate fechaNacimiento,
 
-                @Size(max = 50, message = "El teléfono no puede exceder 50 caracteres") @Schema(description = "Número de teléfono de contacto", example = "+57 3001234567") String telefono,
+                @Size(max = 50, message = "El teléfono no puede exceder 50 caracteres") @Schema(description = "Número de teléfono de contacto", example = "+57 3001234567") String telefono
 
-                @NotBlank(message = "El estado no puede estar vacío") @Schema(description = "Estado del usuario (ACTIVO, INACTIVO, BLOQUEADO)", example = "ACTIVO") String estado) {
+) {
 }

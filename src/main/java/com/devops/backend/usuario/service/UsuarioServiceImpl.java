@@ -53,7 +53,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     private Long validacionRol(String rol) {
         return rolRepository.findByNombreRol(rol)
                 .orElseThrow(() -> new BadRequestException(
-                        "El rol por defecto " + rol + " no está disponible"))
+                        "El rol  " + rol + " no está disponible"))
                 .getIdRol();
     }
 
@@ -80,13 +80,13 @@ public class UsuarioServiceImpl implements UsuarioService {
     public UserResponseAdmin findByDocumento(String documento) {
         return usuarioRepository.findByDocumento(documento)
                 .map(usuarioMapper::toUserResponseAdmin)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404),"Usuario con documento " + documento + " no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario con documento " + documento + " no encontrado"));
     }
 
     @Override
     public UserListResponse findByIdUser(Long idUsuario) {
         return usuarioRepository.findByIdUsuario(idUsuario).map(usuarioMapper::toListResponse)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404),"Usuario con ID " + idUsuario + " no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario con ID " + idUsuario + " no encontrado"));
     }
 
     @Override
@@ -181,9 +181,7 @@ public class UsuarioServiceImpl implements UsuarioService {
                     return null;
         });
 
-        if (!isEstadoValido(request.estado())) {
-            errors.add(new ApiValidationError("estado", "El estado debe ser ACTIVO, INACTIVO o BLOQUEADO"));
-        }
+
 
         if (!errors.isEmpty()) {
             throw new ConflictException("Campos inválidos en la actualización", errors);

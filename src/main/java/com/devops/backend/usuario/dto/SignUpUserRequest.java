@@ -16,7 +16,10 @@ public record SignUpUserRequest(
 
         @NotBlank @Schema(description = "Apellidos del usuario", example = "Pérez García") String apellidos,
 
-        @Pattern(regexp = "masculino|femenino", message = "El género debe ser masculino o femenino") @Schema(description = "Género del usuario (masculino o femenino)", example = "masculino") String genero,
+        @NotBlank(message = "El género es obligatorio")
+        @Pattern(regexp = "masculino|femenino", message = "El género debe ser masculino o femenino")
+        @Schema(description = "Género del usuario (masculino o femenino)", example = "masculino")
+        String genero,
 
         @Past @Schema(description = "Fecha de nacimiento (formato: 1990-05-15)", example = "1990-05-15") Date fechaNacimiento,
 
@@ -30,7 +33,7 @@ public record SignUpUserRequest(
         )
         @Schema(
                 description = "Nombre del rol en formato ROLE_NOMBRE (máximo 100 caracteres, solo mayúsculas)",
-                example = "ROLE_ADMIN"
+                example = "ROLE_USER"
         )
         String nombreRol
 

@@ -129,7 +129,6 @@ public class UsuarioMapper {
         usuario.setFechaNacimiento(dto.fechaNacimiento());
         usuario.setTelefono(dto.telefono());
         usuario.setRol(rol);
-        usuario.setEstado(dto.estado());
     }
     private String toGeneroFromCode(Short genero) {
         if (genero == null) {
@@ -137,7 +136,12 @@ public class UsuarioMapper {
         }
         return genero == GENERO_MASCULINO_CODE ? "masculino" : "femenino";
     }
-    private short toCodeFromGenero(String genero) {
+
+    private Short toCodeFromGenero(String genero) {
+
+        if (genero == null) {
+            return null;
+        }
         return genero.equalsIgnoreCase("masculino")
                 ? (short) GENERO_MASCULINO_CODE : (short) GENERO_FEMENINO_CODE;
     }
