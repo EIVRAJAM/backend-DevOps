@@ -10,10 +10,10 @@ public record CompleteStatusResponse(
                 example = "true"
         )
         boolean requiresCompletion,
-        
+
         @Schema(
                 description = "Lista de nombres de campos que faltan completar",
-                example = "[\"firstName\", \"lastName\", \"phone\"]"
+                example = "[\"documento_usuario\", \"genero_usuario\", \"telefono_usuario\"]"
         )
         List<String> missingFields
 ) {
