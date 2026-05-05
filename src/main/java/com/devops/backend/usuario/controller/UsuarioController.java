@@ -98,7 +98,6 @@ public class UsuarioController {
 
                 Authentication aut = SecurityContextHolder.getContext().getAuthentication();
                 Long idUsuario = Long.parseLong(aut.getName());
-                System.out.println("Id del usuario autenticado: " + idUsuario);
                 return ResponseEntity.ok(uService.findByIdUser(idUsuario));
         }
 
@@ -129,8 +128,6 @@ public class UsuarioController {
 
                 Authentication aut = SecurityContextHolder.getContext().getAuthentication();
                 Long idUsuario = Long.parseLong(aut.getName());
-                System.out.println("Id del usuario autenticado: " + idUsuario);
-
                 return ResponseEntity.ok(uService.updateUser(idUsuario, request));
         }
 
