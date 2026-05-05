@@ -1,4 +1,4 @@
-package com.devops.backend.rol.entity.dto;
+package com.devops.backend.rol.dto;
 
 import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
 import com.devops.backend.rol.enums.Estado;

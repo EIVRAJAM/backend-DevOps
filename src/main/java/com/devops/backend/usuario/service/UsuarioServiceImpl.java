@@ -1,10 +1,9 @@
 package com.devops.backend.usuario.service;
 
-import com.devops.backend.acceso.repository.AccesoRepository;
-import com.devops.backend.auth.dto.SignUpRequest;
 import com.devops.backend.exception.ApiValidationError;
 import com.devops.backend.exception.BadRequestException;
 import com.devops.backend.exception.ConflictException;
+import com.devops.backend.exception.ResourceNotFoundException;
 import com.devops.backend.rol.entity.Rol;
 import com.devops.backend.rol.repository.RolRepository;
 import com.devops.backend.usuario.dto.*;
@@ -15,14 +14,10 @@ import com.devops.backend.usuario.specification.UsuarioSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.StreamSupport;
 
 
 @Service
@@ -30,46 +25,30 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final RolRepository rolRepository;
-    private final AccesoRepository accesoRepository;
     private final UsuarioMapper usuarioMapper;
-    private static final String DEFAULT_ROLE = "ROLE_USER";
-
 
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository,
-                              RolRepository rolRepository, AccesoRepository accesoRepository, UsuarioMapper usuarioMapper) {
+                              RolRepository rolRepository, UsuarioMapper usuarioMapper) {
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRepository;
-        this.accesoRepository = accesoRepository;
         this.usuarioMapper = usuarioMapper;
     }
 
     @Override
-    public SignUpResponseUsuario saveUser(SignUpRequest signupRequest) {
+    public SignUpResponseUsuario saveUser(SignUpUserRequest signupRequest) {
 
-        Long idRol = obtenerRolPorDefecto();
-        validaciones(signupRequest);
-        Usuario usuario = save(usuarioMapper.toDTO(signupRequest,idRol));
+        Long idRol = validacionRol(signupRequest.nombreRol());
+        Usuario usuario = save(usuarioMapper.toDTOUser(signupRequest,idRol));
 
         return  usuarioMapper.toResponse(usuario);
     }
 
-    private void validaciones(SignUpRequest signupRequest) {
-        List<ApiValidationError> errors = new ArrayList<>();
-        if (accesoRepository.existsByUsername(signupRequest.username())) {
-            errors.add(new ApiValidationError("username", "El username ya está en uso"));
-        }
-        if (accesoRepository.existsByCorreoAcceso(signupRequest.correoAcceso())) {
-            errors.add(new ApiValidationError("correoAcceso", "El correo ya está registrado"));
-        }
-        if (!errors.isEmpty()) {
-            throw new ConflictException("Campos duplicados en el registro", errors);
-        }
-    }
 
-    private Long obtenerRolPorDefecto() {
-        return rolRepository.findByNombreRol(DEFAULT_ROLE)
+
+    private Long validacionRol(String rol) {
+        return rolRepository.findByNombreRol(rol)
                 .orElseThrow(() -> new BadRequestException(
-                        "El rol por defecto " + DEFAULT_ROLE + " no está disponible"))
+                        "El rol  " + rol + " no está disponible"))
                 .getIdRol();
     }
 
@@ -86,26 +65,51 @@ public class UsuarioServiceImpl implements UsuarioService {
 
 
     @Override
-    public UserListResponse findById(Long id) {
+    public UserResponseAdmin findById(Long id) {
         return usuarioRepository.findByIdUsuario(id)
-                .map(usuarioMapper::toListResponse)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404),"Usuario con ID " + id + " no encontrado"));
+                .map(usuarioMapper::toUserResponseAdmin)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario con ID " + id + " no encontrado"));
     }
 
     @Override
-    public UserListResponse findByDocumento(String documento) {
+    public UserResponseAdmin findByDocumento(String documento) {
         return usuarioRepository.findByDocumento(documento)
-                .map(usuarioMapper::toListResponse)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404),"Usuario con documento " + documento + " no encontrado"));
+                .map(usuarioMapper::toUserResponseAdmin)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario con documento " + documento + " no encontrado"));
     }
 
     @Override
-    public List<UserListResponse> getAllUsers() {
-
-        return StreamSupport.stream(usuarioRepository.findAll().spliterator(),false).
-                //    Nota: Aclarar con el equipo si lo dejamos la lista modificable o sin modifical .collect(Collectors.toList()
-                map(usuarioMapper::toListResponse).toList();
+    public UserListResponse findByIdUser(Long idUsuario) {
+        return usuarioRepository.findByIdUsuario(idUsuario).map(usuarioMapper::toListResponse)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario con ID " + idUsuario + " no encontrado"));
     }
+
+    @Override
+    public CompleteStatusResponse getCompleteStatus(Long userId) {
+
+        Usuario usuario = findUser(userId);
+
+        List<String> missingFields = new ArrayList<>();
+
+        // Verificamos si el documento es  OAuth?
+        if (usuario.getDocumento() != null && usuario.getDocumento().startsWith("OAUTH_")) {
+            missingFields.add("documento_usuario");
+        }
+        if (usuario.getGenero() == null) {
+            missingFields.add("genero_usuario");
+        }
+
+        if (usuario.getFechaNacimiento() == null) {
+            missingFields.add("fecha_nacimiento_usuario");
+        }
+
+        if (usuario.getTelefono() == null) {
+            missingFields.add("telefono_usuario");
+        }
+
+        return new CompleteStatusResponse(!missingFields.isEmpty(), missingFields);
+    }
+
 
     @Override
     public Page<UserListResponse> getAllUsers(UsuarioFilterRequest f) {
@@ -126,27 +130,17 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public UserListResponse updateUser(Long id, UpdateUsuarioRequest request) {
 
-        Usuario usuario = usuarioRepository.findByIdUsuario(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatusCode.valueOf(404), "Usuario con ID " + id + " no encontrado"));
+        Usuario usuario = findUser(id);
 
         List<ApiValidationError> errors = new ArrayList<>();
 
-        //Buscame si otro tiene el documento, excluyendo al usuario a actualizar
         if (usuarioRepository.existsByDocumentoAndIdUsuarioNot(request.documento(), id)) {
             errors.add(new ApiValidationError("documento", "El documento ya está registrado por otro usuario"));
         }
 
-        //Buscame si otro tiene el telefono , excluyendo al usuario a actualizar
-        if (usuarioRepository.existsByDocumentoAndIdUsuarioNot(request.telefono(),id)){
+        if (usuarioRepository.existsByTelefonoAndIdUsuarioNot(request.telefono(),id)){
             errors.add(new ApiValidationError("telefono", "El telefono ya está registrado por otro usuario"));
         }
-
-        Rol rol = rolRepository.findById(request.idRol())
-                .orElseGet(() -> {
-                    errors.add(new ApiValidationError("idRol", "El rol con ID " + request.idRol() + " no existe"));
-                    return null;
-       });
 
 
         if (!errors.isEmpty()) {
@@ -154,35 +148,72 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
 
         // 4. Aplicar cambios y persistir
-        usuarioMapper.applyUpdate(usuario, request, rol);
+        usuarioMapper.applyUpdate(usuario, request);
         Usuario updated = usuarioRepository.save(usuario);
 
         return usuarioMapper.toListResponse(updated);
     }
 
     @Override
-    public UserListResponse activar(Long id) {
+    @Transactional
+    public UserUpdateAdminResponse updateUserAdmin(Long id, UserUpdateAdminDto request) {
+
+        Usuario usuario = findUser(id);
+
+        List<ApiValidationError> errors = new ArrayList<>();
+
+        if (usuarioRepository.existsByDocumentoAndIdUsuarioNot(request.documento(), id)) {
+            errors.add(new ApiValidationError("documento", "El documento ya está registrado por otro usuario"));
+        }
+
+        if (request.telefono() != null && usuarioRepository.existsByTelefonoAndIdUsuarioNot(request.telefono(), id)) {
+            errors.add(new ApiValidationError("telefono", "El teléfono ya está registrado por otro usuario"));
+        }
+
+        Rol rol = rolRepository.findById(request.idRol())
+                .orElseGet(() -> {
+                    errors.add(new ApiValidationError("idRol", "El rol con ID " + request.idRol() + " no existe"));
+                    return null;
+        });
+
+
+
+        if (!errors.isEmpty()) {
+            throw new ConflictException("Campos inválidos en la actualización", errors);
+        }
+
+        usuarioMapper.applyUpdateAdmin(usuario, request, rol);
+        Usuario updated = usuarioRepository.save(usuario);
+
+        return usuarioMapper.toUpdateAdminResponse(updated);
+    }
+
+    private boolean isEstadoValido(String estado) {
+        return estado != null && (estado.equals("ACTIVO") || estado.equals("INACTIVO") || estado.equals("BLOQUEADO"));
+    }
+
+    @Override
+    public UserResponseAdmin activar(Long id) {
         return updateStatus(id,"ACTIVO");
     }
 
     @Override
-    public UserListResponse desactivar(Long id) {
+    public UserResponseAdmin desactivar(Long id) {
         return updateStatus(id,"INACTIVO");
     }
     @Override
-    public UserListResponse bloquear(Long id) {
+    public UserResponseAdmin bloquear(Long id) {
         return updateStatus(id,"BLOQUEADO");
     }
 
-    private UserListResponse updateStatus(Long id, String status){
 
-        Usuario usuario = usuarioRepository.findByIdUsuario(id).
-                orElseThrow(() -> new ResponseStatusException(
-                        HttpStatusCode.valueOf(404), "Usuario con ID " + id + " no encontrado"));
+    private UserResponseAdmin updateStatus(Long id, String status){
+
+        Usuario usuario =findUser(id);
 
         usuario.setEstado(status);
 
-        return usuarioMapper.toListResponse(usuarioRepository.save(usuario));
+        return usuarioMapper.toUserResponseAdmin(usuarioRepository.save(usuario));
     }
 
     private void validacionesDto(UsuarioDTO dto) {
@@ -205,5 +236,12 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new ConflictException("Campos duplicados o inválidos en el registro", errors);
         }
 
+    }
+
+
+    private Usuario findUser(Long id){
+        return usuarioRepository.findByIdUsuario(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Usuario con ID " + id + " no encontrado"));
     }
 }

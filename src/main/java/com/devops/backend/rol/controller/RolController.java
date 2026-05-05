@@ -1,11 +1,11 @@
 package com.devops.backend.rol.controller;
 
 import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
-import com.devops.backend.rol.entity.dto.AsignarFuncionalidadesRequest;
-import com.devops.backend.rol.entity.dto.RolFilterRequest;
-import com.devops.backend.rol.entity.dto.RolRequest;
-import com.devops.backend.rol.entity.dto.RolResponse;
-import com.devops.backend.rol.entity.dto.RolUpdateDto;
+import com.devops.backend.rol.dto.AsignarFuncionalidadesRequest;
+import com.devops.backend.rol.dto.RolFilterRequest;
+import com.devops.backend.rol.dto.RolRequest;
+import com.devops.backend.rol.dto.RolResponse;
+import com.devops.backend.rol.dto.RolUpdateDto;
 import com.devops.backend.rol.service.RolService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

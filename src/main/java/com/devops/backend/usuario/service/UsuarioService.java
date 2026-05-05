@@ -1,22 +1,23 @@
 package com.devops.backend.usuario.service;
 
-import com.devops.backend.auth.dto.SignUpRequest;
 import com.devops.backend.usuario.dto.*;
 import com.devops.backend.usuario.entity.Usuario;
 import org.springframework.data.domain.Page;
 
-import java.util.List;
 
 public interface UsuarioService {
 
-    SignUpResponseUsuario saveUser(SignUpRequest signupRequest);
+    SignUpResponseUsuario saveUser(SignUpUserRequest signupRequest);
     Usuario save(UsuarioDTO usuarioDTO);
-    UserListResponse findById(Long id);
-    UserListResponse findByDocumento(String documento);
-    List<UserListResponse> getAllUsers();
+    UserResponseAdmin findById(Long id);
+    UserResponseAdmin findByDocumento(String documento);
     Page<UserListResponse> getAllUsers(UsuarioFilterRequest dtoFilter);
     UserListResponse updateUser(Long id, UpdateUsuarioRequest request);
-    UserListResponse activar(Long id);
-    UserListResponse desactivar(Long id);
-    UserListResponse bloquear(Long id);
+    UserUpdateAdminResponse updateUserAdmin(Long id, UserUpdateAdminDto request);
+    UserResponseAdmin activar(Long id);
+    UserResponseAdmin desactivar(Long id);
+    UserResponseAdmin bloquear(Long id);
+    UserListResponse findByIdUser(Long idUsuario);
+    CompleteStatusResponse getCompleteStatus(Long userId);
+
 }

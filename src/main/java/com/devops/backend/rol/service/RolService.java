@@ -1,11 +1,10 @@
 package com.devops.backend.rol.service;
 
 import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
-import com.devops.backend.rol.entity.dto.*;
+import com.devops.backend.rol.dto.*;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
-import java.util.Set;
 
 public interface RolService {
 

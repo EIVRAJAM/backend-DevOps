@@ -20,7 +20,7 @@ public record UpdateUsuarioRequest(
 
                 @NotBlank(message = "Genero no puede estar vacío") @Pattern(regexp = "masculino|femenino", message = "El género debe ser masculino o femenino") @Schema(description = "Género (masculino o femenino)", example = "masculino") String genero,
 
-                @NotNull(message = "Fecha de nacimiento no puede estar vacío") @Schema(description = "Fecha de nacimiento (ISO-8601)", example = "1990-05-15") Date fechaNacimiento,
+                @NotNull(message = "Fecha de nacimiento no puede estar vacío") @Schema(description = "Fecha de nacimiento (ISO-8601)", example = "1990-05-15") Date fechaNacimiento
 
-                @NotNull(message = "El rol no puede estar vacío") @Schema(description = "ID del rol a asignar al usuario", example = "2") Long idRol) {
+) {
 }

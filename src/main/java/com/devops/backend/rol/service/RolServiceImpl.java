@@ -3,7 +3,7 @@ package com.devops.backend.rol.service;
 import com.devops.backend.funcionalidad.dto.FuncionalidadResponse;
 import com.devops.backend.funcionalidad.entity.Funcionalidad;
 import com.devops.backend.funcionalidad.repository.FuncionalidadRepository;
-import com.devops.backend.rol.entity.dto.*;
+import com.devops.backend.rol.dto.*;
 import com.devops.backend.rol.enums.Estado;
 import com.devops.backend.exception.ApiValidationError;
 import com.devops.backend.exception.ConflictException;
