@@ -1,6 +1,5 @@
 package com.devops.backend.usuario.service;
 
-import com.devops.backend.acceso.repository.AccesoRepository;
 import com.devops.backend.exception.ApiValidationError;
 import com.devops.backend.exception.BadRequestException;
 import com.devops.backend.exception.ConflictException;
@@ -15,14 +14,10 @@ import com.devops.backend.usuario.specification.UsuarioSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.StreamSupport;
 
 
 @Service
