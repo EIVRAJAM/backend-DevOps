@@ -23,7 +23,7 @@ import java.util.List;
 
 @Tag(name = "Role Management", description = "Operaciones relacionadas con roles y sus funcionalidades")
 @RestController
-@RequestMapping("/v1/roles")
+@RequestMapping("/api/v1/roles")
 @SecurityRequirement(name = "bearerAuth")
 public class RolController {
 
