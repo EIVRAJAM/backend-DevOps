@@ -32,24 +32,28 @@ jobs:
       - name: Determinar politica segun rama
         id: policy
         shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          GIT_REF: ${{ github.ref }}
         run: |
           STRICT="false"
           BASELINE=""
 
           # PR contra main -> estricto
-          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.base_ref }}" = "main" ]; then
+          if [ "$EVENT_NAME" = "pull_request" ] && [ "$BASE_REF" = "main" ]; then
             STRICT="true"
           fi
 
           # Push a main / release/* / hotfix/* -> estricto
-          if [ "${{ github.ref }}" = "refs/heads/main" ] \
-            || [[ "${{ github.ref }}" == refs/heads/release/* ]] \
-            || [[ "${{ github.ref }}" == refs/heads/hotfix/* ]]; then
+          if [ "$GIT_REF" = "refs/heads/main" ] \
+            || [[ "$GIT_REF" == refs/heads/release/* ]] \
+            || [[ "$GIT_REF" == refs/heads/hotfix/* ]]; then
             STRICT="true"
           fi
 
           # PR a develop -> baseline scan, reporta solo findings nuevos
-          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.base_ref }}" = "develop" ]; then
+          if [ "$EVENT_NAME" = "pull_request" ] && [ "$BASE_REF" = "develop" ]; then
             BASELINE="--baseline-commit=origin/develop"
           fi
 
@@ -59,9 +63,12 @@ jobs:
 
       - name: Ejecutar Semgrep
         shell: bash
+        env:
+          STRICT_OUTPUT: ${{ steps.policy.outputs.strict }}
+          BASELINE_OUTPUT: ${{ steps.policy.outputs.baseline }}
         run: |
           STRICT_FLAGS=""
-          if [ "${{ steps.policy.outputs.strict }}" = "true" ]; then
+          if [ "$STRICT_OUTPUT" = "true" ]; then
             STRICT_FLAGS="--error --severity=ERROR"
           fi
 
@@ -70,7 +77,7 @@ jobs:
             --config=p/java \
             --config=p/secrets \
             --config=.semgrep/ \
-            ${{ steps.policy.outputs.baseline }} \
+            $BASELINE_OUTPUT \
             $STRICT_FLAGS \
             --sarif --output=results.sarif \
             ./src 
