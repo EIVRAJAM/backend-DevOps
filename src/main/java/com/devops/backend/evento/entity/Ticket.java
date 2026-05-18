@@ -65,6 +65,16 @@ public class Ticket {
     @Column(name = "fecha_compra", nullable = false)
     private LocalDateTime fechaCompra;
 
+    @Column(name = "checkin_realizado", nullable = false)
+    private Boolean checkinRealizado = false;
+
+    @Column(name = "fecha_checkin")
+    private LocalDateTime fechaCheckin;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usuario_checkin")
+    private Usuario usuarioCheckin;
+
     @Column(name = "creado_en", nullable = false, updatable = false)
     private LocalDateTime creadoEn;
 
