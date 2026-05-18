@@ -67,6 +67,25 @@ public class EventoExceptionHandler {
     }
 
     /**
+     * Maneja intento de inscripción a evento no disponible (409 Conflict)
+     * Ejemplo: evento en BORRADOR, CERRADO o CANCELADO
+     */
+    @ExceptionHandler(EventoNoInscribibleException.class)
+    public ResponseEntity<ApiError> handleEventoNoInscribible(EventoNoInscribibleException ex, WebRequest request) {
+        ApiError apiError = buildError(HttpStatus.CONFLICT, ex.getMessage(), request);
+        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
+    }
+
+    /**
+     * Maneja falta de cupos disponibles en el evento (409 Conflict)
+     */
+    @ExceptionHandler(CuposAgotadosException.class)
+    public ResponseEntity<ApiError> handleCuposAgotados(CuposAgotadosException ex, WebRequest request) {
+        ApiError apiError = buildError(HttpStatus.CONFLICT, ex.getMessage(), request);
+        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
+    }
+
+    /**
      * Construye un objeto ApiError estándar
      */
     private ApiError buildError(HttpStatus status, String message, WebRequest request) {

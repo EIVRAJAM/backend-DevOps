@@ -30,6 +30,26 @@ public interface EventoService {
             LocalDate fechaFin
     );
 
+    Page<EventoResponseDTO> listarEventosDisponibles(
+            Pageable pageable,
+            String nombre,
+            String lugar,
+            LocalDate fechaInicio,
+            LocalDate fechaFin,
+            Boolean esDePago,
+            Boolean conCupos
+    );
+
+    Page<EventoResponseDTO> listarMisEventos(
+            Pageable pageable,
+            EstadoEvento estadoEvento,
+            Estado estado,
+            String nombreEvento,
+            String lugarEvento,
+            LocalDate fechaInicio,
+            LocalDate fechaFin
+    );
+
     EventoResponseDTO actualizarEvento(Long idEvento, UpdateEventoDTO updateEventoDTO);
 
     Page<EventoResponseDTO> listarEventosPorUsuario(Long idUsuario, Pageable pageable);
