@@ -47,6 +47,7 @@ public class EventoServiceImpl implements EventoService {
         private final EventoMapper eventoMapper;
         private final HistorialEventoMapper historialEventoMapper;
         private final EventoSpecification eventoSpecification;
+        private final EventoAutorizacionService autorizacionService;
 
         @Override
         public EventoResponseDTO crearEvento(CreateEventoDTO createEventoDTO) {
@@ -84,8 +85,17 @@ public class EventoServiceImpl implements EventoService {
                         return eventoMapper.toDTO(evento);
                 }
 
+                // STAFF: Si el usuario está asignado como staff activo, puede ver el evento
+                try {
+                        if (autorizacionService.esStaffActivo(idEvento)) {
+                                return eventoMapper.toDTO(evento);
+                        }
+                } catch (Exception e) {
+                        // Ignorar y caer en el denegado
+                }
+
                 // ROLE_USER: no tiene acceso a este endpoint de gestión.
-                // Debe usar GET /api/v1/eventos/disponibles con filtros.
+                // Debe usar GET /api/v1/eventos/disponibles/{id}
                 throw new AccessDeniedException(
                                 "Acceso denegado. Usa GET /api/v1/eventos/disponibles para explorar eventos.");
         }
@@ -193,6 +203,16 @@ public class EventoServiceImpl implements EventoService {
         }
 
         @Override
+        @Transactional(readOnly = true)
+        public EventoResponseDTO obtenerEventoDisponiblePorId(Long idEvento) {
+                Evento evento = obtenerEvento(idEvento);
+                if (evento.getEstadoEvento() != EstadoEvento.PUBLICADO || evento.getEstado() != Estado.ACTIVO) {
+                        throw new AccessDeniedException("El evento no está disponible.");
+                }
+                return eventoMapper.toDTO(evento);
+        }
+
+        @Override
         public EventoResponseDTO actualizarEvento(
                         Long idEvento,
                         UpdateEventoDTO updateEventoDTO) {
@@ -226,7 +246,7 @@ public class EventoServiceImpl implements EventoService {
                 if (!tieneRolAdmin()) {
                         throw new AccessDeniedException(
                                         "Solo los administradores pueden listar eventos de otro usuario. "
-                                        + "Usa GET /api/v1/eventos/mis-eventos para ver tus propios eventos.");
+                                                        + "Usa GET /api/v1/eventos/mis-eventos para ver tus propios eventos.");
                 }
 
                 usuarioRepository.findById(idUsuario)
@@ -524,7 +544,7 @@ public class EventoServiceImpl implements EventoService {
                 if (nueva < ocupados) {
                         throw new ConflictException(
                                         "No se puede reducir la capacidad máxima a " + nueva
-                                        + " porque ya hay " + ocupados + " cupos ocupados.");
+                                                        + " porque ya hay " + ocupados + " cupos ocupados.");
                 }
 
                 // Ajustar capacidadDisponible proporcionalmente

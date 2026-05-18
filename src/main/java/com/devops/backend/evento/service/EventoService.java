@@ -15,54 +15,53 @@ import java.util.List;
 
 public interface EventoService {
 
-    EventoResponseDTO crearEvento(CreateEventoDTO createEventoDTO);
+        EventoResponseDTO crearEvento(CreateEventoDTO createEventoDTO);
 
-    EventoResponseDTO obtenerEventoPorId(Long idEvento);
+        EventoResponseDTO obtenerEventoPorId(Long idEvento);
 
-    Page<EventoResponseDTO> listarEventos(
-            Pageable pageable,
-            EstadoEvento estadoEvento,
-            Estado estado,
-            String nombreEvento,
-            String lugarEvento,
-            Long idUsuarioCreador,
-            LocalDate fechaInicio,
-            LocalDate fechaFin
-    );
+        Page<EventoResponseDTO> listarEventos(
+                        Pageable pageable,
+                        EstadoEvento estadoEvento,
+                        Estado estado,
+                        String nombreEvento,
+                        String lugarEvento,
+                        Long idUsuarioCreador,
+                        LocalDate fechaInicio,
+                        LocalDate fechaFin);
 
-    Page<EventoResponseDTO> listarEventosDisponibles(
-            Pageable pageable,
-            String nombre,
-            String lugar,
-            LocalDate fechaInicio,
-            LocalDate fechaFin,
-            Boolean esDePago,
-            Boolean conCupos
-    );
+        Page<EventoResponseDTO> listarEventosDisponibles(
+                        Pageable pageable,
+                        String nombre,
+                        String lugar,
+                        LocalDate fechaInicio,
+                        LocalDate fechaFin,
+                        Boolean esDePago,
+                        Boolean conCupos);
 
-    Page<EventoResponseDTO> listarMisEventos(
-            Pageable pageable,
-            EstadoEvento estadoEvento,
-            Estado estado,
-            String nombreEvento,
-            String lugarEvento,
-            LocalDate fechaInicio,
-            LocalDate fechaFin
-    );
+        EventoResponseDTO obtenerEventoDisponiblePorId(Long idEvento);
 
-    EventoResponseDTO actualizarEvento(Long idEvento, UpdateEventoDTO updateEventoDTO);
+        Page<EventoResponseDTO> listarMisEventos(
+                        Pageable pageable,
+                        EstadoEvento estadoEvento,
+                        Estado estado,
+                        String nombreEvento,
+                        String lugarEvento,
+                        LocalDate fechaInicio,
+                        LocalDate fechaFin);
 
-    Page<EventoResponseDTO> listarEventosPorUsuario(Long idUsuario, Pageable pageable);
+        EventoResponseDTO actualizarEvento(Long idEvento, UpdateEventoDTO updateEventoDTO);
 
-    List<HistorialEventoDTO> obtenerHistorialEvento(Long idEvento);
+        Page<EventoResponseDTO> listarEventosPorUsuario(Long idUsuario, Pageable pageable);
 
-    EventoResponseDTO publicarEvento(Long idEvento);
+        List<HistorialEventoDTO> obtenerHistorialEvento(Long idEvento);
 
-    EventoResponseDTO cancelarEvento(Long idEvento, ComentarioRequest comentarioRequest);
+        EventoResponseDTO publicarEvento(Long idEvento);
 
-    EventoResponseDTO cerrarEvento(Long idEvento);
+        EventoResponseDTO cancelarEvento(Long idEvento, ComentarioRequest comentarioRequest);
 
-    EventoResponseDTO activarEvento(Long idEvento);
+        EventoResponseDTO cerrarEvento(Long idEvento);
 
-    EventoResponseDTO desactivarEvento(Long idEvento, ComentarioRequest comentarioRequest);
+        EventoResponseDTO activarEvento(Long idEvento);
+
+        EventoResponseDTO desactivarEvento(Long idEvento, ComentarioRequest comentarioRequest);
 }

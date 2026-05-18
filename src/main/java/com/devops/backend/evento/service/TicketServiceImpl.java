@@ -43,6 +43,7 @@ public class TicketServiceImpl implements TicketService {
     private final EventoRepository eventoRepository;
     private final UsuarioRepository usuarioRepository;
     private final StripeService stripeService;
+    private final QrCodeService qrCodeService;
 
     // ─────────────────────────── INSCRIPCION ────────────────────────────────
 
@@ -286,6 +287,26 @@ public class TicketServiceImpl implements TicketService {
         return usuarioRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Usuario con ID " + userId + " no encontrado"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public byte[] generarQrTicket(Long ticketId, Long userId) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket no encontrado"));
+
+        // Solo el dueño del ticket o un admin pueden descargar el QR
+        boolean esDuenio = ticket.getUsuario().getIdUsuario().equals(userId);
+        if (!esDuenio && !tieneRolAdmin()) {
+            throw new AccessDeniedException("No tienes permisos para ver el QR de este ticket");
+        }
+
+        String codigoQr = ticket.getCodigoQr();
+        if (codigoQr == null || codigoQr.isBlank()) {
+            throw new ResourceNotFoundException("Este ticket no tiene un código QR asignado");
+        }
+
+        return qrCodeService.generarQrPng(codigoQr);
     }
 
     private boolean tieneRolAdmin() {
