@@ -24,4 +24,7 @@ public interface TicketService {
 
     /** Llamado por el webhook de Stripe para decrementar el cupo al confirmar pago */
     void confirmarCupoTrasExitoso(Long eventoId);
+
+    /** Genera la imagen PNG del QR del ticket (solo dueño o admin) */
+    byte[] generarQrTicket(Long ticketId, Long userId);
 }

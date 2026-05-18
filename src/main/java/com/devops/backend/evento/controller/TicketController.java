@@ -116,4 +116,33 @@ public class TicketController {
         Long userId = Long.parseLong(authentication.getName());
         return ResponseEntity.ok(ticketService.cancelarTicket(id, userId));
     }
+
+    // ─────────────────────────── QR DEL TICKET ──────────────────────────────
+
+    @Operation(
+            summary = "Descargar QR del ticket",
+            description = "Devuelve la imagen PNG del código QR del ticket. "
+                    + "Solo el propietario del ticket o un administrador pueden descargarlo. "
+                    + "El QR codifica únicamente el UUID del ticket, que es el valor que el check-in espera recibir."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Imagen PNG del QR devuelta exitosamente"),
+            @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
+            @ApiResponse(responseCode = "403", description = "No tienes permisos para ver el QR de este ticket"),
+            @ApiResponse(responseCode = "404", description = "Ticket no encontrado o sin código QR")
+    })
+    @GetMapping(value = "/{id}/qr", produces = "image/png")
+    public ResponseEntity<byte[]> obtenerQrTicket(
+            @Parameter(description = "ID del ticket", required = true, example = "10")
+            @PathVariable Long id,
+            Authentication authentication) {
+
+        Long userId = Long.parseLong(authentication.getName());
+        byte[] qrBytes = ticketService.generarQrTicket(id, userId);
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "inline; filename=\"ticket-" + id + "-qr.png\"")
+                .body(qrBytes);
+    }
 }
+
