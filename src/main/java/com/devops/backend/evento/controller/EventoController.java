@@ -86,10 +86,21 @@ public class EventoController {
                 return ResponseEntity.ok(eventos);
         }
 
-        @Operation(
-                        summary = "Mis eventos (organizador)",
-                        description = "Devuelve los eventos creados por el usuario autenticado, con paginación y filtros opcionales. "
-                                        + "Disponible para ROLE_ORGANIZER y ROLE_ADMIN. El filtro siempre se fuerza al usuario autenticado.")
+        @Operation(summary = "Obtener detalle de un evento disponible", description = "Devuelve los detalles de un evento específico solo si se encuentra PUBLICADO y ACTIVO.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Evento obtenido exitosamente"),
+                        @ApiResponse(responseCode = "403", description = "El evento no está disponible (puede estar en borrador o cancelado)"),
+                        @ApiResponse(responseCode = "404", description = "Evento no encontrado")
+        })
+        @GetMapping("/disponibles/{id}")
+        public ResponseEntity<EventoResponseDTO> obtenerEventoDisponiblePorId(
+                        @Parameter(description = "ID único del evento", required = true, example = "1") @PathVariable Long id) {
+                EventoResponseDTO evento = eventoService.obtenerEventoDisponiblePorId(id);
+                return ResponseEntity.ok(evento);
+        }
+
+        @Operation(summary = "Mis eventos (organizador)", description = "Devuelve los eventos creados por el usuario autenticado, con paginación y filtros opcionales. "
+                        + "Disponible para ROLE_ORGANIZER y ROLE_ADMIN. El filtro siempre se fuerza al usuario autenticado.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Lista de eventos propios obtenida exitosamente"),
                         @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado")
@@ -111,11 +122,10 @@ public class EventoController {
                 return ResponseEntity.ok(eventos);
         }
 
-        @Operation(summary = "Listar eventos con paginación y filtros (solo ADMIN)",
-                        description = "Endpoint exclusivo para administradores: lista todos los eventos del sistema con cualquier filtro. "
-                                        + "ORGANIZER debe usar GET /api/v1/eventos/mis-eventos. "
-                                        + "ROLE_USER debe usar GET /api/v1/eventos/disponibles. "
-                                        + "Cualquier otro rol recibe 403.")
+        @Operation(summary = "Listar eventos con paginación y filtros (solo ADMIN)", description = "Endpoint exclusivo para administradores: lista todos los eventos del sistema con cualquier filtro. "
+                        + "ORGANIZER debe usar GET /api/v1/eventos/mis-eventos. "
+                        + "ROLE_USER debe usar GET /api/v1/eventos/disponibles. "
+                        + "Cualquier otro rol recibe 403.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Lista de eventos obtenida exitosamente"),
                         @ApiResponse(responseCode = "400", description = "Parámetros de paginación inválidos"),
@@ -149,10 +159,9 @@ public class EventoController {
                 return ResponseEntity.ok(eventos);
         }
 
-        @Operation(summary = "Obtener evento por ID (ADMIN y ORGANIZER)",
-                        description = "ADMIN: puede ver cualquier evento. "
-                                        + "ORGANIZER: solo puede ver el detalle de sus propios eventos (403 si el evento es de otro). "
-                                        + "ROLE_USER: 403 — debe usar GET /api/v1/eventos/disponibles con filtros para explorar eventos.")
+        @Operation(summary = "Obtener evento por ID (ADMIN y ORGANIZER)", description = "ADMIN: puede ver cualquier evento. "
+                        + "ORGANIZER: solo puede ver el detalle de sus propios eventos (403 si el evento es de otro). "
+                        + "ROLE_USER: 403 — debe usar GET /api/v1/eventos/disponibles con filtros para explorar eventos.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Evento obtenido exitosamente"),
                         @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
@@ -295,10 +304,8 @@ public class EventoController {
                 return ResponseEntity.ok(eventoActualizado);
         }
 
-        @Operation(
-                        summary = "Listar tickets de un evento",
-                        description = "Devuelve todos los tickets registrados para un evento específico. "
-                                        + "Solo el creador del evento o un administrador pueden consultar esta información.")
+        @Operation(summary = "Listar tickets de un evento", description = "Devuelve todos los tickets registrados para un evento específico. "
+                        + "Solo el creador del evento o un administrador pueden consultar esta información.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Lista de tickets obtenida exitosamente"),
                         @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
