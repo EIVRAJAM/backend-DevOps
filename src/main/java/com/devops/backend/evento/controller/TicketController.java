@@ -1,34 +1,119 @@
 package com.devops.backend.evento.controller;
 
 import com.devops.backend.evento.dto.InscripcionTicketResponseDTO;
+import com.devops.backend.evento.dto.TicketResponseDTO;
 import com.devops.backend.evento.service.TicketService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
+@Tag(name = "Tickets", description = "Operaciones de inscripción y gestión de tickets de eventos")
 @RestController
 @RequestMapping("/api/v1/tickets")
+@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class TicketController {
 
     private final TicketService ticketService;
 
-    
+    // ─────────────────────────── INSCRIPCION ────────────────────────────────
+
+    @Operation(
+            summary = "Inscribirse a un evento",
+            description = "Inscribe al usuario autenticado al evento indicado. "
+                    + "Para eventos gratuitos, descuenta cupo y emite ticket GRATIS de inmediato. "
+                    + "Para eventos de pago, crea un ticket PENDIENTE y devuelve el clientSecret de Stripe. "
+                    + "Solo se permite inscribirse a eventos PUBLICADO + ACTIVO con cupos disponibles."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Inscripción realizada; ticket emitido"),
+            @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
+            @ApiResponse(responseCode = "404", description = "Evento no encontrado"),
+            @ApiResponse(responseCode = "409", description = "Evento no disponible, cupos agotados o inscripción duplicada")
+    })
     @PostMapping("/evento/{eventoId}")
     public ResponseEntity<InscripcionTicketResponseDTO> inscribirseAEvento(
+            @Parameter(description = "ID del evento al que inscribirse", required = true, example = "5")
             @PathVariable Long eventoId,
             Authentication authentication) {
 
-        // Extrae el userId del claim sub del JWT (auth.getName() devuelve el sub)
         Long userId = Long.parseLong(authentication.getName());
-
         InscripcionTicketResponseDTO response = ticketService.inscribirseAEvento(eventoId, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // ─────────────────────────── MIS TICKETS ────────────────────────────────
+
+    @Operation(
+            summary = "Listar mis tickets",
+            description = "Devuelve todos los tickets (inscripciones) del usuario autenticado, "
+                    + "ordenados por fecha de compra descendente."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de tickets obtenida exitosamente"),
+            @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado")
+    })
+    @GetMapping("/mis-tickets")
+    public ResponseEntity<List<TicketResponseDTO>> obtenerMisTickets(Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        return ResponseEntity.ok(ticketService.obtenerMisTickets(userId));
+    }
+
+    // ─────────────────────────── TICKET POR ID ──────────────────────────────
+
+    @Operation(
+            summary = "Obtener ticket por ID",
+            description = "Devuelve el detalle de un ticket específico. "
+                    + "Solo el propietario del ticket o un administrador pueden consultarlo."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Ticket encontrado"),
+            @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
+            @ApiResponse(responseCode = "403", description = "Sin permisos para ver este ticket"),
+            @ApiResponse(responseCode = "404", description = "Ticket no encontrado")
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<TicketResponseDTO> obtenerTicketPorId(
+            @Parameter(description = "ID del ticket", required = true, example = "1")
+            @PathVariable Long id,
+            Authentication authentication) {
+
+        Long userId = Long.parseLong(authentication.getName());
+        return ResponseEntity.ok(ticketService.obtenerTicketPorId(id, userId));
+    }
+
+    // ─────────────────────────── CANCELAR TICKET ────────────────────────────
+
+    @Operation(
+            summary = "Cancelar un ticket",
+            description = "Cancela el ticket del usuario autenticado. "
+                    + "Si el ticket estaba activo (GRATIS o PAGADO), devuelve el cupo al evento. "
+                    + "No se puede cancelar un ticket ya cancelado o reembolsado."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Ticket cancelado exitosamente"),
+            @ApiResponse(responseCode = "400", description = "El ticket ya fue cancelado o reembolsado"),
+            @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
+            @ApiResponse(responseCode = "403", description = "Solo puedes cancelar tus propios tickets"),
+            @ApiResponse(responseCode = "404", description = "Ticket no encontrado")
+    })
+    @PostMapping("/{id}/cancelar")
+    public ResponseEntity<TicketResponseDTO> cancelarTicket(
+            @Parameter(description = "ID del ticket a cancelar", required = true, example = "1")
+            @PathVariable Long id,
+            Authentication authentication) {
+
+        Long userId = Long.parseLong(authentication.getName());
+        return ResponseEntity.ok(ticketService.cancelarTicket(id, userId));
     }
 }

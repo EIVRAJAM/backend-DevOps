@@ -3,6 +3,7 @@ package com.devops.backend.pago.service;
 import com.devops.backend.evento.entity.Ticket;
 import com.devops.backend.evento.enums.EstadoTicket;
 import com.devops.backend.evento.repository.TicketRepository;
+import com.devops.backend.evento.service.TicketService;
 import com.devops.backend.pago.entity.Pago;
 import com.devops.backend.pago.repository.PagoRepository;
 import com.stripe.model.Event;
@@ -21,6 +22,7 @@ public class PagoServiceImpl implements PagoService {
 
     private final PagoRepository pagoRepository;
     private final TicketRepository ticketRepository;
+    private final TicketService ticketService;
 
     @Override
     public void procesarPagoExitoso(Event event) {
@@ -39,6 +41,9 @@ public class PagoServiceImpl implements PagoService {
         ticket.setEstadoTicket(EstadoTicket.PAGADO);
         ticket.setMontoPagado(new BigDecimal(paymentIntent.getAmount()).divide(new BigDecimal("100")));
         ticketRepository.save(ticket);
+
+        // Decrementar cupo disponible del evento de forma atómica
+        ticketService.confirmarCupoTrasExitoso(ticket.getEvento().getIdEvento());
 
         // Guardar registro del Pago
         guardarPago(event, ticket, paymentIntent, "COBRO", "EXITOSO");
