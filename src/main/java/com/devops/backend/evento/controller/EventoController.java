@@ -4,10 +4,12 @@ import com.devops.backend.evento.dto.ComentarioRequest;
 import com.devops.backend.evento.dto.CreateEventoDTO;
 import com.devops.backend.evento.dto.EventoResponseDTO;
 import com.devops.backend.evento.dto.HistorialEventoDTO;
+import com.devops.backend.evento.dto.TicketResponseDTO;
 import com.devops.backend.evento.dto.UpdateEventoDTO;
 import com.devops.backend.evento.enums.Estado;
 import com.devops.backend.evento.enums.EstadoEvento;
 import com.devops.backend.evento.service.EventoService;
+import com.devops.backend.evento.service.TicketService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -35,6 +38,9 @@ public class EventoController {
         @Autowired
         private EventoService eventoService;
 
+        @Autowired
+        private TicketService ticketService;
+
         @Operation(summary = "Crear un nuevo evento", description = "Registra un nuevo evento en el sistema en estado BORRADOR. El usuario creador se obtiene automáticamente del contexto de seguridad. El evento no será visible para otros usuarios hasta que sea publicado.")
         @ApiResponses({
                         @ApiResponse(responseCode = "201", description = "Evento creado exitosamente en estado BORRADOR"),
@@ -48,11 +54,73 @@ public class EventoController {
                 return ResponseEntity.status(HttpStatus.CREATED).body(eventoCreado);
         }
 
-        @Operation(summary = "Listar eventos con paginación y filtros", description = "Obtiene una lista paginada de eventos. Soporta filtros por estado de evento (BORRADOR, PUBLICADO, CERRADO, CANCELADO), estado general (ACTIVO/INACTIVO), nombre, lugar, usuario creador y rango de fechas. Máximo 100 registros por página.")
+        @Operation(summary = "Listar eventos disponibles (vista usuario)", description = "Devuelve únicamente eventos en estado PUBLICADO + ACTIVO, ordenados por fecha ascendente. "
+                        + "Soporta filtros por nombre, lugar, rango de fechas, modalidad de pago y disponibilidad de cupos. "
+                        + "Requiere autenticación JWT.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Lista de eventos disponibles obtenida exitosamente"),
+                        @ApiResponse(responseCode = "400", description = "Parámetros de paginación inválidos"),
+                        @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado")
+        })
+        @GetMapping("/disponibles")
+        public ResponseEntity<Page<EventoResponseDTO>> listarEventosDisponibles(
+                        @Parameter(description = "Número de página (comienza en 0)", example = "0") @RequestParam(defaultValue = "0") int page,
+
+                        @Parameter(description = "Cantidad de registros por página (máximo 100)", example = "20") @RequestParam(defaultValue = "20") int size,
+
+                        @Parameter(description = "Filtro por nombre del evento (búsqueda parcial)", required = false) @RequestParam(required = false) String nombre,
+
+                        @Parameter(description = "Filtro por lugar del evento (búsqueda parcial)", required = false) @RequestParam(required = false) String lugar,
+
+                        @Parameter(description = "Fecha inicio del rango de búsqueda (ISO-8601)", example = "2026-04-01", required = false) @RequestParam(required = false) LocalDate fechaInicio,
+
+                        @Parameter(description = "Fecha fin del rango de búsqueda (ISO-8601)", example = "2026-12-31", required = false) @RequestParam(required = false) LocalDate fechaFin,
+
+                        @Parameter(description = "Filtrar solo eventos de pago (true) o gratuitos (false)", required = false) @RequestParam(required = false) Boolean esDePago,
+
+                        @Parameter(description = "Si es true, devuelve solo eventos con cupos disponibles", required = false) @RequestParam(required = false) Boolean conCupos) {
+
+                Pageable pageable = org.springframework.data.domain.PageRequest.of(page, Math.min(size, 100));
+                Page<EventoResponseDTO> eventos = eventoService.listarEventosDisponibles(
+                                pageable, nombre, lugar, fechaInicio, fechaFin, esDePago, conCupos);
+                return ResponseEntity.ok(eventos);
+        }
+
+        @Operation(
+                        summary = "Mis eventos (organizador)",
+                        description = "Devuelve los eventos creados por el usuario autenticado, con paginación y filtros opcionales. "
+                                        + "Disponible para ROLE_ORGANIZER y ROLE_ADMIN. El filtro siempre se fuerza al usuario autenticado.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Lista de eventos propios obtenida exitosamente"),
+                        @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado")
+        })
+        @GetMapping("/mis-eventos")
+        public ResponseEntity<Page<EventoResponseDTO>> listarMisEventos(
+                        @Parameter(description = "Número de página (comienza en 0)", example = "0") @RequestParam(defaultValue = "0") int page,
+                        @Parameter(description = "Cantidad de registros por página (máximo 100)", example = "20") @RequestParam(defaultValue = "20") int size,
+                        @Parameter(description = "Filtro opcional: estado del evento", required = false) @RequestParam(required = false) EstadoEvento estadoEvento,
+                        @Parameter(description = "Filtro opcional: estado general (ACTIVO/INACTIVO)", required = false) @RequestParam(required = false) Estado estado,
+                        @Parameter(description = "Filtro opcional: nombre del evento (búsqueda parcial)", required = false) @RequestParam(required = false) String nombre,
+                        @Parameter(description = "Filtro opcional: lugar del evento (búsqueda parcial)", required = false) @RequestParam(required = false) String lugar,
+                        @Parameter(description = "Filtro opcional: fecha inicio del rango", example = "2026-04-01", required = false) @RequestParam(required = false) LocalDate fechaInicio,
+                        @Parameter(description = "Filtro opcional: fecha fin del rango", example = "2026-12-31", required = false) @RequestParam(required = false) LocalDate fechaFin) {
+
+                Pageable pageable = org.springframework.data.domain.PageRequest.of(page, Math.min(size, 100));
+                Page<EventoResponseDTO> eventos = eventoService.listarMisEventos(
+                                pageable, estadoEvento, estado, nombre, lugar, fechaInicio, fechaFin);
+                return ResponseEntity.ok(eventos);
+        }
+
+        @Operation(summary = "Listar eventos con paginación y filtros (solo ADMIN)",
+                        description = "Endpoint exclusivo para administradores: lista todos los eventos del sistema con cualquier filtro. "
+                                        + "ORGANIZER debe usar GET /api/v1/eventos/mis-eventos. "
+                                        + "ROLE_USER debe usar GET /api/v1/eventos/disponibles. "
+                                        + "Cualquier otro rol recibe 403.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Lista de eventos obtenida exitosamente"),
-                        @ApiResponse(responseCode = "400", description = "Parámetros de paginación inválidos (page < 0 o size > 100)"),
-                        @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado")
+                        @ApiResponse(responseCode = "400", description = "Parámetros de paginación inválidos"),
+                        @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
+                        @ApiResponse(responseCode = "403", description = "Acceso denegado: solo ADMIN puede usar este endpoint")
         })
         @GetMapping
         public ResponseEntity<Page<EventoResponseDTO>> listarEventos(
@@ -81,10 +149,14 @@ public class EventoController {
                 return ResponseEntity.ok(eventos);
         }
 
-        @Operation(summary = "Obtener evento por ID", description = "Obtiene los detalles completos de un evento específico, incluyendo información de creación, estado, capacidad y ubicación.")
+        @Operation(summary = "Obtener evento por ID (ADMIN y ORGANIZER)",
+                        description = "ADMIN: puede ver cualquier evento. "
+                                        + "ORGANIZER: solo puede ver el detalle de sus propios eventos (403 si el evento es de otro). "
+                                        + "ROLE_USER: 403 — debe usar GET /api/v1/eventos/disponibles con filtros para explorar eventos.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Evento obtenido exitosamente"),
                         @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
+                        @ApiResponse(responseCode = "403", description = "Acceso denegado: ROLE_USER no puede usar este endpoint; ORGANIZER intentando ver evento ajeno"),
                         @ApiResponse(responseCode = "404", description = "Evento no encontrado")
         })
         @GetMapping("/{id}")
@@ -221,6 +293,24 @@ public class EventoController {
                         @Valid @RequestBody ComentarioRequest comentarioRequest) {
                 EventoResponseDTO eventoActualizado = eventoService.desactivarEvento(id, comentarioRequest);
                 return ResponseEntity.ok(eventoActualizado);
+        }
+
+        @Operation(
+                        summary = "Listar tickets de un evento",
+                        description = "Devuelve todos los tickets registrados para un evento específico. "
+                                        + "Solo el creador del evento o un administrador pueden consultar esta información.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Lista de tickets obtenida exitosamente"),
+                        @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
+                        @ApiResponse(responseCode = "403", description = "Sin permisos: solo el creador del evento o un admin pueden ver los tickets"),
+                        @ApiResponse(responseCode = "404", description = "Evento no encontrado")
+        })
+        @GetMapping("/{id}/tickets")
+        public ResponseEntity<List<TicketResponseDTO>> obtenerTicketsPorEvento(
+                        @Parameter(description = "ID del evento", required = true, example = "5") @PathVariable Long id,
+                        Authentication authentication) {
+                Long userId = Long.parseLong(authentication.getName());
+                return ResponseEntity.ok(ticketService.obtenerTicketsPorEvento(id, userId));
         }
 
 }

@@ -43,6 +43,14 @@ public class EventoSpecification {
                 "%" + lugar.toLowerCase() + "%");
     }
 
+    public Specification<Evento> filtrarPorEsDePago(Boolean esDePago) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("esDePago"), esDePago);
+    }
+
+    public Specification<Evento> filtrarConCuposDisponibles() {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThan(root.get("capacidadDisponible"), 0);
+    }
+
     /**
      * Combina múltiples especificaciones con AND
      */
