@@ -76,8 +76,14 @@ public class EventoMapper {
         evento.setTieneParqueadero(dto.tieneParqueadero());
         evento.setCuposParqueadero(dto.cuposParqueadero());
         evento.setEsDePago(dto.esDePago());
-        evento.setPrecio(dto.precio());
-        evento.setMoneda(dto.moneda());
+
+        if (Boolean.TRUE.equals(dto.esDePago())) {
+            evento.setPrecio(dto.precio());
+            evento.setMoneda(dto.moneda());
+        } else {
+            evento.setPrecio(null);
+            evento.setMoneda(null);
+        }
 
         // Estados por defecto (se asignan en @PrePersist)
         evento.setEstadoEvento(EstadoEvento.BORRADOR);
@@ -140,14 +146,20 @@ public class EventoMapper {
 
         if (dto.esDePago() != null) {
             evento.setEsDePago(dto.esDePago());
-        }
-
-        if (dto.precio() != null) {
-            evento.setPrecio(dto.precio());
-        }
-
-        if (dto.moneda() != null) {
-            evento.setMoneda(dto.moneda());
+            if (Boolean.TRUE.equals(dto.esDePago())) {
+                if (dto.precio() != null) evento.setPrecio(dto.precio());
+                if (dto.moneda() != null) evento.setMoneda(dto.moneda());
+            } else {
+                evento.setPrecio(null);
+                evento.setMoneda(null);
+            }
+        } else {
+            if (dto.precio() != null) {
+                evento.setPrecio(dto.precio());
+            }
+            if (dto.moneda() != null) {
+                evento.setMoneda(dto.moneda());
+            }
         }
 
         return evento;

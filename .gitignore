@@ -35,3 +35,7 @@ build/
 
 # 🔐 Configuración local (NO subir)
 application-local.properties
+
+# 📁 Documentación y skills locales
+docs/resumenes/
+skills/
