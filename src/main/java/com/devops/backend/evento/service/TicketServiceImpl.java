@@ -16,11 +16,13 @@ import com.devops.backend.evento.repository.TicketRepository;
 import com.devops.backend.exception.BadRequestException;
 import com.devops.backend.exception.ResourceNotFoundException;
 import com.devops.backend.pago.service.StripeService;
+import com.devops.backend.shared.events.InscripcionConfirmadaEvent;
 import com.devops.backend.usuario.entity.Usuario;
 import com.devops.backend.usuario.repository.UsuarioRepository;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -44,6 +46,7 @@ public class TicketServiceImpl implements TicketService {
     private final UsuarioRepository usuarioRepository;
     private final StripeService stripeService;
     private final QrCodeService qrCodeService;
+    private final ApplicationEventPublisher eventPublisher;
 
     // ─────────────────────────── INSCRIPCION ────────────────────────────────
 
@@ -90,6 +93,17 @@ public class TicketServiceImpl implements TicketService {
 
         try {
             Ticket ticketGuardado = ticketRepository.save(ticket);
+
+            String emailUsuario = usuario.getAcceso() != null
+                    ? usuario.getAcceso().getCorreoAcceso()
+                    : null;
+
+            if (emailUsuario != null) {
+                eventPublisher.publishEvent(
+                        new InscripcionConfirmadaEvent(this, ticketGuardado, evento, emailUsuario)
+                );
+            }
+
             return mapearRespuesta(ticketGuardado);
         } catch (DataIntegrityViolationException e) {
             // Segunda barrera: constraint UNIQUE ante condición de carrera
