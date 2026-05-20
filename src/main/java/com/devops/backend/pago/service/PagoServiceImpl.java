@@ -46,6 +46,11 @@ public class PagoServiceImpl implements PagoService {
         if (ticket == null)
             return;
 
+        if (ticket.getEstadoTicket() != EstadoTicket.PENDIENTE) {
+            guardarPago(event, ticket, paymentIntent, "COBRO", "EXITOSO");
+            return;
+        }
+
         // Actualizar Ticket
         ticket.setEstadoTicket(EstadoTicket.PAGADO);
         ticket.setMontoPagado(new BigDecimal(paymentIntent.getAmount()).divide(new BigDecimal("100")));
@@ -72,8 +77,10 @@ public class PagoServiceImpl implements PagoService {
         if (ticket == null)
             return;
 
-        ticket.setEstadoTicket(EstadoTicket.CANCELADO);
-        ticketRepository.save(ticket);
+        if (ticket.getEstadoTicket() == EstadoTicket.PENDIENTE) {
+            ticket.setEstadoTicket(EstadoTicket.CANCELADO);
+            ticketRepository.save(ticket);
+        }
 
         guardarPago(event, ticket, paymentIntent, "COBRO", "FALLIDO");
     }

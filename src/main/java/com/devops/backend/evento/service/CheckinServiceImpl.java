@@ -84,7 +84,11 @@ public class CheckinServiceImpl implements CheckinService {
             throw new ResourceNotFoundException("Evento no encontrado");
         }
 
-        List<EstadoTicket> excluidos = List.of(EstadoTicket.PENDIENTE, EstadoTicket.CANCELADO, EstadoTicket.REEMBOLSADO);
+        List<EstadoTicket> excluidos = List.of(
+                EstadoTicket.PENDIENTE,
+                EstadoTicket.CANCELADO,
+                EstadoTicket.REEMBOLSADO,
+                EstadoTicket.EXPIRADO);
         long totalInscritos = ticketRepository.countByEvento_IdEventoAndEstadoTicketNotIn(eventoId, excluidos);
         long totalIngresados = ticketRepository.countByEvento_IdEventoAndCheckinRealizadoTrue(eventoId);
         long totalPendientes = totalInscritos - totalIngresados;

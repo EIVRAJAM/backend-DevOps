@@ -47,6 +47,16 @@ public class StripeServiceImpl implements StripeService {
     }
 
     @Override
+    public PaymentIntent retrievePaymentIntent(String paymentIntentId) throws StripeException {
+        return PaymentIntent.retrieve(paymentIntentId);
+    }
+
+    @Override
+    public PaymentIntent cancelPaymentIntent(String paymentIntentId) throws StripeException {
+        return PaymentIntent.retrieve(paymentIntentId).cancel();
+    }
+
+    @Override
     public Event constructEvent(String payload, String sigHeader) {
         try {
             return Webhook.constructEvent(payload, sigHeader, stripeWebhookSecret);
