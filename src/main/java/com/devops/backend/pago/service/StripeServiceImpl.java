@@ -56,4 +56,16 @@ public class StripeServiceImpl implements StripeService {
             throw new BadRequestException("Error inesperado al procesar el webhook de Stripe");
         }
     }
+
+    @Override
+    public com.stripe.model.Refund createRefund(String chargeId, BigDecimal amount) throws StripeException {
+        long amountInSmallestUnit = amount.multiply(new BigDecimal("100")).longValue();
+        
+        com.stripe.param.RefundCreateParams params = com.stripe.param.RefundCreateParams.builder()
+                .setCharge(chargeId)
+                .setAmount(amountInSmallestUnit)
+                .build();
+                
+        return com.stripe.model.Refund.create(params);
+    }
 }
