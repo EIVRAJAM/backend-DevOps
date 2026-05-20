@@ -17,7 +17,8 @@ import java.time.LocalDateTime;
  * Aplica tanto para eventos gratuitos como de pago.
  *
  * Restricciones de integridad:
- * - Un usuario no puede inscribirse dos veces al mismo evento (UNIQUE en BD)
+ * - Un usuario no puede tener dos tickets activos para el mismo evento
+ *   (indice unico parcial en BD para PENDIENTE/PAGADO/GRATIS)
  * - Preserva historial incluso si evento o usuario se eliminan (ON DELETE
  * RESTRICT)
  * - Para eventos de pago, monto_pagado y moneda son obligatorios
@@ -27,9 +28,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "tickets", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "id_usuario", "id_evento" }, name = "uq_tickets_usuario_evento")
-})
+@Table(name = "tickets")
 public class Ticket {
 
     @Id
