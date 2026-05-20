@@ -6,8 +6,6 @@ import com.devops.backend.evento.entity.Ticket;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
-import java.time.Clock;
-
 /**
  * Se publica cuando una inscripción queda completamente confirmada:
  *  - Inmediatamente para eventos GRATIS
