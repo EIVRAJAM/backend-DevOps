@@ -39,6 +39,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TicketServiceImpl implements TicketService {
 
+    private static final List<EstadoTicket> ESTADOS_TICKET_ACTIVOS = List.of(
+            EstadoTicket.PENDIENTE,
+            EstadoTicket.PAGADO,
+            EstadoTicket.GRATIS);
+
     private final TicketRepository ticketRepository;
     private final EventoRepository eventoRepository;
     private final UsuarioRepository usuarioRepository;
@@ -76,7 +81,7 @@ public class TicketServiceImpl implements TicketService {
         Usuario usuario = obtenerUsuarioPorId(userId);
 
         // Validación previa — error semántico claro
-        if (ticketRepository.existsByUsuario_IdUsuarioAndEvento_IdEvento(userId, evento.getIdEvento())) {
+        if (tieneTicketActivoParaEvento(userId, evento.getIdEvento())) {
             throw new TicketDuplicadoException(userId, evento.getIdEvento());
         }
 
@@ -122,7 +127,7 @@ public class TicketServiceImpl implements TicketService {
     private InscripcionTicketResponseDTO procesarInscripcionPago(Evento evento, Long userId) {
         Usuario usuario = obtenerUsuarioPorId(userId);
 
-        if (ticketRepository.existsByUsuario_IdUsuarioAndEvento_IdEvento(userId, evento.getIdEvento())) {
+        if (tieneTicketActivoParaEvento(userId, evento.getIdEvento())) {
             throw new TicketDuplicadoException(userId, evento.getIdEvento());
         }
 
@@ -287,6 +292,13 @@ public class TicketServiceImpl implements TicketService {
         return usuarioRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Usuario con ID " + userId + " no encontrado"));
+    }
+
+    private boolean tieneTicketActivoParaEvento(Long userId, Long eventoId) {
+        return ticketRepository.existsByUsuario_IdUsuarioAndEvento_IdEventoAndEstadoTicketIn(
+                userId,
+                eventoId,
+                ESTADOS_TICKET_ACTIVOS);
     }
 
     @Override

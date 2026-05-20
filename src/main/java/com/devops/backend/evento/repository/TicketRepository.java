@@ -14,9 +14,10 @@ import java.util.Optional;
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
-    boolean existsByUsuario_IdUsuarioAndEvento_IdEvento(Long idUsuario, Long idEvento);
-
-    Optional<Ticket> findByUsuario_IdUsuarioAndEvento_IdEvento(Long idUsuario, Long idEvento);
+    boolean existsByUsuario_IdUsuarioAndEvento_IdEventoAndEstadoTicketIn(
+            Long idUsuario,
+            Long idEvento,
+            List<EstadoTicket> estadosTicket);
 
     /** Todos los tickets de un usuario (mis-tickets), ordenados por fecha desc */
     List<Ticket> findByUsuario_IdUsuarioOrderByFechaCompraDesc(Long idUsuario);
