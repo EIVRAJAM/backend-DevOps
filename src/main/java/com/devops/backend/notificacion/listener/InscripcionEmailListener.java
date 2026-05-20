@@ -10,10 +10,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 
 @Slf4j
 @Component
@@ -29,6 +32,7 @@ public class InscripcionEmailListener {
      */
     @Async("emailTaskExecutor")
     @EventListener
+    @TransactionalEventListener(phase = AFTER_COMMIT)
     public void onInscripcionConfirmada(InscripcionConfirmadaEvent event) {
         log.debug("[EMAIL-LISTENER] Procesando confirmación para ticket #{}", event.getTicket().getIdTicket());
 

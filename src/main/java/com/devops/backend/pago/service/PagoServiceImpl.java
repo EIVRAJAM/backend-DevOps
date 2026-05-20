@@ -10,9 +10,11 @@ import com.devops.backend.evento.repository.EventoRepository;
 import com.devops.backend.pago.dto.PagoResponse;
 import com.devops.backend.pago.entity.Pago;
 import com.devops.backend.pago.repository.PagoRepository;
+import com.devops.backend.shared.events.InscripcionConfirmadaEvent;
 import com.stripe.model.Event;
 import com.stripe.model.PaymentIntent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,7 @@ public class PagoServiceImpl implements PagoService {
     private final TicketRepository ticketRepository;
     private final TicketService ticketService;
     private final EventoRepository eventoRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public void procesarPagoExitoso(Event event) {
@@ -59,8 +62,19 @@ public class PagoServiceImpl implements PagoService {
         // Decrementar cupo disponible del evento de forma atómica
         ticketService.confirmarCupoTrasExitoso(ticket.getEvento().getIdEvento());
 
+        String email = ticket.getUsuario().getAcceso() != null
+                ? ticket.getUsuario().getAcceso().getCorreoAcceso()
+                : null;
+
+        //Mandamos el correo de confirmacion
+        if (email != null) {
+            eventPublisher.publishEvent(
+                    new InscripcionConfirmadaEvent(this, ticket, ticket.getEvento(), email)
+            );
+        }
         // Guardar registro del Pago
         guardarPago(event, ticket, paymentIntent, "COBRO", "EXITOSO");
+
     }
 
     @Override
