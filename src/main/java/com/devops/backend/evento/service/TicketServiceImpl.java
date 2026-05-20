@@ -1,11 +1,14 @@
 package com.devops.backend.evento.service;
 
 import com.devops.backend.evento.dto.InscripcionTicketResponseDTO;
+import com.devops.backend.evento.dto.MiEstadoInscripcionResponseDTO;
+import com.devops.backend.evento.dto.TicketCheckoutResponseDTO;
 import com.devops.backend.evento.dto.TicketResponseDTO;
 import com.devops.backend.evento.entity.Evento;
 import com.devops.backend.evento.entity.Ticket;
 import com.devops.backend.evento.enums.Estado;
 import com.devops.backend.evento.enums.EstadoEvento;
+import com.devops.backend.evento.enums.EstadoInscripcionUsuario;
 import com.devops.backend.evento.enums.EstadoTicket;
 import com.devops.backend.evento.exception.CuposAgotadosException;
 import com.devops.backend.evento.exception.EventoNoEncontradoException;
@@ -23,6 +26,7 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -41,12 +45,21 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TicketServiceImpl implements TicketService {
 
+    private static final List<EstadoTicket> ESTADOS_TICKET_ACTIVOS = List.of(
+            EstadoTicket.PENDIENTE,
+            EstadoTicket.PAGADO,
+            EstadoTicket.GRATIS);
+
     private final TicketRepository ticketRepository;
     private final EventoRepository eventoRepository;
     private final UsuarioRepository usuarioRepository;
     private final StripeService stripeService;
     private final QrCodeService qrCodeService;
     private final ApplicationEventPublisher eventPublisher;
+    private final TicketCheckoutExpirationService expirationService;
+
+    @Value("${tickets.checkout.expiration-minutes:15}")
+    private long checkoutExpirationMinutes;
 
     // ─────────────────────────── INSCRIPCION ────────────────────────────────
 
@@ -65,6 +78,8 @@ public class TicketServiceImpl implements TicketService {
                     evento.getEstado().name());
         }
 
+        expirarCheckoutPendienteVencido(userId, eventoId);
+
         if (esEventoGratis(evento)) {
             return procesarInscripcionGratis(evento, userId);
         } else {
@@ -79,7 +94,7 @@ public class TicketServiceImpl implements TicketService {
         Usuario usuario = obtenerUsuarioPorId(userId);
 
         // Validación previa — error semántico claro
-        if (ticketRepository.existsByUsuario_IdUsuarioAndEvento_IdEvento(userId, evento.getIdEvento())) {
+        if (tieneTicketActivoParaEvento(userId, evento.getIdEvento())) {
             throw new TicketDuplicadoException(userId, evento.getIdEvento());
         }
 
@@ -128,6 +143,7 @@ public class TicketServiceImpl implements TicketService {
                 ticket.getIdTicket(),
                 ticket.getEstadoTicket(),
                 ticket.getCodigoQr(),
+                null,
                 null);
     }
 
@@ -136,7 +152,12 @@ public class TicketServiceImpl implements TicketService {
     private InscripcionTicketResponseDTO procesarInscripcionPago(Evento evento, Long userId) {
         Usuario usuario = obtenerUsuarioPorId(userId);
 
-        if (ticketRepository.existsByUsuario_IdUsuarioAndEvento_IdEvento(userId, evento.getIdEvento())) {
+        InscripcionTicketResponseDTO checkoutPendiente = obtenerRespuestaCheckoutPendienteVigente(userId, evento);
+        if (checkoutPendiente != null) {
+            return checkoutPendiente;
+        }
+
+        if (tieneTicketActivoParaEvento(userId, evento.getIdEvento())) {
             throw new TicketDuplicadoException(userId, evento.getIdEvento());
         }
 
@@ -155,6 +176,7 @@ public class TicketServiceImpl implements TicketService {
         ticket.setMoneda(evento.getMoneda());
         ticket.setCodigoQr(UUID.randomUUID().toString());
         ticket.setFechaCompra(LocalDateTime.now());
+        ticket.setExpiraEn(LocalDateTime.now().plusMinutes(checkoutExpirationMinutes));
 
         Ticket ticketGuardado;
         try {
@@ -175,13 +197,15 @@ public class TicketServiceImpl implements TicketService {
                     userId);
 
             ticketGuardado.setStripePaymentIntentId(paymentIntent.getId());
+            ticketGuardado.setStripeClientSecret(paymentIntent.getClientSecret());
             ticketRepository.save(ticketGuardado);
 
             return new InscripcionTicketResponseDTO(
                     ticketGuardado.getIdTicket(),
                     ticketGuardado.getEstadoTicket(),
                     ticketGuardado.getCodigoQr(),
-                    paymentIntent.getClientSecret());
+                    paymentIntent.getClientSecret(),
+                    ticketGuardado.getExpiraEn());
 
         } catch (StripeException e) {
             throw new BadRequestException(
@@ -230,6 +254,63 @@ public class TicketServiceImpl implements TicketService {
         return toTicketResponseDTO(ticket);
     }
 
+    @Override
+    public TicketCheckoutResponseDTO obtenerCheckoutPendiente(Long eventoId, Long userId) {
+        Evento evento = eventoRepository.findById(eventoId)
+                .orElseThrow(() -> new EventoNoEncontradoException(eventoId));
+
+        expirarCheckoutPendienteVencido(userId, eventoId);
+
+        Ticket ticket = ticketRepository
+                .findFirstByUsuario_IdUsuarioAndEvento_IdEventoAndEstadoTicketOrderByFechaCompraDesc(
+                        userId,
+                        eventoId,
+                        EstadoTicket.PENDIENTE)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No tienes un checkout pendiente vigente para este evento"));
+
+        if (!checkoutEstaVigente(ticket)) {
+            throw new ResourceNotFoundException(
+                    "No tienes un checkout pendiente vigente para este evento");
+        }
+
+        if (ticket.getStripeClientSecret() == null || ticket.getStripeClientSecret().isBlank()) {
+            ticket.setEstadoTicket(EstadoTicket.EXPIRADO);
+            ticketRepository.save(ticket);
+            throw new ResourceNotFoundException(
+                    "No tienes un checkout pendiente vigente para este evento");
+        }
+
+        return new TicketCheckoutResponseDTO(
+                ticket.getIdTicket(),
+                evento.getIdEvento(),
+                evento.getNombreEvento(),
+                ticket.getEstadoTicket(),
+                ticket.getStripeClientSecret(),
+                ticket.getExpiraEn());
+    }
+
+    @Override
+    public MiEstadoInscripcionResponseDTO obtenerMiEstadoInscripcion(Long eventoId, Long userId) {
+        eventoRepository.findById(eventoId)
+                .orElseThrow(() -> new EventoNoEncontradoException(eventoId));
+
+        expirarCheckoutPendienteVencido(userId, eventoId);
+
+        return ticketRepository
+                .findFirstByUsuario_IdUsuarioAndEvento_IdEventoOrderByFechaCompraDesc(userId, eventoId)
+                .map(ticket -> mapearEstadoInscripcion(eventoId, ticket))
+                .orElseGet(() -> new MiEstadoInscripcionResponseDTO(
+                        eventoId,
+                        false,
+                        true,
+                        null,
+                        null,
+                        EstadoInscripcionUsuario.NO_INSCRITO,
+                        null,
+                        null));
+    }
+
     // ─────────────────────────── TICKETS POR EVENTO ─────────────────────────
 
     @Override
@@ -265,7 +346,8 @@ public class TicketServiceImpl implements TicketService {
         }
 
         if (ticket.getEstadoTicket() == EstadoTicket.CANCELADO
-                || ticket.getEstadoTicket() == EstadoTicket.REEMBOLSADO) {
+                || ticket.getEstadoTicket() == EstadoTicket.REEMBOLSADO
+                || ticket.getEstadoTicket() == EstadoTicket.EXPIRADO) {
             throw new BadRequestException(
                     "El ticket ya se encuentra en estado " + ticket.getEstadoTicket());
         }
@@ -301,6 +383,92 @@ public class TicketServiceImpl implements TicketService {
         return usuarioRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Usuario con ID " + userId + " no encontrado"));
+    }
+
+    private boolean tieneTicketActivoParaEvento(Long userId, Long eventoId) {
+        return ticketRepository.existsByUsuario_IdUsuarioAndEvento_IdEventoAndEstadoTicketIn(
+                userId,
+                eventoId,
+                ESTADOS_TICKET_ACTIVOS);
+    }
+
+    private void expirarCheckoutPendienteVencido(Long userId, Long eventoId) {
+        expirationService.resolverCheckoutPendienteVencido(userId, eventoId);
+    }
+
+    private InscripcionTicketResponseDTO obtenerRespuestaCheckoutPendienteVigente(Long userId, Evento evento) {
+        return ticketRepository
+                .findFirstByUsuario_IdUsuarioAndEvento_IdEventoAndEstadoTicketOrderByFechaCompraDesc(
+                        userId,
+                        evento.getIdEvento(),
+                        EstadoTicket.PENDIENTE)
+                .map(ticket -> {
+                    if (!checkoutEstaVigente(ticket)) {
+                        return null;
+                    }
+
+                    if (ticket.getStripeClientSecret() == null || ticket.getStripeClientSecret().isBlank()) {
+                        ticket.setEstadoTicket(EstadoTicket.EXPIRADO);
+                        ticketRepository.saveAndFlush(ticket);
+                        return null;
+                    }
+
+                    return new InscripcionTicketResponseDTO(
+                            ticket.getIdTicket(),
+                            ticket.getEstadoTicket(),
+                            ticket.getCodigoQr(),
+                            ticket.getStripeClientSecret(),
+                            ticket.getExpiraEn());
+                })
+                .orElse(null);
+    }
+
+    private boolean checkoutEstaVigente(Ticket ticket) {
+        return ticket.getExpiraEn() != null && ticket.getExpiraEn().isAfter(LocalDateTime.now());
+    }
+
+    private MiEstadoInscripcionResponseDTO mapearEstadoInscripcion(Long eventoId, Ticket ticket) {
+        EstadoTicket estadoTicket = ticket.getEstadoTicket();
+
+        if (estadoTicket == EstadoTicket.GRATIS || estadoTicket == EstadoTicket.PAGADO) {
+            return new MiEstadoInscripcionResponseDTO(
+                    eventoId,
+                    true,
+                    false,
+                    ticket.getIdTicket(),
+                    estadoTicket,
+                    EstadoInscripcionUsuario.INSCRITO,
+                    ticket.getExpiraEn(),
+                    ticket.getCheckinRealizado());
+        }
+
+        if (estadoTicket == EstadoTicket.PENDIENTE) {
+            boolean checkoutVigente = checkoutEstaVigente(ticket)
+                    && ticket.getStripeClientSecret() != null
+                    && !ticket.getStripeClientSecret().isBlank();
+
+            return new MiEstadoInscripcionResponseDTO(
+                    eventoId,
+                    false,
+                    false,
+                    ticket.getIdTicket(),
+                    estadoTicket,
+                    checkoutVigente
+                            ? EstadoInscripcionUsuario.CHECKOUT_PENDIENTE
+                            : EstadoInscripcionUsuario.PAGO_EN_PROCESO,
+                    ticket.getExpiraEn(),
+                    ticket.getCheckinRealizado());
+        }
+
+        return new MiEstadoInscripcionResponseDTO(
+                eventoId,
+                false,
+                true,
+                ticket.getIdTicket(),
+                estadoTicket,
+                EstadoInscripcionUsuario.REINTENTO_DISPONIBLE,
+                ticket.getExpiraEn(),
+                ticket.getCheckinRealizado());
     }
 
     @Override
@@ -341,6 +509,7 @@ public class TicketServiceImpl implements TicketService {
                 ticket.getMoneda(),
                 ticket.getCodigoQr(),
                 ticket.getFechaCompra(),
+                ticket.getExpiraEn(),
                 ticket.getCreadoEn());
     }
 }

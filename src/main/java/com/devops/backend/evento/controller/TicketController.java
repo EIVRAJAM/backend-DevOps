@@ -1,6 +1,8 @@
 package com.devops.backend.evento.controller;
 
 import com.devops.backend.evento.dto.InscripcionTicketResponseDTO;
+import com.devops.backend.evento.dto.MiEstadoInscripcionResponseDTO;
+import com.devops.backend.evento.dto.TicketCheckoutResponseDTO;
 import com.devops.backend.evento.dto.TicketResponseDTO;
 import com.devops.backend.evento.service.TicketService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,6 +51,47 @@ public class TicketController {
         Long userId = Long.parseLong(authentication.getName());
         InscripcionTicketResponseDTO response = ticketService.inscribirseAEvento(eventoId, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(
+            summary = "Obtener checkout pendiente por evento",
+            description = "Devuelve el checkout PENDIENTE vigente del usuario autenticado para continuar el pago. "
+                    + "Si el checkout ya vencio, el backend verifica Stripe y lo resuelve antes de responder."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Checkout pendiente vigente encontrado"),
+            @ApiResponse(responseCode = "401", description = "Token JWT invalido o expirado"),
+            @ApiResponse(responseCode = "404", description = "Evento no encontrado o sin checkout pendiente vigente")
+    })
+    @GetMapping("/checkout/evento/{eventoId}")
+    public ResponseEntity<TicketCheckoutResponseDTO> obtenerCheckoutPendiente(
+            @Parameter(description = "ID del evento", required = true, example = "5")
+            @PathVariable Long eventoId,
+            Authentication authentication) {
+
+        Long userId = Long.parseLong(authentication.getName());
+        return ResponseEntity.ok(ticketService.obtenerCheckoutPendiente(eventoId, userId));
+    }
+
+    @Operation(
+            summary = "Obtener mi estado de inscripcion en un evento",
+            description = "Devuelve el estado resumido del usuario autenticado frente a un evento. "
+                    + "Permite al front saber si ya esta inscrito, si tiene checkout pendiente, "
+                    + "si el pago esta en proceso o si puede iniciar una nueva inscripcion."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Estado de inscripcion obtenido exitosamente"),
+            @ApiResponse(responseCode = "401", description = "Token JWT invalido o expirado"),
+            @ApiResponse(responseCode = "404", description = "Evento no encontrado")
+    })
+    @GetMapping("/evento/{eventoId}/mi-estado")
+    public ResponseEntity<MiEstadoInscripcionResponseDTO> obtenerMiEstadoInscripcion(
+            @Parameter(description = "ID del evento", required = true, example = "5")
+            @PathVariable Long eventoId,
+            Authentication authentication) {
+
+        Long userId = Long.parseLong(authentication.getName());
+        return ResponseEntity.ok(ticketService.obtenerMiEstadoInscripcion(eventoId, userId));
     }
 
     // ─────────────────────────── MIS TICKETS ────────────────────────────────

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Nueva solicitud de reembolso - {{eventoNombre}}</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f3f4f6; font-family:Arial, Helvetica, sans-serif; color:#111827;">
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0;">
+    {{usuario}} ha solicitado un reembolso para {{eventoNombre}}.
+  </div>
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f3f4f6; padding:32px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:14px; overflow:hidden; box-shadow:0 8px 24px rgba(15,23,42,0.08);">
+
+          <tr>
+            <td style="background-color:#111827; padding:28px 32px;">
+              <h1 style="margin:0; color:#ffffff; font-size:24px; line-height:1.3;">
+                Nueva solicitud de reembolso
+              </h1>
+              <p style="margin:8px 0 0; color:#d1d5db; font-size:14px;">
+                Instituto El Saber
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:32px;">
+              <p style="margin:0 0 18px; font-size:16px; line-height:1.6;">
+                Un usuario ha solicitado un reembolso. Los detalles del pago y la cuenta para realizar la devolucion se encuentran a continuacion.
+              </p>
+
+              <div style="margin:24px 0; padding:20px; background-color:#f9fafb; border:1px solid #e5e7eb; border-radius:12px;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding:8px 0; color:#6b7280; font-size:14px;">Evento</td>
+                    <td align="right" style="padding:8px 0; font-size:14px; font-weight:bold; color:#111827;">{{eventoNombre}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0; color:#6b7280; font-size:14px;">Usuario</td>
+                    <td align="right" style="padding:8px 0; font-size:14px; font-weight:bold; color:#111827;">{{usuario}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0; color:#6b7280; font-size:14px;">Email usuario</td>
+                    <td align="right" style="padding:8px 0; font-size:14px; font-weight:bold; color:#111827;">{{emailUsuario}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0; color:#6b7280; font-size:14px;">Monto</td>
+                    <td align="right" style="padding:8px 0; font-size:14px; font-weight:bold; color:#111827;">{{monto}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0; color:#6b7280; font-size:14px;">Motivo</td>
+                    <td align="right" style="padding:8px 0; font-size:14px; color:#374151;">{{motivo}}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <h2 style="margin:28px 0 12px; font-size:18px; color:#111827;">Datos para realizar el reembolso</h2>
+
+              <div style="margin:16px 0; padding:20px; background-color:#fefce8; border:1px solid #facc15; border-radius:12px;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding:8px 0; color:#6b7280; font-size:14px;">Medio</td>
+                    <td align="right" style="padding:8px 0; font-size:14px; font-weight:bold; color:#111827;">{{medioReembolso}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0; color:#6b7280; font-size:14px;">Titular</td>
+                    <td align="right" style="padding:8px 0; font-size:14px; font-weight:bold; color:#111827;">{{titularCuenta}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0; color:#6b7280; font-size:14px;">Documento</td>
+                    <td align="right" style="padding:8px 0; font-size:14px; font-weight:bold; color:#111827;">{{documentoTitular}}</td>
+                  </tr>
+                  {{#entidadFinanciera}}
+                  <tr>
+                    <td style="padding:8px 0; color:#6b7280; font-size:14px;">Entidad</td>
+                    <td align="right" style="padding:8px 0; font-size:14px; font-weight:bold; color:#111827;">{{entidadFinanciera}}</td>
+                  </tr>
+                  {{/entidadFinanciera}}
+                  {{#tipoCuenta}}
+                  <tr>
+                    <td style="padding:8px 0; color:#6b7280; font-size:14px;">Tipo de cuenta</td>
+                    <td align="right" style="padding:8px 0; font-size:14px; font-weight:bold; color:#111827;">{{tipoCuenta}}</td>
+                  </tr>
+                  {{/tipoCuenta}}
+                  {{#numeroCuentaCompleto}}
+                  <tr>
+                    <td style="padding:8px 0; color:#6b7280; font-size:14px;">Numero de cuenta</td>
+                    <td align="right" style="padding:8px 0; font-size:14px; font-weight:bold; color:#dc2626;">{{numeroCuentaCompleto}}</td>
+                  </tr>
+                  {{/numeroCuentaCompleto}}
+                  <tr>
+                    <td style="padding:8px 0; color:#6b7280; font-size:14px;">Correo contacto</td>
+                    <td align="right" style="padding:8px 0; font-size:14px; font-weight:bold; color:#111827;">{{correoContacto}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0; color:#6b7280; font-size:14px;">Telefono contacto</td>
+                    <td align="right" style="padding:8px 0; font-size:14px; font-weight:bold; color:#111827;">{{telefonoContacto}}</td>
+                  </tr>
+                </table>
+              </div>
+
+              {{#observaciones}}
+              <div style="margin:24px 0;">
+                <p style="margin:0 0 8px; font-size:14px; font-weight:bold; color:#111827;">Observaciones del usuario</p>
+                <p style="margin:0; padding:14px 16px; background-color:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; font-size:14px; line-height:1.6; color:#374151;">{{observaciones}}</p>
+              </div>
+              {{/observaciones}}
+
+              <div style="margin:24px 0; padding:18px 20px; background-color:#eef2ff; border-left:4px solid #4f46e5; border-radius:10px;">
+                <p style="margin:0; font-size:15px; line-height:1.6; color:#1e1b4b;">
+                  El usuario adjunto los documentos requeridos (certificado bancario y/o documento adicional). Revisa los archivos adjuntos a este correo para verificar la informacion.
+                </p>
+              </div>
+
+              <p style="margin:24px 0 0; font-size:14px; line-height:1.6; color:#4b5563;">
+                Gestiona esta solicitud desde el panel de organizador en la plataforma. Puedes aprobar, rechazar o marcar como reembolsado una vez completes el tramite externo.
+              </p>
+
+              <hr style="border:none; border-top:1px solid #e5e7eb; margin:32px 0;">
+
+              <p style="margin:0; font-size:12px; line-height:1.5; color:#9ca3af;">
+                Este es un mensaje automatico. No respondas directamente a este correo.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -52,14 +52,14 @@ public record UpdateEventoDTO(
         @Schema(description = "Nuevos cupos de parqueadero (opcional)", example = "150") 
         Integer cuposParqueadero,
 
-        @Schema(description = "Indica si será evento de pago (opcional)", example = "true") 
+        @Schema(description = "Indica si será evento de pago (opcional). Si cambia a false, no envíe precio ni moneda", example = "false") 
         Boolean esDePago,
 
         @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser mayor a 0") 
-        @Schema(description = "Nuevo precio del evento (opcional)", example = "75000") 
+        @Schema(description = "Nuevo precio del evento (obligatorio solo si esDePago=true). No envíe si es gratuito", nullable = true) 
         BigDecimal precio,
 
-        @Schema(description = "Nueva moneda (opcional) - USD, COP, EUR, MXN", example = "COP", 
+        @Schema(description = "Nueva moneda (obligatorio solo si esDePago=true). USD, COP, EUR, MXN. No envíe si es gratuito", nullable = true,
         allowableValues = {"USD", "COP", "EUR", "MXN" }) 
         Moneda moneda
 ) {}

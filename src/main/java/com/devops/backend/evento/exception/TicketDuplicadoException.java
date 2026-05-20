@@ -1,13 +1,13 @@
 package com.devops.backend.evento.exception;
 
 /**
- * Excepción lanzada cuando un usuario intenta inscribirse
- * a un evento al que ya está inscrito (violación UNIQUE id_usuario + id_evento).
+ * Excepcion lanzada cuando un usuario intenta inscribirse
+ * a un evento donde ya tiene un ticket activo.
  */
 public class TicketDuplicadoException extends RuntimeException {
 
     public TicketDuplicadoException(Long idUsuario, Long idEvento) {
-        super("El usuario " + idUsuario + " ya está inscrito en el evento " + idEvento);
+        super("El usuario " + idUsuario + " ya tiene una inscripcion activa en el evento " + idEvento);
     }
 
     public TicketDuplicadoException(String message) {

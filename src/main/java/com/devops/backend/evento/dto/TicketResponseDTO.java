@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
  * Se usa en GET mis-tickets, GET {id}, GET eventos/{id}/tickets.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "Información completa de un ticket de inscripción")
+@Schema(description = "Informacion completa de un ticket de inscripcion")
 public record TicketResponseDTO(
 
-        @Schema(description = "ID único del ticket", example = "1")
+        @Schema(description = "ID unico del ticket", example = "1")
         Long idTicket,
 
         @Schema(description = "ID del evento al que pertenece el ticket", example = "5")
@@ -30,7 +30,7 @@ public record TicketResponseDTO(
 
         @Schema(description = "Estado actual del ticket",
                 example = "GRATIS",
-                allowableValues = {"PENDIENTE", "PAGADO", "CANCELADO", "REEMBOLSADO", "GRATIS"})
+                allowableValues = {"PENDIENTE", "PAGADO", "CANCELADO", "REEMBOLSADO", "GRATIS", "EXPIRADO"})
         EstadoTicket estadoTicket,
 
         @Schema(description = "Monto pagado por el ticket", example = "50000.00")
@@ -40,12 +40,15 @@ public record TicketResponseDTO(
                 allowableValues = {"USD", "COP", "EUR", "MXN"})
         Moneda moneda,
 
-        @Schema(description = "Código QR único del ticket", example = "uuid-generado")
+        @Schema(description = "Codigo QR unico del ticket", example = "uuid-generado")
         String codigoQr,
 
         @Schema(description = "Fecha de compra del ticket")
         LocalDateTime fechaCompra,
 
-        @Schema(description = "Fecha de creación del registro")
+        @Schema(description = "Fecha de expiracion del checkout si el ticket esta pendiente")
+        LocalDateTime expiraEn,
+
+        @Schema(description = "Fecha de creacion del registro")
         LocalDateTime creadoEn
 ) {}
