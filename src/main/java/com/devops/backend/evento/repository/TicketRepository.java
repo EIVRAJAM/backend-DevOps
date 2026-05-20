@@ -37,6 +37,15 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
            "WHERE e.idEvento = :eventoId AND e.capacidadDisponible > 0")
     int decrementarCupo(@Param("eventoId") Long eventoId);
 
+    /**
+     * Incrementa 1 cupo disponible de forma atómica, usado al liberar cupo
+     * tras un reembolso.
+     */
+    @Modifying
+    @Query("UPDATE Evento e SET e.capacidadDisponible = e.capacidadDisponible + 1 " +
+           "WHERE e.idEvento = :eventoId")
+    int incrementarCupo(@Param("eventoId") Long eventoId);
+
     Optional<Ticket> findByEvento_IdEventoAndCodigoQr(Long idEvento, String codigoQr);
 
     long countByEvento_IdEventoAndEstadoTicketNotIn(Long idEvento, List<EstadoTicket> excluidos);

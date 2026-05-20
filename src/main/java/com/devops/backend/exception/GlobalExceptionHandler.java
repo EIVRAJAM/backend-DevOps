@@ -67,16 +67,49 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ApiError> handleUnauthorized(UnauthorizedException ex, WebRequest request) {
+        ApiError apiError = buildError(HttpStatus.FORBIDDEN, ex.getMessage(), request, null);
+        return new ResponseEntity<>(apiError, HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiError> handleResourceNotFound(ResourceNotFoundException ex, WebRequest request) {
         ApiError apiError = buildError(HttpStatus.NOT_FOUND, ex.getMessage(), request, null);
         return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(com.devops.backend.pago.exception.SolicitudReembolsoNotFoundException.class)
+    public ResponseEntity<ApiError> handleSolicitudReembolsoNotFound(
+            com.devops.backend.pago.exception.SolicitudReembolsoNotFoundException ex, WebRequest request) {
+        ApiError apiError = buildError(HttpStatus.NOT_FOUND, ex.getMessage(), request, null);
+        return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(com.devops.backend.pago.exception.ReembolsoNoPermitidoException.class)
+    public ResponseEntity<ApiError> handleReembolsoNoPermitido(com.devops.backend.pago.exception.ReembolsoNoPermitidoException ex,
+            WebRequest request) {
+        ApiError apiError = buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request, null);
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(org.springframework.orm.ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ApiError> handleOptimisticLock(org.springframework.orm.ObjectOptimisticLockingFailureException ex,
+            WebRequest request) {
+        ApiError apiError = buildError(HttpStatus.CONFLICT,
+                "La solicitud fue modificada por otro usuario. Intenta de nuevo.", request, null);
+        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex, WebRequest request) {
-        ApiError apiError = buildError(HttpStatus.CONFLICT, "Database constraint violation", request,
-                ex.getMostSpecificCause().getMessage());
+        String rootMsg = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : "";
+        if (rootMsg.contains("idx_one_active_solicitud_per_ticket")) {
+            ApiError apiError = buildError(HttpStatus.BAD_REQUEST,
+                    "Ya existe una solicitud de reembolso activa para este ticket", request, null);
+            return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+        }
+        ApiError apiError = buildError(HttpStatus.CONFLICT, "Database constraint violation", request, rootMsg);
         return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
     }
 

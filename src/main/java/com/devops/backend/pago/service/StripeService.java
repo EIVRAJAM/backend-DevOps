@@ -17,4 +17,9 @@ public interface StripeService {
      * Verifica la firma del webhook y construye el objeto Event
      */
     Event constructEvent(String payload, String sigHeader);
+    
+    /**
+     * Procesa un reembolso en Stripe
+     */
+    com.stripe.model.Refund createRefund(String chargeId, BigDecimal amount) throws StripeException;
 }
