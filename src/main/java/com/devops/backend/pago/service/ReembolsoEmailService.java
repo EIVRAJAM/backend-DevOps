@@ -1,14 +1,14 @@
 package com.devops.backend.pago.service;
 
 import com.devops.backend.pago.dto.OrganizerRefundEmailData;
+import com.devops.backend.pago.dto.OrganizerRefundEmailPayload;
 import com.devops.backend.pago.dto.RefundEmailData;
 import com.devops.backend.pago.dto.RefundEmailModel;
-import com.devops.backend.shared.email.EmailSenderService;
-import com.devops.backend.shared.email.EmailTemplateRenderer;
+import com.devops.backend.shared.email.EmailJobType;
+import com.devops.backend.shared.email.EmailQueueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -27,10 +27,9 @@ public class ReembolsoEmailService {
     private static final DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("dd/MM/yyyy 'a las' HH:mm", LOCALE_CO);
 
-    private final EmailTemplateRenderer templateRenderer;
-    private final EmailSenderService emailSenderService;
+    private final EmailQueueService emailQueueService;
 
-    public void enviarCorreoSolicitudAprobada(RefundEmailData data) {
+    public void encolarCorreoSolicitudAprobada(RefundEmailData data) {
         RefundEmailModel model = buildModel(
                 "Solicitud de reembolso aprobada",
                 "Tu solicitud de reembolso fue aprobada.",
@@ -41,10 +40,15 @@ public class ReembolsoEmailService {
                 "#166534"
         );
 
-        send(data.email(), model);
+        emailQueueService.enqueueHtmlEmail(
+                EmailJobType.REEMBOLSO_APROBADA,
+                data.email(),
+                model.title() + " - " + model.eventName(),
+                "refund-status.mustache",
+                model);
     }
 
-    public void enviarCorreoSolicitudRechazada(RefundEmailData data) {
+    public void encolarCorreoSolicitudRechazada(RefundEmailData data) {
         RefundEmailModel model = buildModel(
                 "Solicitud de reembolso rechazada",
                 "Tu solicitud de reembolso fue rechazada.",
@@ -55,10 +59,15 @@ public class ReembolsoEmailService {
                 "#991b1b"
         );
 
-        send(data.email(), model);
+        emailQueueService.enqueueHtmlEmail(
+                EmailJobType.REEMBOLSO_RECHAZADA,
+                data.email(),
+                model.title() + " - " + model.eventName(),
+                "refund-status.mustache",
+                model);
     }
 
-    public void enviarCorreoSolicitudReembolsada(RefundEmailData data) {
+    public void encolarCorreoSolicitudReembolsada(RefundEmailData data) {
         RefundEmailModel model = buildModel(
                 "Solicitud de reembolso completada",
                 "Tu solicitud fue marcada como reembolsada.",
@@ -69,10 +78,15 @@ public class ReembolsoEmailService {
                 "#1d4ed8"
         );
 
-        send(data.email(), model);
+        emailQueueService.enqueueHtmlEmail(
+                EmailJobType.REEMBOLSO_REEMBOLSADA,
+                data.email(),
+                model.title() + " - " + model.eventName(),
+                "refund-status.mustache",
+                model);
     }
 
-    public void enviarCorreoSolicitudCreadaUsuario(RefundEmailData data) {
+    public void encolarCorreoSolicitudCreadaUsuario(RefundEmailData data) {
         RefundEmailModel model = buildModel(
                 "Solicitud de reembolso enviada",
                 "Tu solicitud de reembolso fue enviada al organizador.",
@@ -83,13 +97,19 @@ public class ReembolsoEmailService {
                 "#92400e"
         );
 
-        send(data.email(), model);
+        emailQueueService.enqueueHtmlEmail(
+                EmailJobType.REEMBOLSO_SOLICITUD_USUARIO,
+                data.email(),
+                model.title() + " - " + model.eventName(),
+                "refund-status.mustache",
+                model);
     }
 
-    public void enviarCorreoNuevaSolicitudOrganizador(OrganizerRefundEmailData data) {
-        String html = templateRenderer.render("refund-organizer.mustache", data);
+    public void encolarCorreoNuevaSolicitudOrganizador(OrganizerRefundEmailData data) {
+        OrganizerRefundEmailPayload payload = OrganizerRefundEmailPayload.from(data);
+        String subject = "Nueva solicitud de reembolso - " + payload.eventoNombre();
 
-        List<MultipartFile> adjuntos = new ArrayList<>();
+        List<org.springframework.web.multipart.MultipartFile> adjuntos = new ArrayList<>();
         if (data.certificadoCuenta() != null && !data.certificadoCuenta().isEmpty()) {
             adjuntos.add(data.certificadoCuenta());
         }
@@ -97,25 +117,21 @@ public class ReembolsoEmailService {
             adjuntos.add(data.documentoAdicional());
         }
 
-        MultipartFile[] attachments = adjuntos.toArray(new MultipartFile[0]);
-
-        try {
-            if (attachments.length > 0) {
-                emailSenderService.sendHtmlEmailWithAttachments(
-                        data.emailOrganizador(),
-                        "Nueva solicitud de reembolso - " + data.eventoNombre(),
-                        html,
-                        attachments);
-            } else {
-                emailSenderService.sendHtmlEmail(
-                        data.emailOrganizador(),
-                        "Nueva solicitud de reembolso - " + data.eventoNombre(),
-                        html);
-            }
-            log.info("Correo de nueva solicitud enviado al organizador. solicitudId={}, organizador={}",
-                    data.idSolicitud(), data.emailOrganizador());
-        } catch (Exception ex) {
-            log.error("No se pudo enviar correo al organizador. solicitudId={}", data.idSolicitud(), ex);
+        if (!adjuntos.isEmpty()) {
+            emailQueueService.enqueueHtmlEmailWithAttachments(
+                    EmailJobType.REEMBOLSO_SOLICITUD_ORGANIZADOR,
+                    payload.emailOrganizador(),
+                    subject,
+                    "refund-organizer.mustache",
+                    payload,
+                    adjuntos.toArray(new org.springframework.web.multipart.MultipartFile[0]));
+        } else {
+            emailQueueService.enqueueHtmlEmail(
+                    EmailJobType.REEMBOLSO_SOLICITUD_ORGANIZADOR,
+                    payload.emailOrganizador(),
+                    subject,
+                    "refund-organizer.mustache",
+                    payload);
         }
     }
 
@@ -143,19 +159,6 @@ public class ReembolsoEmailService {
                 badgeBg,
                 badgeColor
         );
-    }
-
-    private void send(String email, RefundEmailModel model) {
-        String subject = model.title() + " - " + model.eventName();
-
-        try {
-            String html = templateRenderer.render("refund-status.mustache", model);
-            emailSenderService.sendHtmlEmail(email, subject, html);
-            log.info("Correo de reembolso enviado. estado={}, destinatario={}", model.status(), email);
-        } catch (Exception ex) {
-            log.error("No se pudo enviar correo de reembolso. estado={}, destinatario={}",
-                    model.status(), email, ex);
-        }
     }
 
     private String formatMoney(BigDecimal amount) {

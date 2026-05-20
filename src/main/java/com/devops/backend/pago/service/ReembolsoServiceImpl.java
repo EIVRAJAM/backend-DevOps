@@ -21,8 +21,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -122,7 +120,7 @@ public class ReembolsoServiceImpl implements ReembolsoService {
 
         solicitudRepository.save(solicitud);
 
-        enviarCorreosPostCommit(solicitud, request);
+        encolarCorreos(solicitud, request);
 
         return mapToResponse(solicitud);
     }
@@ -233,7 +231,7 @@ public class ReembolsoServiceImpl implements ReembolsoService {
 
         solicitudRepository.save(solicitud);
 
-        enviarCorreoPostCommit(solicitud, "APROBADA");
+        encolarCorreo(solicitud, "APROBADA");
 
         return mapToResponse(solicitud);
     }
@@ -264,7 +262,7 @@ public class ReembolsoServiceImpl implements ReembolsoService {
 
         solicitudRepository.save(solicitud);
 
-        enviarCorreoPostCommit(solicitud, "RECHAZADA");
+        encolarCorreo(solicitud, "RECHAZADA");
 
         return mapToResponse(solicitud);
     }
@@ -299,7 +297,7 @@ public class ReembolsoServiceImpl implements ReembolsoService {
         solicitud.setFechaProcesamiento(LocalDateTime.now());
         solicitudRepository.save(solicitud);
 
-        enviarCorreoPostCommit(solicitud, "REEMBOLSADA");
+        encolarCorreo(solicitud, "REEMBOLSADA");
 
         return mapToResponse(solicitud);
     }
@@ -315,44 +313,22 @@ public class ReembolsoServiceImpl implements ReembolsoService {
                 .orElse(false);
     }
 
-    private void enviarCorreoPostCommit(SolicitudReembolso solicitud, String accion) {
+    private void encolarCorreo(SolicitudReembolso solicitud, String accion) {
         RefundEmailData data = extractRefundEmailData(solicitud);
 
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                try {
-                    switch (accion) {
-                        case "APROBADA" -> reembolsoEmailService.enviarCorreoSolicitudAprobada(data);
-                        case "RECHAZADA" -> reembolsoEmailService.enviarCorreoSolicitudRechazada(data);
-                        case "REEMBOLSADA" -> reembolsoEmailService.enviarCorreoSolicitudReembolsada(data);
-                    }
-                } catch (Exception e) {
-                    log.error("Error al enviar correo de reembolso {}: {}", accion, e.getMessage());
-                }
-            }
-        });
+        switch (accion) {
+            case "APROBADA" -> reembolsoEmailService.encolarCorreoSolicitudAprobada(data);
+            case "RECHAZADA" -> reembolsoEmailService.encolarCorreoSolicitudRechazada(data);
+            case "REEMBOLSADA" -> reembolsoEmailService.encolarCorreoSolicitudReembolsada(data);
+        }
     }
 
-    private void enviarCorreosPostCommit(SolicitudReembolso solicitud, CrearSolicitudReembolsoRequest request) {
+    private void encolarCorreos(SolicitudReembolso solicitud, CrearSolicitudReembolsoRequest request) {
         RefundEmailData data = extractRefundEmailData(solicitud);
         OrganizerRefundEmailData organizerData = extractOrganizerData(solicitud, request);
 
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                try {
-                    reembolsoEmailService.enviarCorreoSolicitudCreadaUsuario(data);
-                } catch (Exception e) {
-                    log.error("Error al enviar correo de confirmacion al usuario", e);
-                }
-                try {
-                    reembolsoEmailService.enviarCorreoNuevaSolicitudOrganizador(organizerData);
-                } catch (Exception e) {
-                    log.error("Error al enviar correo al organizador", e);
-                }
-            }
-        });
+        reembolsoEmailService.encolarCorreoSolicitudCreadaUsuario(data);
+        reembolsoEmailService.encolarCorreoNuevaSolicitudOrganizador(organizerData);
     }
 
     private RefundEmailData extractRefundEmailData(SolicitudReembolso solicitud) {
