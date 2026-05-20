@@ -9,6 +9,7 @@ import com.devops.backend.evento.entity.Evento;
 import com.devops.backend.evento.entity.HistorialEvento;
 import com.devops.backend.evento.enums.Estado;
 import com.devops.backend.evento.enums.EstadoEvento;
+import com.devops.backend.evento.enums.Moneda;
 import com.devops.backend.evento.exception.EventoNoEditableException;
 import com.devops.backend.evento.mapper.EventoMapper;
 import com.devops.backend.evento.mapper.HistorialEventoMapper;
@@ -16,6 +17,7 @@ import com.devops.backend.evento.repository.EventoRepository;
 import com.devops.backend.evento.repository.HistorialEventoRepository;
 import com.devops.backend.evento.repository.TicketRepository;
 import com.devops.backend.evento.specification.EventoSpecification;
+import com.devops.backend.exception.BadRequestException;
 import com.devops.backend.exception.ConflictException;
 import com.devops.backend.exception.ResourceNotFoundException;
 import com.devops.backend.usuario.entity.Usuario;
@@ -32,6 +34,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -56,6 +59,8 @@ public class EventoServiceImpl implements EventoService {
                         throw new AccessDeniedException(
                                         "Los usuarios no pueden crear eventos. Se requiere rol ORGANIZER o ADMIN.");
                 }
+
+                validarDatosPagoCreate(createEventoDTO);
 
                 Usuario usuarioCreador = obtenerUsuarioAutenticado();
 
@@ -227,6 +232,7 @@ public class EventoServiceImpl implements EventoService {
                                         "No se puede editar un evento en estado " + evento.getEstadoEvento());
                 }
 
+                validarDatosPagoUpdate(updateEventoDTO, evento);
                 validarParqueadero(updateEventoDTO);
                 validarCapacidadMaxima(updateEventoDTO, evento);
 
@@ -550,5 +556,53 @@ public class EventoServiceImpl implements EventoService {
                 // Ajustar capacidadDisponible proporcionalmente
                 int nuevaDisponible = nueva - ocupados;
                 evento.setCapacidadDisponible(nuevaDisponible);
+        }
+
+        void validarDatosPagoCreate(CreateEventoDTO request) {
+                boolean esDePago = Boolean.TRUE.equals(request.esDePago());
+
+                if (esDePago) {
+                        if (request.precio() == null || request.precio().compareTo(BigDecimal.ZERO) <= 0) {
+                                throw new BadRequestException("Debe especificar un precio mayor a 0 si el evento es de pago");
+                        }
+                        if (request.moneda() == null) {
+                                throw new BadRequestException("Debe especificar la moneda si el evento es de pago");
+                        }
+                        return;
+                }
+
+                if (request.precio() != null && request.precio().compareTo(BigDecimal.ZERO) > 0) {
+                        throw new BadRequestException("No debe especificar precio si el evento es gratuito");
+                }
+
+                if (request.moneda() != null) {
+                        throw new BadRequestException("No debe especificar moneda si el evento es gratuito");
+                }
+        }
+
+        void validarDatosPagoUpdate(UpdateEventoDTO dto, Evento evento) {
+                Boolean esDePago = dto.esDePago() != null ? dto.esDePago() : evento.getEsDePago();
+                boolean isPaid = Boolean.TRUE.equals(esDePago);
+
+                BigDecimal precio = dto.precio() != null ? dto.precio() : evento.getPrecio();
+                Moneda moneda = dto.moneda() != null ? dto.moneda() : evento.getMoneda();
+
+                if (isPaid) {
+                        if (precio == null || precio.compareTo(BigDecimal.ZERO) <= 0) {
+                                throw new BadRequestException("Debe especificar un precio mayor a 0 si el evento es de pago");
+                        }
+                        if (moneda == null) {
+                                throw new BadRequestException("Debe especificar la moneda si el evento es de pago");
+                        }
+                        return;
+                }
+
+                if (dto.precio() != null && dto.precio().compareTo(BigDecimal.ZERO) > 0) {
+                        throw new BadRequestException("No debe especificar precio si el evento es gratuito");
+                }
+
+                if (dto.moneda() != null) {
+                        throw new BadRequestException("No debe especificar moneda si el evento es gratuito");
+                }
         }
 }

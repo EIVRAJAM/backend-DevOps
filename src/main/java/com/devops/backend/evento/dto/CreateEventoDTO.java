@@ -58,15 +58,14 @@ public record CreateEventoDTO(
         Integer cuposParqueadero,
 
         @NotNull(message = "Debe indicar si el evento es de pago")
-        @Schema(description = "Indica si el evento requiere pago de entrada", example = "false") 
+        @Schema(description = "Indica si el evento requiere pago de entrada. Si es false, no envíe precio ni moneda", example = "false") 
         Boolean esDePago,
 
         @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser mayor a 0 para eventos de pago") 
-        @Schema(description = "Precio del evento (requerido si esDePago=true)", example = "50000") 
+        @Schema(description = "Precio del evento (obligatorio solo si esDePago=true). No envíe este campo si es gratuito", nullable = true) 
         BigDecimal precio,
 
-        @NotNull(message = "Debe especificar la moneda si el evento es de pago") 
-        @Schema(description = "Moneda del precio del evento (USD, COP, EUR, MXN)", example = "COP", 
+        @Schema(description = "Moneda del precio del evento (obligatorio solo si esDePago=true). USD, COP, EUR, MXN. No envíe este campo si es gratuito", nullable = true,
         allowableValues = {"USD", "COP", "EUR", "MXN" }) 
         Moneda moneda
  ) {}
