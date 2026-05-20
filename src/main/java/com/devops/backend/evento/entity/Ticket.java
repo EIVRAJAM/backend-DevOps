@@ -47,6 +47,9 @@ public class Ticket {
     @Column(name = "stripe_payment_intent_id", length = 100)
     private String stripePaymentIntentId;
 
+    @Column(name = "stripe_client_secret", length = 255)
+    private String stripeClientSecret;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_ticket", nullable = false)
     private EstadoTicket estadoTicket;
@@ -63,6 +66,9 @@ public class Ticket {
 
     @Column(name = "fecha_compra", nullable = false)
     private LocalDateTime fechaCompra;
+
+    @Column(name = "expira_en")
+    private LocalDateTime expiraEn;
 
     @Column(name = "checkin_realizado", nullable = false)
     private Boolean checkinRealizado = false;

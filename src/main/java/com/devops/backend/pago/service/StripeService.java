@@ -14,6 +14,16 @@ public interface StripeService {
     PaymentIntent createPaymentIntent(BigDecimal amount, String currency, String receiptEmail, Long idTicket, Long idEvento, Long idUsuario) throws StripeException;
 
     /**
+     * Consulta un PaymentIntent existente en Stripe.
+     */
+    PaymentIntent retrievePaymentIntent(String paymentIntentId) throws StripeException;
+
+    /**
+     * Cancela un PaymentIntent pendiente en Stripe cuando el checkout local expira.
+     */
+    PaymentIntent cancelPaymentIntent(String paymentIntentId) throws StripeException;
+
+    /**
      * Verifica la firma del webhook y construye el objeto Event
      */
     Event constructEvent(String payload, String sigHeader);
