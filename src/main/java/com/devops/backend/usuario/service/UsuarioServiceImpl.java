@@ -244,4 +244,5 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Usuario con ID " + id + " no encontrado"));
     }
+
 }

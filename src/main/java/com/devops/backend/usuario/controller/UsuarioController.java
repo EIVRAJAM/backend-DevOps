@@ -215,4 +215,5 @@ public class UsuarioController {
             return ResponseEntity.ok(uService.getCompleteStatus(idUsuario));
         }
 
+
 }

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de inscripción</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; }
+        .wrapper { max-width: 600px; margin: 30px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .header { background-color: #1d4ed8; padding: 32px 24px; text-align: center; }
+        .header h1 { color: #ffffff; font-size: 22px; }
+        .body { padding: 32px 24px; color: #333333; }
+        .body p { line-height: 1.6; margin-bottom: 16px; }
+        .card { background: #eff6ff; border-left: 4px solid #1d4ed8; border-radius: 4px; padding: 20px; margin: 24px 0; }
+        .card p { margin-bottom: 8px; }
+        .card strong { color: #1e3a8a; }
+        .ticket-id { font-size: 13px; color: #6b7280; margin-top: 20px; }
+        .footer { background: #f9fafb; padding: 20px 24px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+
+    <div class="header">
+        <h1>🎟️ ¡Inscripción confirmada!</h1>
+    </div>
+
+    <div class="body">
+
+        <p>Hola, <strong th:text="${nombreUsuario}">Nombre del usuario</strong>.</p>
+
+        <p>Tu inscripción al siguiente evento ha sido confirmada exitosamente:</p>
+
+        <div class="card">
+            <p>🎯 <strong>Evento: </strong><span th:text="${nombreEvento}">Nombre del evento</span></p>
+            <p>📅 <strong>Fecha: </strong><span th:text="${fechaEvento}">Fecha del evento</span></p>
+            <p>📍 <strong>Lugar: </strong><span th:text="${lugarEvento}">Lugar del evento</span></p>
+        </div>
+
+        <p>
+            Tu código QR está adjunto a este correo como <strong>ticket-qr.png</strong>.
+            Preséntalo el día del evento para hacer tu check-in.
+        </p>
+
+        <p class="ticket-id">ID de tu ticket: #<span th:text="${idTicket}">0</span></p>
+
+    </div>
+
+    <div class="footer">
+        <p>Este es un mensaje automático. Por favor no respondas a este correo.</p>
+    </div>
+
+</div>
+</body>
+</html>

@@ -146,6 +146,11 @@
 			<artifactId>javase</artifactId>
 			<version>3.5.3</version>
 		</dependency>
+        <!-- Plantillas HTML para correos -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
 	</dependencies>
 
 	<build>
