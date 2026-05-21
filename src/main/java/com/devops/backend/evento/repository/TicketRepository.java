@@ -106,7 +106,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     JOIN FETCH t.evento e
     WHERE e.fechaEvento = :fecha
     AND t.estadoTicket IN :estados
-    AND e.estado = 'ACTIVO'
+    AND e.estado = com.devops.backend.evento.enums.Estado.ACTIVO
     """)
     List<Ticket> findTicketsActivosParaFecha(
             @Param("fecha") LocalDate fecha,

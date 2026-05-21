@@ -26,7 +26,6 @@ import com.devops.backend.shared.events.EventoModificadoEvent;
 import com.devops.backend.usuario.entity.Usuario;
 import com.devops.backend.usuario.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -240,22 +239,21 @@ public class EventoServiceImpl implements EventoService {
                                         "No se puede editar un evento en estado " + evento.getEstadoEvento());
                 }
 
-                validarDatosPagoUpdate(updateEventoDTO, evento);
-                validarParqueadero(updateEventoDTO);
-                validarCapacidadMaxima(updateEventoDTO, evento);
+           validarDatosPagoUpdate(updateEventoDTO, evento);
+           validarParqueadero(updateEventoDTO);
+           validarCapacidadMaxima(updateEventoDTO, evento);
 
-                LocalDate fechaAnterior = evento.getFechaEvento();
-                LocalTime horaAnterior  = evento.getHoraEvento();
-                String lugarAnterior    = evento.getLugarEvento();
+            LocalDate fechaAnterior = evento.getFechaEvento();
+            LocalTime horaAnterior  = evento.getHoraEvento();
+            String lugarAnterior    = evento.getLugarEvento();
 
-                boolean huboCambio =
-                        !Objects.equals(fechaAnterior, updateEventoDTO.fechaEvento()) ||
-                                !Objects.equals(horaAnterior,  updateEventoDTO.horaEvento())  ||
-                                !Objects.equals(lugarAnterior, updateEventoDTO.lugarEvento());
+            Evento eventoActualizado = eventoMapper.updateEntity(updateEventoDTO, evento);
+            Evento eventoGuardado = eventoRepository.save(eventoActualizado);
 
-
-                Evento eventoActualizado = eventoMapper.updateEntity(updateEventoDTO, evento);
-                Evento eventoGuardado = eventoRepository.save(eventoActualizado);
+            boolean huboCambio =
+                    !Objects.equals(fechaAnterior, eventoGuardado.getFechaEvento()) ||
+                            !Objects.equals(horaAnterior,  eventoGuardado.getHoraEvento())  ||
+                            !Objects.equals(lugarAnterior, eventoGuardado.getLugarEvento());
 
             if (huboCambio) {
                 List<Ticket> inscritos = ticketRepository.findTicketsActivosPorEvento(
