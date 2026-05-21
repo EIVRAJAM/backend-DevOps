@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -97,4 +98,18 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
             @Param("ahora") java.time.LocalDateTime ahora,
             @Param("estadoPendiente") EstadoTicket estadoPendiente,
             @Param("estadoExpirado") EstadoTicket estadoExpirado);
+
+    @Query("""
+    SELECT t FROM Ticket t
+    JOIN FETCH t.usuario u
+    JOIN FETCH u.acceso
+    JOIN FETCH t.evento e
+    WHERE e.fechaEvento = :fecha
+    AND t.estadoTicket IN :estados
+    AND e.estado = 'ACTIVO'
+    """)
+    List<Ticket> findTicketsActivosParaFecha(
+            @Param("fecha") LocalDate fecha,
+            @Param("estados") List<EstadoTicket> estados
+    );
 }

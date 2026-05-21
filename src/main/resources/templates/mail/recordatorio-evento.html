@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recordatorio de evento</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fb;
+            font-family: Arial, sans-serif;
+            color: #333333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .content p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+
+        .event-card {
+            background-color: #f8fafc;
+            border-left: 5px solid #2563eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+
+        .event-card h2 {
+            color: #1e3a8a;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .event-detail {
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .event-detail strong {
+            color: #1e40af;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #f8fafc;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .emoji {
+            font-size: 22px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .content {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .event-card h2 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>⏰ ¡Tu evento es mañana!</h1>
+    </div>
+
+    <div class="content">
+        <p>
+            Hola <strong th:text="${nombreUsuario}"></strong>,
+        </p>
+
+        <p>
+            Queremos recordarte que mañana tienes un evento programado. ¡Prepárate para disfrutarlo!
+        </p>
+
+        <div class="event-card">
+            <h2 th:text="${nombreEvento}"></h2>
+
+            <div class="event-detail">
+                📅 <strong>Fecha:</strong>
+                <span th:text="${fechaEvento}"></span>
+            </div>
+
+            <div class="event-detail">
+                🕒 <strong>Hora:</strong>
+                <span th:text="${horaEvento}"></span>
+            </div>
+
+            <div class="event-detail">
+                📍 <strong>Lugar:</strong>
+                <span th:text="${lugarEvento}"></span>
+            </div>
+
+            <div class="event-detail">
+                🎟️ <strong>N° Ticket:</strong>
+                <span th:text="${idTicket}"></span>
+            </div>
+        </div>
+
+        <p style="text-align:center; font-size:18px;">
+            📲 <strong>¡No olvides llevar tu ticket QR!</strong>
+        </p>
+    </div>
+
+    <div class="footer">
+        Gracias por confiar en nosotros 💙<br>
+        Equipo de DevOps
+    </div>
+
+</div>
+
+</body>
+</html>
