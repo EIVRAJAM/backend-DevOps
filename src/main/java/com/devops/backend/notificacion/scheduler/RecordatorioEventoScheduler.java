@@ -25,14 +25,17 @@ public class RecordatorioEventoScheduler {
     @Scheduled(cron = "0 0 10 * * *")
     public void enviarRecordatorios() {
         log.info("[SCHEDULER] Iniciando envío de recordatorios de eventos...");
-        int enviados = procesarRecordatorios();
-        log.info("[SCHEDULER] Recordatorios enviados: {}", enviados);
+        int publicados = procesarRecordatorios();
+        log.info("[SCHEDULER] Recordatorios publicados: {}", publicados);
     }
 
     public int procesarRecordatorios() {
         LocalDate manana = LocalDate.now().plusDays(1);
 
-        List<Ticket> tickets = ticketRepository.findTicketsActivosParaFecha(manana, List.of(EstadoTicket.GRATIS, EstadoTicket.PAGADO));
+        List<Ticket> tickets = ticketRepository.findTicketsActivosParaFecha(
+                manana, List.of(EstadoTicket.GRATIS, EstadoTicket.PAGADO));
+
+        int publicados = 0;
 
         for (Ticket ticket : tickets) {
             String email = ticket.getUsuario().getAcceso() != null
@@ -43,9 +46,10 @@ public class RecordatorioEventoScheduler {
                 eventPublisher.publishEvent(
                         new RecordatorioEventoEvent(this, ticket, ticket.getEvento(), email)
                 );
+                publicados++;
             }
         }
 
-        return tickets.size();
+        return publicados;
     }
 }
