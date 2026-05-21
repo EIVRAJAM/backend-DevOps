@@ -102,7 +102,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     @Query("""
     SELECT t FROM Ticket t
     JOIN FETCH t.usuario u
-    JOIN FETCH u.acceso
+    LEFT JOIN FETCH u.acceso
     JOIN FETCH t.evento e
     WHERE e.fechaEvento = :fecha
     AND t.estadoTicket IN :estados
@@ -117,7 +117,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     @Query("""
     SELECT t FROM Ticket t
     JOIN FETCH t.usuario u
-    JOIN FETCH u.acceso
+    LEFT JOIN FETCH u.acceso
     JOIN FETCH t.evento e
     WHERE e.idEvento = :eventoId
     AND t.estadoTicket IN :estados
