@@ -7,8 +7,10 @@ import com.devops.backend.evento.dto.HistorialEventoDTO;
 import com.devops.backend.evento.dto.UpdateEventoDTO;
 import com.devops.backend.evento.entity.Evento;
 import com.devops.backend.evento.entity.HistorialEvento;
+import com.devops.backend.evento.entity.Ticket;
 import com.devops.backend.evento.enums.Estado;
 import com.devops.backend.evento.enums.EstadoEvento;
+import com.devops.backend.evento.enums.EstadoTicket;
 import com.devops.backend.evento.enums.Moneda;
 import com.devops.backend.evento.exception.EventoNoEditableException;
 import com.devops.backend.evento.mapper.EventoMapper;
@@ -20,9 +22,12 @@ import com.devops.backend.evento.specification.EventoSpecification;
 import com.devops.backend.exception.BadRequestException;
 import com.devops.backend.exception.ConflictException;
 import com.devops.backend.exception.ResourceNotFoundException;
+import com.devops.backend.shared.events.EventoModificadoEvent;
 import com.devops.backend.usuario.entity.Usuario;
 import com.devops.backend.usuario.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +41,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -51,6 +58,7 @@ public class EventoServiceImpl implements EventoService {
         private final HistorialEventoMapper historialEventoMapper;
         private final EventoSpecification eventoSpecification;
         private final EventoAutorizacionService autorizacionService;
+        private final ApplicationEventPublisher eventPublisher;
 
         @Override
         public EventoResponseDTO crearEvento(CreateEventoDTO createEventoDTO) {
@@ -236,10 +244,38 @@ public class EventoServiceImpl implements EventoService {
                 validarParqueadero(updateEventoDTO);
                 validarCapacidadMaxima(updateEventoDTO, evento);
 
-                Evento eventoActualizado = eventoMapper.updateEntity(updateEventoDTO, evento);
+                LocalDate fechaAnterior = evento.getFechaEvento();
+                LocalTime horaAnterior  = evento.getHoraEvento();
+                String lugarAnterior    = evento.getLugarEvento();
 
-                return eventoMapper.toDTO(
-                                eventoRepository.save(eventoActualizado));
+                boolean huboCambio =
+                        !Objects.equals(fechaAnterior, updateEventoDTO.fechaEvento()) ||
+                                !Objects.equals(horaAnterior,  updateEventoDTO.horaEvento())  ||
+                                !Objects.equals(lugarAnterior, updateEventoDTO.lugarEvento());
+
+
+                Evento eventoActualizado = eventoMapper.updateEntity(updateEventoDTO, evento);
+                Evento eventoGuardado = eventoRepository.save(eventoActualizado);
+
+            if (huboCambio) {
+                List<Ticket> inscritos = ticketRepository.findTicketsActivosPorEvento(
+                        idEvento,
+                        List.of(EstadoTicket.GRATIS, EstadoTicket.PAGADO));
+
+                for (Ticket ticket : inscritos) {
+                    String email = ticket.getUsuario().getAcceso() != null
+                            ? ticket.getUsuario().getAcceso().getCorreoAcceso()
+                            : null;
+
+                    if (email != null) {
+                        eventPublisher.publishEvent(new EventoModificadoEvent(
+                                this, ticket, eventoGuardado, email,
+                                fechaAnterior, horaAnterior, lugarAnterior));
+                    }
+                }
+            }
+
+            return eventoMapper.toDTO(eventoGuardado);
         }
 
         @Override

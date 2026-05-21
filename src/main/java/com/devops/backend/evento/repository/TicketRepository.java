@@ -112,4 +112,17 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
             @Param("fecha") LocalDate fecha,
             @Param("estados") List<EstadoTicket> estados
     );
+
+    @Query("""
+    SELECT t FROM Ticket t
+    JOIN FETCH t.usuario u
+    JOIN FETCH u.acceso
+    JOIN FETCH t.evento e
+    WHERE e.idEvento = :eventoId
+    AND t.estadoTicket IN :estados
+""")
+    List<Ticket> findTicketsActivosPorEvento(
+            @Param("eventoId") Long eventoId,
+            @Param("estados") List<EstadoTicket> estados
+    );
 }
