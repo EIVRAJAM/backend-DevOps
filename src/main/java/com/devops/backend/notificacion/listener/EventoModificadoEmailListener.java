@@ -8,11 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
+import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 
 @Slf4j
 @Component
@@ -24,6 +27,7 @@ public class EventoModificadoEmailListener {
 
     @Async("emailTaskExecutor")
     @EventListener
+    @TransactionalEventListener(phase = AFTER_COMMIT)
     public void onEventoModificado(EventoModificadoEvent event) {
         log.debug("[CAMBIO-EVENTO] Notificando cambio a {}", event.getEmailDestinatario());
 
