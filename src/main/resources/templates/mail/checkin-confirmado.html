@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Ingreso Confirmado</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 30px auto; background: #ffffff;
+            border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .header { background-color: #22c55e; padding: 32px 24px; text-align: center; }
+        .header h1 { color: #ffffff; margin: 0; font-size: 24px; }
+        .checkmark { font-size: 56px; }
+        .body { padding: 32px 24px; color: #333333; }
+        .body p { line-height: 1.6; }
+        .info-box { background-color: #f0fdf4; border-left: 4px solid #22c55e;
+            border-radius: 4px; padding: 16px 20px; margin: 24px 0; }
+        .info-box p { margin: 6px 0; font-size: 14px; }
+        .info-box strong { color: #15803d; }
+        .footer { background-color: #f9fafb; text-align: center;
+            padding: 20px 24px; font-size: 12px; color: #9ca3af; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <div class="checkmark" role="img" aria-label="Confirmado">✓</div>
+        <h1>¡Ingreso Confirmado!</h1>
+    </div>
+
+    <div class="body">
+        <p>Hola, <strong th:text="${nombreUsuario}">Usuario</strong>.</p>
+        <p>
+            Tu ingreso al evento ha sido registrado exitosamente.
+            ¡Disfruta la experiencia!
+        </p>
+
+        <div class="info-box">
+            <p><strong>Evento:</strong>
+                <span th:text="${nombreEvento}">Nombre del evento</span></p>
+            <p><strong>Ticket N°:</strong>
+                <span th:text="${idTicket}">000</span></p>
+            <p><strong>Fecha del evento:</strong>
+                <span th:text="${fechaEvento}">Por confirmar</span></p>
+            <p><strong>Lugar:</strong>
+                <span th:text="${lugarEvento}">Por confirmar</span></p>
+            <p><strong>Hora de ingreso:</strong>
+                <span th:text="${fechaCheckin}">--</span></p>
+        </div>
+
+        <p>Si tienes alguna duda, comunícate con el equipo organizador del evento.</p>
+    </div>
+
+    <div class="footer">
+        <p>Este correo fue generado automáticamente, por favor no respondas a este mensaje.</p>
+            Gracias por confiar en nosotros 💙<br>
+            Equipo de DevOps
+    </div>
+
+</div>
+</body>
+</html>

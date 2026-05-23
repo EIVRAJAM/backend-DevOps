@@ -11,9 +11,11 @@ import com.devops.backend.evento.exception.TicketNoValidoParaCheckinException;
 import com.devops.backend.evento.repository.EventoRepository;
 import com.devops.backend.evento.repository.TicketRepository;
 import com.devops.backend.exception.ResourceNotFoundException;
+import com.devops.backend.shared.events.CheckinConfirmadoEvent;
 import com.devops.backend.usuario.entity.Usuario;
 import com.devops.backend.usuario.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,7 +33,7 @@ public class CheckinServiceImpl implements CheckinService {
     private final EventoRepository eventoRepository;
     private final UsuarioRepository usuarioRepository;
     private final EventoAutorizacionService autorizacionService;
-
+    private final ApplicationEventPublisher eventPublisher;
     @Override
     @Transactional
     public CheckinResponseDTO realizarCheckin(Long eventoId, CheckinRequestDTO request) {
@@ -64,6 +66,15 @@ public class CheckinServiceImpl implements CheckinService {
         Usuario asistente = ticket.getUsuario();
         String nombreAsistente = asistente.getNombres() + " " + asistente.getApellidos();
 
+        String emailAsistente = ticket.getUsuario().getAcceso() != null
+                ? ticket.getUsuario().getAcceso().getCorreoAcceso()
+                : null;
+
+        if (emailAsistente != null) {
+            eventPublisher.publishEvent(
+                    new CheckinConfirmadoEvent(this, ticket, ticket.getEvento(), emailAsistente)
+            );
+        }
         return new CheckinResponseDTO(
                 ticket.getIdTicket(),
                 evento.getIdEvento(),
