@@ -76,6 +76,7 @@ public class Ticket {
     @Column(name = "fecha_checkin")
     private LocalDateTime fechaCheckin;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario_checkin")
     private Usuario usuarioCheckin;
@@ -96,6 +97,7 @@ public class Ticket {
         if (estadoTicket == null) {
             estadoTicket = EstadoTicket.PENDIENTE;
         }
+
     }
 
     @PreUpdate
