@@ -66,7 +66,7 @@ public class CheckinServiceImpl implements CheckinService {
         Usuario asistente = ticket.getUsuario();
         String nombreAsistente = asistente.getNombres() + " " + asistente.getApellidos();
 
-        String emailAsistente = ticket.getUsuario().getAcceso() !=null
+        String emailAsistente = ticket.getUsuario().getAcceso() != null
                 ? ticket.getUsuario().getAcceso().getCorreoAcceso()
                 : null;
 
