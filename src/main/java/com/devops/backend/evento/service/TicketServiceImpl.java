@@ -510,6 +510,8 @@ public class TicketServiceImpl implements TicketService {
                 ticket.getCodigoQr(),
                 ticket.getFechaCompra(),
                 ticket.getExpiraEn(),
-                ticket.getCreadoEn());
+                ticket.getCreadoEn(),
+                ticket.getCheckinRealizado(),
+                ticket.getFechaCheckin());
     }
 }

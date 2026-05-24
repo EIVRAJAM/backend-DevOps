@@ -4,8 +4,8 @@ import com.devops.backend.pago.dto.OrganizerRefundEmailData;
 import com.devops.backend.pago.dto.OrganizerRefundEmailPayload;
 import com.devops.backend.pago.dto.RefundEmailData;
 import com.devops.backend.pago.dto.RefundEmailModel;
-import com.devops.backend.shared.email.EmailJobType;
-import com.devops.backend.shared.email.EmailQueueService;
+import com.devops.backend.shared.email.enums.EmailJobType;
+import com.devops.backend.shared.email.queue.EmailQueueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -112,10 +112,19 @@ public class ReembolsoEmailService {
         List<org.springframework.web.multipart.MultipartFile> adjuntos = new ArrayList<>();
         if (data.certificadoCuenta() != null && !data.certificadoCuenta().isEmpty()) {
             adjuntos.add(data.certificadoCuenta());
+            log.info("[REEMBOLSO-EMAIL] Adjuntando certificado: nombre={}, sizeBytes={}",
+                    data.certificadoCuenta().getOriginalFilename(),
+                    data.certificadoCuenta().getSize());
         }
         if (data.documentoAdicional() != null && !data.documentoAdicional().isEmpty()) {
             adjuntos.add(data.documentoAdicional());
+            log.info("[REEMBOLSO-EMAIL] Adjuntando documento adicional: nombre={}, sizeBytes={}",
+                    data.documentoAdicional().getOriginalFilename(),
+                    data.documentoAdicional().getSize());
         }
+
+        log.info("[REEMBOLSO-EMAIL] Encolando correo para organizador: destinatario={}, adjuntos={}",
+                payload.emailOrganizador(), adjuntos.size());
 
         if (!adjuntos.isEmpty()) {
             emailQueueService.enqueueHtmlEmailWithAttachments(

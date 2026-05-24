@@ -1,4 +1,4 @@
-package com.devops.backend.shared.email;
+package com.devops.backend.shared.email.sender;
 
 import jakarta.activation.DataSource;
 import jakarta.mail.internet.MimeMessage;

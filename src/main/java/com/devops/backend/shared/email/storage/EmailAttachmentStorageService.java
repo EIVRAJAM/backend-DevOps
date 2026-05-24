@@ -1,4 +1,4 @@
-package com.devops.backend.shared.email;
+package com.devops.backend.shared.email.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +36,11 @@ public class EmailAttachmentStorageService {
 
         try {
             Files.copy(file.getInputStream(), targetPath);
+            log.info("[ATTACHMENT-STORAGE] MultipartFile guardado: original={}, stored={}, sizeBytes={}, contentType={}",
+                    originalName, storedName, file.getSize(), file.getContentType());
         } catch (IOException e) {
+            log.error("[ATTACHMENT-STORAGE] Error al guardar MultipartFile: original={}, error={}",
+                    originalName, e.getMessage(), e);
             throw new IllegalStateException("No se pudo guardar archivo adjunto: " + originalName, e);
         }
 
@@ -45,6 +49,32 @@ public class EmailAttachmentStorageService {
                 storedName,
                 file.getContentType() != null ? file.getContentType() : "application/octet-stream",
                 file.getSize(),
+                targetPath.toString()
+        );
+    }
+
+    public StoredAttachment store(byte[] data, String originalName, String contentType) {
+        if (data == null || data.length == 0) return null;
+
+        String safeName = sanitizeFilename(originalName);
+        String storedName = UUID.randomUUID() + "_" + safeName;
+        Path targetPath = baseDir.resolve(storedName);
+
+        try {
+            Files.write(targetPath, data);
+            log.info("[ATTACHMENT-STORAGE] byte[] guardado: original={}, stored={}, sizeBytes={}, contentType={}",
+                    safeName, storedName, data.length, contentType);
+        } catch (IOException e) {
+            log.error("[ATTACHMENT-STORAGE] Error al guardar byte[]: original={}, error={}",
+                    safeName, e.getMessage(), e);
+            throw new IllegalStateException("No se pudo guardar archivo adjunto: " + originalName, e);
+        }
+
+        return new StoredAttachment(
+                safeName,
+                storedName,
+                contentType != null ? contentType : "application/octet-stream",
+                data.length,
                 targetPath.toString()
         );
     }

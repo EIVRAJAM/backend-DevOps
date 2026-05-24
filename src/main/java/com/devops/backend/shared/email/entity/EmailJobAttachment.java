@@ -1,4 +1,4 @@
-package com.devops.backend.shared.email;
+package com.devops.backend.shared.email.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

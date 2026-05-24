@@ -11,6 +11,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.Instant;
@@ -118,6 +120,26 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ApiError apiError = buildError(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", request,
                 ex.getMessage());
         return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMaxUploadSizeExceededException(
+            MaxUploadSizeExceededException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ApiError apiError = new ApiError(
+                Instant.now(),
+                HttpStatus.PAYLOAD_TOO_LARGE.value(),
+                HttpStatus.PAYLOAD_TOO_LARGE.getReasonPhrase(),
+                "El archivo supera el tamano maximo permitido de 5 MB.",
+                request.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(apiError, headers, HttpStatus.PAYLOAD_TOO_LARGE);
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ApiError> handleMultipart(MultipartException ex, WebRequest request) {
+        ApiError apiError = buildError(HttpStatus.BAD_REQUEST,
+                "Error al procesar el archivo adjunto. Verifique el tamano y formato.", request,
+                ex.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
     private ApiError buildError(HttpStatus status, String message, WebRequest request,

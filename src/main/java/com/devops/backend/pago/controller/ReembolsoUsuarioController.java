@@ -5,6 +5,7 @@ import com.devops.backend.pago.dto.SolicitudReembolsoResponse;
 import com.devops.backend.pago.service.ReembolsoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -28,6 +30,21 @@ public class ReembolsoUsuarioController {
             @ModelAttribute CrearSolicitudReembolsoRequest request,
             Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
+        log.info("[CONTROLLER] Solicitud de reembolso recibida. ticketId={}, userId={}, motivoLength={}",
+                ticketId, userId,
+                request.getMotivoSolicitud() != null ? request.getMotivoSolicitud().length() : 0);
+        if (request.getCertificadoCuenta() != null && !request.getCertificadoCuenta().isEmpty()) {
+            log.info("[CONTROLLER] Certificado adjunto: nombre={}, sizeBytes={}, contentType={}",
+                    request.getCertificadoCuenta().getOriginalFilename(),
+                    request.getCertificadoCuenta().getSize(),
+                    request.getCertificadoCuenta().getContentType());
+        }
+        if (request.getDocumentoAdicional() != null && !request.getDocumentoAdicional().isEmpty()) {
+            log.info("[CONTROLLER] Documento adicional adjunto: nombre={}, sizeBytes={}, contentType={}",
+                    request.getDocumentoAdicional().getOriginalFilename(),
+                    request.getDocumentoAdicional().getSize(),
+                    request.getDocumentoAdicional().getContentType());
+        }
         SolicitudReembolsoResponse response = reembolsoService.solicitarReembolso(ticketId, userId, request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

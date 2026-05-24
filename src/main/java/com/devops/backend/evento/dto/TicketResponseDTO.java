@@ -50,5 +50,11 @@ public record TicketResponseDTO(
         LocalDateTime expiraEn,
 
         @Schema(description = "Fecha de creacion del registro")
-        LocalDateTime creadoEn
+        LocalDateTime creadoEn,
+
+        @Schema(description = "Indica si el check-in ya fue realizado", example = "true")
+        Boolean checkinRealizado,
+
+        @Schema(description = "Fecha y hora del check-in")
+        LocalDateTime fechaCheckin
 ) {}

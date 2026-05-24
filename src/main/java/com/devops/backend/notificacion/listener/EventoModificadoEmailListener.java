@@ -1,7 +1,7 @@
 package com.devops.backend.notificacion.listener;
 
-import com.devops.backend.notificacion.service.EmailServiceImp;
-import com.devops.backend.notificacion.service.EmailTemplateService;
+import com.devops.backend.shared.email.enums.EmailJobType;
+import com.devops.backend.shared.email.queue.EmailQueueService;
 import com.devops.backend.shared.events.EventoModificadoEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,33 +22,27 @@ import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMI
 @RequiredArgsConstructor
 public class EventoModificadoEmailListener {
 
-    private final EmailServiceImp emailService;
-    private final EmailTemplateService templateService;
+    private final EmailQueueService emailQueueService;
 
     @Async("emailTaskExecutor")
     @EventListener
     @TransactionalEventListener(phase = AFTER_COMMIT)
     public void onEventoModificado(EventoModificadoEvent event) {
-        log.debug("[CAMBIO-EVENTO] Notificando cambio a {}", event.getEmailDestinatario());
+        log.debug("[CAMBIO-EVENTO] Encolando notificacion para {}", event.getEmailDestinatario());
 
         try {
             Map<String, Object> variables = construirVariables(event);
 
-            String htmlContent = templateService.renderizar(
+            emailQueueService.enqueueHtmlEmail(
+                    EmailJobType.CAMBIO_EVENTO,
+                    event.getEmailDestinatario(),
+                    "Cambio en el evento: " + event.getEvento().getNombreEvento(),
                     "mail/cambio-evento",
                     variables
             );
 
-            emailService.enviarConAdjunto(
-                    event.getEmailDestinatario(),
-                    "Cambio en el evento: " + event.getEvento().getNombreEvento(),
-                    htmlContent,
-                    null,
-                    null
-            );
-
         } catch (Exception e) {
-            log.error("[CAMBIO-EVENTO] Falló notificación para ticket #{}: {}",
+            log.error("[CAMBIO-EVENTO] Fallo encolado para ticket #{}: {}",
                     event.getTicket().getIdTicket(), e.getMessage(), e);
         }
     }
@@ -61,7 +55,6 @@ public class EventoModificadoEmailListener {
         vars.put("nombreEvento", event.getEvento().getNombreEvento());
         vars.put("idTicket", event.getTicket().getIdTicket());
 
-        // Valores anteriores
         vars.put("fechaAnterior", event.getFechaAnterior() != null
                 ? event.getFechaAnterior().format(fmt) : "Sin fecha");
         vars.put("horaAnterior", event.getHoraAnterior() != null
@@ -69,7 +62,6 @@ public class EventoModificadoEmailListener {
         vars.put("lugarAnterior", event.getLugarAnterior() != null
                 ? event.getLugarAnterior() : "Sin lugar");
 
-        // Valores nuevos
         vars.put("fechaNueva", event.getEvento().getFechaEvento() != null
                 ? event.getEvento().getFechaEvento().format(fmt) : "Por confirmar");
         vars.put("horaNueva", event.getEvento().getHoraEvento() != null

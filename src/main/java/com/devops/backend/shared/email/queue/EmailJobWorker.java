@@ -1,4 +1,11 @@
-package com.devops.backend.shared.email;
+package com.devops.backend.shared.email.queue;
+
+import com.devops.backend.shared.email.entity.EmailJob;
+import com.devops.backend.shared.email.entity.EmailJobAttachment;
+import com.devops.backend.shared.email.enums.EmailJobStatus;
+import com.devops.backend.shared.email.repository.EmailJobRepository;
+import com.devops.backend.shared.email.storage.EmailAttachmentStorageService;
+import com.devops.backend.shared.email.template.EmailTemplateRenderer;
 
 import jakarta.activation.DataSource;
 import jakarta.mail.internet.MimeMessage;

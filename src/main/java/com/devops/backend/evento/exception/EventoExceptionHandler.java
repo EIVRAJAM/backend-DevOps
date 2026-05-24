@@ -86,6 +86,24 @@ public class EventoExceptionHandler {
     }
 
     /**
+     * Maneja intento de check-in duplicado (409 Conflict)
+     */
+    @ExceptionHandler(CheckinYaRealizadoException.class)
+    public ResponseEntity<ApiError> handleCheckinYaRealizado(CheckinYaRealizadoException ex, WebRequest request) {
+        ApiError apiError = buildError(HttpStatus.CONFLICT, ex.getMessage(), request);
+        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
+    }
+
+    /**
+     * Maneja ticket no valido para check-in (409 Conflict)
+     */
+    @ExceptionHandler(TicketNoValidoParaCheckinException.class)
+    public ResponseEntity<ApiError> handleTicketNoValidoParaCheckin(TicketNoValidoParaCheckinException ex, WebRequest request) {
+        ApiError apiError = buildError(HttpStatus.CONFLICT, ex.getMessage(), request);
+        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
+    }
+
+    /**
      * Construye un objeto ApiError estándar
      */
     private ApiError buildError(HttpStatus status, String message, WebRequest request) {
