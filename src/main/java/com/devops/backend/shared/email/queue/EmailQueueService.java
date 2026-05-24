@@ -1,4 +1,12 @@
-package com.devops.backend.shared.email;
+package com.devops.backend.shared.email.queue;
+
+import com.devops.backend.shared.email.entity.EmailJob;
+import com.devops.backend.shared.email.entity.EmailJobAttachment;
+import com.devops.backend.shared.email.enums.EmailJobStatus;
+import com.devops.backend.shared.email.enums.EmailJobType;
+import com.devops.backend.shared.email.repository.EmailJobRepository;
+import com.devops.backend.shared.email.repository.EmailJobAttachmentRepository;
+import com.devops.backend.shared.email.storage.EmailAttachmentStorageService;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

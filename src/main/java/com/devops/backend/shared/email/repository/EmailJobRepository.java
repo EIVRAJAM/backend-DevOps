@@ -1,5 +1,6 @@
-package com.devops.backend.shared.email;
+package com.devops.backend.shared.email.repository;
 
+import com.devops.backend.shared.email.entity.EmailJob;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

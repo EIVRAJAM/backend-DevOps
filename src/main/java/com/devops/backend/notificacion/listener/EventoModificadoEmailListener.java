@@ -1,7 +1,7 @@
 package com.devops.backend.notificacion.listener;
 
-import com.devops.backend.shared.email.EmailJobType;
-import com.devops.backend.shared.email.EmailQueueService;
+import com.devops.backend.shared.email.enums.EmailJobType;
+import com.devops.backend.shared.email.queue.EmailQueueService;
 import com.devops.backend.shared.events.EventoModificadoEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

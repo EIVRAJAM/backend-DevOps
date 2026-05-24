@@ -1,4 +1,4 @@
-package com.devops.backend.shared.email;
+package com.devops.backend.shared.email.template;
 
 import com.samskivert.mustache.Mustache;
 import lombok.RequiredArgsConstructor;

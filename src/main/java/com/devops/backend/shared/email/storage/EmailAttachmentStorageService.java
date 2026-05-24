@@ -1,4 +1,4 @@
-package com.devops.backend.shared.email;
+package com.devops.backend.shared.email.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,4 +1,4 @@
-package com.devops.backend.shared.email;
+package com.devops.backend.shared.email.enums;
 
 public enum EmailJobType {
     REEMBOLSO_SOLICITUD_USUARIO,
