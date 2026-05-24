@@ -146,4 +146,17 @@ public class UsuarioMapper {
                 ? (short) GENERO_MASCULINO_CODE : (short) GENERO_FEMENINO_CODE;
     }
 
+    public UsuarioOrganizadorDTO toOrganizadorDTO(Usuario u) {
+        return new UsuarioOrganizadorDTO(
+                u.getIdUsuario(),
+                u.getNombres(),
+                u.getApellidos(),
+                u.getDocumento(),
+                u.getAcceso() != null ? u.getAcceso().getUsername() : null,
+                u.getAcceso() != null ? u.getAcceso().getCorreoAcceso() : null,
+                u.getTelefono(),
+                u.getRol().getNombreRol()
+        );
+    }
+
 }

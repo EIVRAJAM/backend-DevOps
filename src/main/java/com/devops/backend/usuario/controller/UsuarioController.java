@@ -70,6 +70,28 @@ public class UsuarioController {
                                                 page, size)));
         }
 
+        @PreAuthorize("hasAnyRole('ORGANIZER','ADMIN')")
+        @GetMapping("/organizador")
+        @Operation(summary = "Buscar usuarios - ORGANIZER/ADMIN", description = "Busca usuarios con rol ROLE_USER. Soporta filtros por documento, nombres, apellidos, username y correo. Retorna solo informacion no sensible.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Pagina de usuarios recuperada exitosamente"),
+                        @ApiResponse(responseCode = "401", description = "Token JWT invalido o expirado"),
+                        @ApiResponse(responseCode = "403", description = "Acceso denegado: solo organizadores y admins")
+        })
+        public ResponseEntity<Page<UsuarioOrganizadorDTO>> buscarOrganizador(
+                        @RequestParam(required = false) @Parameter(description = "Filtro opcional: numero de documento (busqueda exacta)", example = "1234567890") String documento,
+                        @RequestParam(required = false) @Parameter(description = "Filtro opcional: nombres del usuario (busqueda parcial)", example = "Juan") String nombres,
+                        @RequestParam(required = false) @Parameter(description = "Filtro opcional: apellidos del usuario (busqueda parcial)", example = "Perez") String apellidos,
+                        @RequestParam(required = false) @Parameter(description = "Filtro opcional: username (busqueda parcial)", example = "juan.perez") String username,
+                        @RequestParam(required = false) @Parameter(description = "Filtro opcional: correo electronico (busqueda parcial)", example = "juan@example.com") String correo,
+                        @RequestParam(defaultValue = "0") @Parameter(description = "Numero de pagina (comienza en 0)", example = "0") int page,
+                        @RequestParam(defaultValue = "10") @Parameter(description = "Cantidad de registros por pagina (maximo 100)", example = "10") int size) {
+
+                return ResponseEntity.ok(
+                                uService.buscarUsuariosOrganizador(
+                                                new UsuarioFilterRequest(documento, nombres, apellidos, null, page, size),
+                                                username, correo));
+        }
 
         @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
         @GetMapping("/{id}")
