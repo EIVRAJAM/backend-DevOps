@@ -175,6 +175,8 @@ public class PagoServiceImpl implements PagoService {
         return com.devops.backend.pago.dto.PagoResponse.builder()
                 .idPago(p.getIdPago())
                 .idTicket(p.getTicket().getIdTicket())
+                .eventoId(p.getTicket().getEvento().getIdEvento())
+                .usuarioId(p.getTicket().getUsuario().getIdUsuario())
                 .stripeChargeId(p.getStripeChargeId())
                 .stripeRefundId(p.getStripeRefundId())
                 .monto(p.getMonto())
