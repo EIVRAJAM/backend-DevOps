@@ -57,6 +57,7 @@ public class EventoServiceImpl implements EventoService {
         private final HistorialEventoMapper historialEventoMapper;
         private final EventoSpecification eventoSpecification;
         private final EventoAutorizacionService autorizacionService;
+        private final EventoStaffService eventoStaffService;
         private final ApplicationEventPublisher eventPublisher;
 
         @Override
@@ -416,8 +417,10 @@ public class EventoServiceImpl implements EventoService {
 
                 evento.setEstadoEvento(EstadoEvento.CANCELADO);
 
-                return eventoMapper.toDTO(
-                                eventoRepository.save(evento));
+                eventoRepository.save(evento);
+                eventoStaffService.desactivarStaffPorEvento(idEvento);
+
+                return eventoMapper.toDTO(evento);
         }
 
         @Override
@@ -439,8 +442,10 @@ public class EventoServiceImpl implements EventoService {
 
                 evento.setEstadoEvento(EstadoEvento.CERRADO);
 
-                return eventoMapper.toDTO(
-                                eventoRepository.save(evento));
+                eventoRepository.save(evento);
+                eventoStaffService.desactivarStaffPorEvento(idEvento);
+
+                return eventoMapper.toDTO(evento);
         }
 
         @Override

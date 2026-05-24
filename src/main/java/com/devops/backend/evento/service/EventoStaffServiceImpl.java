@@ -14,6 +14,7 @@ import com.devops.backend.exception.ResourceNotFoundException;
 import com.devops.backend.usuario.entity.Usuario;
 import com.devops.backend.usuario.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventoStaffServiceImpl implements EventoStaffService {
@@ -149,6 +151,13 @@ public class EventoStaffServiceImpl implements EventoStaffService {
     public boolean tieneAsignacionesActivas() {
         Long idAutenticado = obtenerIdUsuarioAutenticado();
         return eventoStaffRepository.existsByUsuario_IdUsuarioAndEstado(idAutenticado, Estado.ACTIVO);
+    }
+
+    @Override
+    @Transactional
+    public void desactivarStaffPorEvento(Long eventoId) {
+        int afectados = eventoStaffRepository.desactivarPorEvento(eventoId);
+        log.info("Staff desactivado por cierre/cancelacion del evento {}: {} asignaciones afectadas", eventoId, afectados);
     }
 
     // --- Helpers ---
