@@ -19,4 +19,6 @@ public interface EventoStaffService {
     List<MisAsignacionesStaffDTO> obtenerMisAsignaciones();
 
     boolean tieneAsignacionesActivas();
+
+    void desactivarStaffPorEvento(Long eventoId);
 }
