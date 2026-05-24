@@ -245,4 +245,19 @@ public class UsuarioServiceImpl implements UsuarioService {
                         "Usuario con ID " + id + " no encontrado"));
     }
 
+    @Override
+    public Page<UsuarioOrganizadorDTO> buscarUsuariosOrganizador(UsuarioFilterRequest filter, String username, String correo) {
+        Specification<Usuario> spec = Specification
+                .where(UsuarioSpecification.porRol("ROLE_USER"))
+                .and(UsuarioSpecification.porDocumento(filter.documento()))
+                .and(UsuarioSpecification.porNombre(filter.nombre()))
+                .and(UsuarioSpecification.porApellido(filter.apellido()))
+                .and(UsuarioSpecification.porUsername(username))
+                .and(UsuarioSpecification.porCorreo(correo));
+
+        PageRequest pageable = PageRequest.of(filter.page(), filter.size());
+
+        return usuarioRepository.findAll(spec, pageable)
+                .map(usuarioMapper::toOrganizadorDTO);
+    }
 }

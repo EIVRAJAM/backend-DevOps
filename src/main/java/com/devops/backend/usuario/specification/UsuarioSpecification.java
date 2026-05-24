@@ -34,5 +34,19 @@ public class UsuarioSpecification {
         };
     }
 
+    public static Specification<Usuario> porUsername(String username) {
+        return (root, query, cb) -> {
+            if (username == null || username.isEmpty()) return cb.conjunction();
+            return cb.like(cb.lower(root.join("acceso").get("username")), "%" + username.toLowerCase() + "%");
+        };
+    }
+
+    public static Specification<Usuario> porCorreo(String correo) {
+        return (root, query, cb) -> {
+            if (correo == null || correo.isEmpty()) return cb.conjunction();
+            return cb.like(cb.lower(root.join("acceso").get("correoAcceso")), "%" + correo.toLowerCase() + "%");
+        };
+    }
+
 
 }
