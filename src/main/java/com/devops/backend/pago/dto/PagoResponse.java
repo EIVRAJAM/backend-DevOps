@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 public class PagoResponse {
     private Long idPago;
     private Long idTicket;
+    private Long eventoId;
+    private Long usuarioId;
     private String stripeChargeId;
     private String stripeRefundId;
     private BigDecimal monto;
