@@ -3,6 +3,7 @@ package com.devops.backend.evento.service;
 import com.devops.backend.evento.dto.CheckinRequestDTO;
 import com.devops.backend.evento.dto.CheckinResponseDTO;
 import com.devops.backend.evento.dto.CheckinResumenDTO;
+import com.devops.backend.evento.dto.EstadoCheckinDTO;
 import com.devops.backend.evento.entity.Evento;
 import com.devops.backend.evento.entity.Ticket;
 import com.devops.backend.evento.enums.Estado;
@@ -120,6 +121,52 @@ public class CheckinServiceImpl implements CheckinService {
                 totalIngresados,
                 totalPendientes,
                 porcentaje
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public EstadoCheckinDTO obtenerEstadoCheckin(Long eventoId) {
+        autorizacionService.validarAccesoOperativo(eventoId);
+
+        Evento evento = eventoRepository.findById(eventoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado"));
+
+        ZoneId zona = ZoneId.of("America/Bogota");
+        ZonedDateTime ahora = ZonedDateTime.now(zona);
+
+        LocalDateTime aperturaCheckin = null;
+        if (evento.getFechaEvento() != null && evento.getHoraEvento() != null) {
+            ZonedDateTime inicioEvento = ZonedDateTime.of(
+                    evento.getFechaEvento(), evento.getHoraEvento(), zona);
+            aperturaCheckin = inicioEvento.minusHours(1).toLocalDateTime();
+        }
+
+        boolean habilitado = true;
+        String motivo = "Check-in disponible";
+
+        if (evento.getEstadoEvento() != EstadoEvento.PUBLICADO) {
+            habilitado = false;
+            motivo = "El evento no esta publicado. Estado: " + evento.getEstadoEvento();
+        } else if (evento.getEstado() != Estado.ACTIVO) {
+            habilitado = false;
+            motivo = "El evento no esta activo. Estado: " + evento.getEstado();
+        } else if (aperturaCheckin != null && ahora.isBefore(aperturaCheckin.atZone(zona))) {
+            habilitado = false;
+            motivo = "El check-in aun no esta habilitado. Se abre 1 hora antes del evento.";
+        }
+
+        return new EstadoCheckinDTO(
+                habilitado,
+                motivo,
+                evento.getIdEvento(),
+                evento.getNombreEvento(),
+                evento.getEstadoEvento().name(),
+                evento.getEstado().name(),
+                evento.getFechaEvento(),
+                evento.getHoraEvento(),
+                aperturaCheckin,
+                ahora.toLocalDateTime()
         );
     }
 
