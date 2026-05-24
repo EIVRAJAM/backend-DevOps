@@ -1,9 +1,8 @@
-
 package com.devops.backend.notificacion.listener;
 
 import com.devops.backend.evento.service.QrCodeService;
-import com.devops.backend.notificacion.service.EmailServiceImp;
-import com.devops.backend.notificacion.service.EmailTemplateService;
+import com.devops.backend.shared.email.EmailJobType;
+import com.devops.backend.shared.email.EmailQueueService;
 import com.devops.backend.shared.events.InscripcionConfirmadaEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,43 +22,33 @@ import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMI
 @RequiredArgsConstructor
 public class InscripcionEmailListener {
 
-    private final EmailServiceImp emailService;
-    private final EmailTemplateService templateService;
+    private final EmailQueueService emailQueueService;
     private final QrCodeService qrCodeService;
 
-    /**
-     * El usuario ya recibió su respuesta 201 antes de que este método siquiera empiece.
-     */
     @Async("emailTaskExecutor")
     @EventListener
     @TransactionalEventListener(phase = AFTER_COMMIT)
     public void onInscripcionConfirmada(InscripcionConfirmadaEvent event) {
-        log.debug("[EMAIL-LISTENER] Procesando confirmación para ticket #{}", event.getTicket().getIdTicket());
+        log.debug("[EMAIL-LISTENER] Encolando confirmacion para ticket #{}", event.getTicket().getIdTicket());
 
         try {
             byte[] qrBytes = qrCodeService.generarQrPng(event.getTicket().getCodigoQr());
 
-            // 2. Preparar las variables para la plantilla HTML
             Map<String, Object> variables = construirVariables(event);
 
-            // 3. Renderizar el HTML con Thymeleaf
-            String htmlContent = templateService.renderizar(
-                    "mail/confirmacion-inscripcion",
-                    variables
-            );
-
-            // 4. Enviar con QR adjunto
-            emailService.enviarConAdjunto(
+            emailQueueService.enqueueHtmlEmailWithByteAttachment(
+                    EmailJobType.INSCRIPCION,
                     event.getEmailDestinatario(),
-                    " Tu ticket para " + event.getEvento().getNombreEvento(),
-                    htmlContent,
+                    "Tu ticket para " + event.getEvento().getNombreEvento(),
+                    "mail/confirmacion-inscripcion",
+                    variables,
                     qrBytes,
-                    "ticket-qr.png"
+                    "ticket-qr.png",
+                    "image/png"
             );
 
         } catch (Exception e) {
-
-            log.error("[EMAIL-LISTENER] Falló envío de confirmación para ticket #{}: {}",
+            log.error("[EMAIL-LISTENER] Fallo encolado de confirmacion para ticket #{}: {}",
                     event.getTicket().getIdTicket(), e.getMessage(), e);
         }
     }

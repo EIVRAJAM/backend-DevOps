@@ -1,7 +1,7 @@
 package com.devops.backend.notificacion.listener;
 
-import com.devops.backend.notificacion.service.EmailServiceImp;
-import com.devops.backend.notificacion.service.EmailTemplateService;
+import com.devops.backend.shared.email.EmailJobType;
+import com.devops.backend.shared.email.EmailQueueService;
 import com.devops.backend.shared.events.RecordatorioEventoEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,36 +22,30 @@ import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMI
 @RequiredArgsConstructor
 public class RecordatorioEmailListener {
 
-    private final EmailServiceImp emailService;
-    private final EmailTemplateService templateService;
+    private final EmailQueueService emailQueueService;
 
     @Async("emailTaskExecutor")
     @EventListener
     @TransactionalEventListener(phase = AFTER_COMMIT)
     public void onRecordatorioEvento(RecordatorioEventoEvent event) {
-        log.debug("[RECORDATORIO] Enviando recordatorio para ticket #{}", event.getTicket().getIdTicket());
+        log.debug("[RECORDATORIO] Encolando recordatorio para ticket #{}", event.getTicket().getIdTicket());
 
         try {
             Map<String, Object> variables = construirVariables(event);
 
-            String htmlContent = templateService.renderizar(
+            emailQueueService.enqueueHtmlEmail(
+                    EmailJobType.RECORDATORIO,
+                    event.getEmailDestinatario(),
+                    "Recordatorio: " + event.getEvento().getNombreEvento() + " es manana",
                     "mail/recordatorio-evento",
                     variables
             );
 
-            emailService.enviarConAdjunto(
-                    event.getEmailDestinatario(),
-                    "Recordatorio: " + event.getEvento().getNombreEvento() + " es mañana",
-                    htmlContent,
-                    null,
-                    null
-            );
-
-            log.info("[RECORDATORIO] Correo enviado a {} para evento #{}",
+            log.info("[RECORDATORIO] Job encolado para {} - evento #{}",
                     event.getEmailDestinatario(), event.getEvento().getIdEvento());
 
         } catch (Exception e) {
-            log.error("[RECORDATORIO] Falló envío para ticket #{}: {}",
+            log.error("[RECORDATORIO] Fallo encolado para ticket #{}: {}",
                     event.getTicket().getIdTicket(), e.getMessage(), e);
         }
     }
