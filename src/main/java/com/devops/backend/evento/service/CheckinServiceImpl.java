@@ -5,6 +5,8 @@ import com.devops.backend.evento.dto.CheckinResponseDTO;
 import com.devops.backend.evento.dto.CheckinResumenDTO;
 import com.devops.backend.evento.entity.Evento;
 import com.devops.backend.evento.entity.Ticket;
+import com.devops.backend.evento.enums.Estado;
+import com.devops.backend.evento.enums.EstadoEvento;
 import com.devops.backend.evento.enums.EstadoTicket;
 import com.devops.backend.evento.exception.CheckinYaRealizadoException;
 import com.devops.backend.evento.exception.TicketNoValidoParaCheckinException;
@@ -23,6 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -39,9 +43,11 @@ public class CheckinServiceImpl implements CheckinService {
     public CheckinResponseDTO realizarCheckin(Long eventoId, CheckinRequestDTO request) {
         autorizacionService.validarAccesoOperativo(eventoId);
 
-        if (!eventoRepository.existsById(eventoId)) {
-            throw new ResourceNotFoundException("Evento no encontrado");
-        }
+        Evento evento = eventoRepository.findById(eventoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado"));
+
+        validarEstadoEvento(evento);
+        validarVentanaCheckin(evento);
 
         Ticket ticket = ticketRepository.findByEvento_IdEventoAndCodigoQr(eventoId, request.codigoQr())
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontró ningún ticket válido con ese código QR para este evento"));
@@ -62,7 +68,6 @@ public class CheckinServiceImpl implements CheckinService {
 
         ticket = ticketRepository.save(ticket);
 
-        Evento evento = ticket.getEvento();
         Usuario asistente = ticket.getUsuario();
         String nombreAsistente = asistente.getNombres() + " " + asistente.getApellidos();
 
@@ -116,6 +121,36 @@ public class CheckinServiceImpl implements CheckinService {
                 totalPendientes,
                 porcentaje
         );
+    }
+
+    private void validarEstadoEvento(Evento evento) {
+        if (evento.getEstadoEvento() != EstadoEvento.PUBLICADO) {
+            throw new TicketNoValidoParaCheckinException(
+                    "El evento no esta disponible para check-in. Estado: " + evento.getEstadoEvento());
+        }
+        if (evento.getEstado() != Estado.ACTIVO) {
+            throw new TicketNoValidoParaCheckinException(
+                    "El evento no esta activo. Estado: " + evento.getEstado());
+        }
+    }
+
+    private void validarVentanaCheckin(Evento evento) {
+        if (evento.getFechaEvento() == null || evento.getHoraEvento() == null) {
+            return;
+        }
+
+        ZoneId zona = ZoneId.of("America/Bogota");
+        ZonedDateTime ahora = ZonedDateTime.now(zona);
+        ZonedDateTime inicioEvento = ZonedDateTime.of(
+                evento.getFechaEvento(),
+                evento.getHoraEvento(),
+                zona);
+        ZonedDateTime aperturaCheckin = inicioEvento.minusHours(1);
+
+        if (ahora.isBefore(aperturaCheckin)) {
+            throw new TicketNoValidoParaCheckinException(
+                    "El check-in aun no esta habilitado. Se abre 1 hora antes del evento.");
+        }
     }
 
     private Usuario obtenerUsuarioAutenticado() {
