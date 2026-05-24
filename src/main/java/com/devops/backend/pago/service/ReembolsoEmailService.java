@@ -112,10 +112,19 @@ public class ReembolsoEmailService {
         List<org.springframework.web.multipart.MultipartFile> adjuntos = new ArrayList<>();
         if (data.certificadoCuenta() != null && !data.certificadoCuenta().isEmpty()) {
             adjuntos.add(data.certificadoCuenta());
+            log.info("[REEMBOLSO-EMAIL] Adjuntando certificado: nombre={}, sizeBytes={}",
+                    data.certificadoCuenta().getOriginalFilename(),
+                    data.certificadoCuenta().getSize());
         }
         if (data.documentoAdicional() != null && !data.documentoAdicional().isEmpty()) {
             adjuntos.add(data.documentoAdicional());
+            log.info("[REEMBOLSO-EMAIL] Adjuntando documento adicional: nombre={}, sizeBytes={}",
+                    data.documentoAdicional().getOriginalFilename(),
+                    data.documentoAdicional().getSize());
         }
+
+        log.info("[REEMBOLSO-EMAIL] Encolando correo para organizador: destinatario={}, adjuntos={}",
+                payload.emailOrganizador(), adjuntos.size());
 
         if (!adjuntos.isEmpty()) {
             emailQueueService.enqueueHtmlEmailWithAttachments(
