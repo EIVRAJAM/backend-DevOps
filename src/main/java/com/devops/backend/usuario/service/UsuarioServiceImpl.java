@@ -134,12 +134,14 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         List<ApiValidationError> errors = new ArrayList<>();
 
-        if (usuarioRepository.existsByDocumentoAndIdUsuarioNot(request.documento(), id)) {
-            errors.add(new ApiValidationError("documento", "El documento ya está registrado por otro usuario"));
+        if (request.documento() != null
+                && usuarioRepository.existsByDocumentoAndIdUsuarioNot(request.documento(), id)) {
+            errors.add(new ApiValidationError("documento", "El documento ya esta registrado por otro usuario"));
         }
 
-        if (usuarioRepository.existsByTelefonoAndIdUsuarioNot(request.telefono(),id)){
-            errors.add(new ApiValidationError("telefono", "El telefono ya está registrado por otro usuario"));
+        if (request.telefono() != null
+                && usuarioRepository.existsByTelefonoAndIdUsuarioNot(request.telefono(), id)) {
+            errors.add(new ApiValidationError("telefono", "El telefono ya esta registrado por otro usuario"));
         }
 
 

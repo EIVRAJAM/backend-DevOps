@@ -25,11 +25,12 @@ import org.springframework.web.bind.annotation.*;
 public class UsuarioController {
 
         private final UsuarioService uService;
+
         public UsuarioController(UsuarioService uService, FuncionalidadService funcionalidadService) {
                 this.uService = uService;
         }
 
-        @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
+        @PreAuthorize("hasRole('ADMIN')") // Verificamos si es Admin
         @PostMapping()
         @Operation(summary = "Crear nuevo usuario - ADMIN", description = "Crea un nuevo usuario en el sistema. Se valida que el documento sea únicos. Los usuarios creados por esta ruta requieren que se cree su acceso luego en el módulo de Acceso.")
         @ApiResponses({
@@ -43,8 +44,7 @@ public class UsuarioController {
                 return ResponseEntity.status(HttpStatus.CREATED).body(uService.saveUser(signUpRequest));
         }
 
-
-        @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
+        @PreAuthorize("hasRole('ADMIN')") // Verificamos si es Admin
         @GetMapping()
         @Operation(summary = "Listar usuarios con paginación y filtros - ADMIN", description = "Obtiene lista paginada de usuarios. Soporta filtros por documento, nombres, apellidos y rol. Todos los parámetros de filtro son opcionales.")
         @ApiResponses({
@@ -89,11 +89,12 @@ public class UsuarioController {
 
                 return ResponseEntity.ok(
                                 uService.buscarUsuariosOrganizador(
-                                                new UsuarioFilterRequest(documento, nombres, apellidos, null, page, size),
+                                                new UsuarioFilterRequest(documento, nombres, apellidos, null, page,
+                                                                size),
                                                 username, correo));
         }
 
-        @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
+        @PreAuthorize("hasRole('ADMIN')") // Verificamos si es Admin
         @GetMapping("/{id}")
         @Operation(summary = "Obtener usuario por ID - ADMIN", description = "Recupera información completa de un usuario específico por su ID. Solo administradores pueden ver datos de otros usuario.")
         @ApiResponses({
@@ -137,7 +138,7 @@ public class UsuarioController {
                 return ResponseEntity.ok(uService.findByIdUser(idUsuario));
         }
 
-        @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
+        @PreAuthorize("hasRole('ADMIN')") // Verificamos si es Admin
         @GetMapping("/document/{document}")
         @Operation(summary = "Obtener usuario por documento - ADMIN   ", description = "Recupera información de un usuario usando su número de documento de identificación (búsqueda exacta).")
         @ApiResponses({
@@ -150,15 +151,20 @@ public class UsuarioController {
                 return ResponseEntity.ok(uService.findByDocumento(document));
         }
 
-        @PutMapping("")
-        @Operation(summary = "Actualizar información de usuario", description = "Actualiza datos personales de un usuario (nombres, apellidos, teléfono, género, fecha nacimiento,). Usuarios normales solo pueden actualizar sus propios datos.")
+        @PatchMapping("/me")
+        @Operation(
+                summary = "Actualizar perfil propio",
+                description = "Permite al usuario autenticado actualizar parcialmente sus datos personales. "
+                        + "Todos los campos son opcionales: solo se actualizan los campos enviados en el request. "
+                        + "El usuario objetivo se obtiene desde el JWT, no desde el request. "
+                        + "No permite modificar estado, rol ni credenciales."
+        )
         @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Usuario actualizado exitosamente"),
-                        @ApiResponse(responseCode = "400", description = "Validación fallida: datos incompletos o formato inválido"),
-                        @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
-                        @ApiResponse(responseCode = "403", description = "Acceso denegado: usuario solo puede actualizar su propio perfil"),
-                        @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
-                        @ApiResponse(responseCode = "409", description = "Conflicto: documento ya registrado a otro usuario")
+                        @ApiResponse(responseCode = "200", description = "Perfil actualizado exitosamente"),
+                        @ApiResponse(responseCode = "400", description = "Datos invalidos en el request"),
+                        @ApiResponse(responseCode = "401", description = "Token JWT invalido o expirado"),
+                        @ApiResponse(responseCode = "404", description = "Usuario del token no encontrado"),
+                        @ApiResponse(responseCode = "409", description = "Documento o telefono ya registrado por otro usuario")
         })
         public ResponseEntity<UserListResponse> update(@Valid @RequestBody UpdateUsuarioRequest request) {
 
@@ -167,7 +173,7 @@ public class UsuarioController {
                 return ResponseEntity.ok(uService.updateUser(idUsuario, request));
         }
 
-        @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
+        @PreAuthorize("hasRole('ADMIN')") // Verificamos si es Admin
         @PutMapping("/{id}/admin")
         @Operation(summary = "Actualizar usuario - ADMIN", description = "Actualiza todos los atributos de un usuario incluyendo su estado y rol. Solo administradores pueden usar este endpoint. Permite cambiar el estado del usuario (ACTIVO, INACTIVO, BLOQUEADO).")
         @ApiResponses({
@@ -185,7 +191,7 @@ public class UsuarioController {
                 return ResponseEntity.ok(uService.updateUserAdmin(id, request));
         }
 
-        @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
+        @PreAuthorize("hasRole('ADMIN')") // Verificamos si es Admin
         @PatchMapping("/{id}/activar")
         @Operation(summary = "Activar usuario - ADMIN", description = "Cambia el estado del usuario a ACTIVO. Solo administradores pueden realizar esta operación. Usuarios activos pueden iniciar sesión y acceder al sistema.")
         @ApiResponses({
@@ -201,7 +207,7 @@ public class UsuarioController {
                 return ResponseEntity.ok(uService.activar(id));
         }
 
-        @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
+        @PreAuthorize("hasRole('ADMIN')") // Verificamos si es Admin
         @PatchMapping("/{id}/desactivar")
         @Operation(summary = "Desactivar usuario - ADMIN", description = "Cambia el estado del usuario a INACTIVO. Solo administradores pueden realizar esta operación. Usuarios inactivos no pueden iniciar sesión.")
         @ApiResponses({
@@ -217,7 +223,7 @@ public class UsuarioController {
                 return ResponseEntity.ok(uService.desactivar(id));
         }
 
-        @PreAuthorize("hasRole('ADMIN')") //Verificamos si es Admin
+        @PreAuthorize("hasRole('ADMIN')") // Verificamos si es Admin
         @PatchMapping("/{id}/bloquear")
         @Operation(summary = "Bloquear usuario - ADMIN", description = "Cambia el estado del usuario a BLOQUEADO. Solo administradores pueden realizar esta operación. Usuarios bloqueados no pueden iniciar sesión hasta ser desbloqueados.")
         @ApiResponses({
@@ -234,22 +240,18 @@ public class UsuarioController {
         }
 
         @GetMapping("/complete-status")
-        @Operation(
-                summary = "Verificar si el usuario debe completar su registro",
-                description = "Retorna si el usuario autenticado tiene campos obligatorios incompletos (caso OAuth)."
-        )
+        @Operation(summary = "Verificar si el usuario debe completar su registro", description = "Retorna si el usuario autenticado tiene campos obligatorios incompletos (caso OAuth).")
         @ApiResponses({
-                @ApiResponse(responseCode = "200", description = "Estado de completitud obtenido exitosamente"),
-                @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
-                @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+                        @ApiResponse(responseCode = "200", description = "Estado de completitud obtenido exitosamente"),
+                        @ApiResponse(responseCode = "401", description = "Token JWT inválido o expirado"),
+                        @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
         })
         public ResponseEntity<CompleteStatusResponse> getCompleteStatus() {
 
-           Authentication aut = SecurityContextHolder.getContext().getAuthentication();
-           Long idUsuario = Long.parseLong(aut.getName());
+                Authentication aut = SecurityContextHolder.getContext().getAuthentication();
+                Long idUsuario = Long.parseLong(aut.getName());
 
-            return ResponseEntity.ok(uService.getCompleteStatus(idUsuario));
+                return ResponseEntity.ok(uService.getCompleteStatus(idUsuario));
         }
-
 
 }
