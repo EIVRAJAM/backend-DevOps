@@ -1,26 +1,38 @@
 package com.devops.backend.usuario.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Date;
 
-@Schema(description = "Datos para actualizar información de un usuario existente")
+@Schema(description = "Datos para actualizar informacion del perfil propio. Todos los campos son opcionales: solo se actualizan los campos enviados.")
 public record UpdateUsuarioRequest(
-                @NotBlank(message = "El documento no puede estar vacío") @Size(max = 20) @Schema(description = "Número de documento (puede cambiar si no está registrado)", example = "1234567890") String documento,
 
-                @NotBlank(message = "Los nombres no pueden estar vacíos") @Schema(description = "Nombres del usuario", example = "Juan Carlos") String nombres,
+        @Size(max = 150, message = "El documento no puede exceder los 150 caracteres")
+        @Schema(description = "Numero de documento de identificacion (opcional)", example = "1234567890")
+        String documento,
 
-                @NotBlank(message = "Los apellidos no pueden estar vacíos") @Schema(description = "Apellidos del usuario", example = "Pérez García") String apellidos,
+        @Size(max = 150, message = "Los nombres no pueden exceder los 150 caracteres")
+        @Schema(description = "Nombres del usuario (opcional)", example = "Juan Carlos")
+        String nombres,
 
-                @NotBlank(message = "El Telefono no puede estar vacío") @Schema(description = "Número de teléfono de contacto", example = "+57 3001234567") String telefono,
+        @Size(max = 150, message = "Los apellidos no pueden exceder los 150 caracteres")
+        @Schema(description = "Apellidos del usuario (opcional)", example = "Perez Garcia")
+        String apellidos,
 
-                @NotBlank(message = "Genero no puede estar vacío") @Pattern(regexp = "masculino|femenino", message = "El género debe ser masculino o femenino") @Schema(description = "Género (masculino o femenino)", example = "masculino") String genero,
+        @Size(max = 50, message = "El telefono no puede exceder los 50 caracteres")
+        @Schema(description = "Numero de telefono de contacto (opcional)", example = "+57 3001234567")
+        String telefono,
 
-                @NotNull(message = "Fecha de nacimiento no puede estar vacío") @Schema(description = "Fecha de nacimiento (ISO-8601)", example = "1990-05-15") Date fechaNacimiento
+        @Pattern(regexp = "masculino|femenino", message = "El genero debe ser masculino o femenino")
+        @Schema(description = "Genero del usuario (opcional)", example = "masculino")
+        String genero,
+
+        @Past(message = "La fecha de nacimiento no puede ser futura")
+        @Schema(description = "Fecha de nacimiento (opcional, no puede ser futura)", example = "1990-05-15")
+        Date fechaNacimiento
 
 ) {
 }

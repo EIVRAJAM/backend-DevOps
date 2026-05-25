@@ -105,18 +105,24 @@ public class UsuarioMapper {
     }
 
     public void applyUpdate(Usuario usuario, UpdateUsuarioRequest dto) {
-        Short genero = toCodeFromGenero(dto.genero());
-
-        LocalDate fechaNacimiento = null;
-        if (dto.fechaNacimiento() != null) {
-            fechaNacimiento = new java.sql.Date(dto.fechaNacimiento().getTime()).toLocalDate();
+        if (dto.documento() != null) {
+            usuario.setDocumento(dto.documento());
         }
-        usuario.setDocumento(dto.documento());
-        usuario.setNombres(dto.nombres());
-        usuario.setApellidos(dto.apellidos());
-        usuario.setGenero(genero);
-        usuario.setFechaNacimiento(fechaNacimiento);
-        usuario.setTelefono(dto.telefono());
+        if (dto.nombres() != null) {
+            usuario.setNombres(dto.nombres());
+        }
+        if (dto.apellidos() != null) {
+            usuario.setApellidos(dto.apellidos());
+        }
+        if (dto.genero() != null) {
+            usuario.setGenero(toCodeFromGenero(dto.genero()));
+        }
+        if (dto.fechaNacimiento() != null) {
+            usuario.setFechaNacimiento(new java.sql.Date(dto.fechaNacimiento().getTime()).toLocalDate());
+        }
+        if (dto.telefono() != null) {
+            usuario.setTelefono(dto.telefono());
+        }
     }
 
     public void applyUpdateAdmin(Usuario usuario, UserUpdateAdminDto dto, Rol rol) {
