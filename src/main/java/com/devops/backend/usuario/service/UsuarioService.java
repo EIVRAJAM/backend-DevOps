@@ -19,5 +19,6 @@ public interface UsuarioService {
     UserResponseAdmin bloquear(Long id);
     UserListResponse findByIdUser(Long idUsuario);
     CompleteStatusResponse getCompleteStatus(Long userId);
+    UsuarioOrganizadorDTO findByIdOrganizador(Long id);
     Page<UsuarioOrganizadorDTO> buscarUsuariosOrganizador(UsuarioFilterRequest filter, String username, String correo);
 }

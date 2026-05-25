@@ -246,6 +246,11 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    public UsuarioOrganizadorDTO findByIdOrganizador(Long id) {
+        return usuarioMapper.toOrganizadorDTO(findUser(id));
+    }
+
+    @Override
     public Page<UsuarioOrganizadorDTO> buscarUsuariosOrganizador(UsuarioFilterRequest filter, String username, String correo) {
         Specification<Usuario> spec = Specification
                 .where(UsuarioSpecification.porRol("ROLE_USER"))
