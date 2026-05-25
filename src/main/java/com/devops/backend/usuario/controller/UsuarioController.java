@@ -109,6 +109,20 @@ public class UsuarioController {
                 return ResponseEntity.ok(uService.findById(id));
         }
 
+        @PreAuthorize("hasAnyRole('ORGANIZER','ADMIN')")
+        @GetMapping("/{id}/organizador")
+        @Operation(summary = "Obtener usuario por ID - ORGANIZER/ADMIN", description = "Recupera informacion de un usuario con el mismo formato que la busqueda de organizador. Incluye username y correo del acceso.")
+        @ApiResponses({
+                @ApiResponse(responseCode = "200", description = "Usuario encontrado exitosamente"),
+                @ApiResponse(responseCode = "401", description = "Token JWT invalido o expirado"),
+                @ApiResponse(responseCode = "403", description = "Acceso denegado: solo organizadores y administradores"),
+                @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+        })
+        public ResponseEntity<UsuarioOrganizadorDTO> findByIdOrganizador(
+                @PathVariable @Parameter(description = "ID del usuario", required = true, example = "123") Long id) {
+                return ResponseEntity.ok(uService.findByIdOrganizador(id));
+        }
+
         @GetMapping("/id")
         @Operation(summary = "Obtener usuario actual", description = "Recupera información completa del usuario de la sesión activa .")
         @ApiResponses({
