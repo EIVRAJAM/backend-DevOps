@@ -624,13 +624,7 @@ public class EventoServiceImpl implements EventoService {
                         return;
                 }
 
-                if (request.precio() != null && request.precio().compareTo(BigDecimal.ZERO) > 0) {
-                        throw new BadRequestException("No debe especificar precio si el evento es gratuito");
-                }
 
-                if (request.moneda() != null) {
-                        throw new BadRequestException("No debe especificar moneda si el evento es gratuito");
-                }
         }
 
         void validarDatosPagoUpdate(UpdateEventoDTO dto, Evento evento) {
