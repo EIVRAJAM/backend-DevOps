@@ -28,6 +28,8 @@ public interface SesionRepository extends JpaRepository<Sesion, Long>, JpaSpecif
      */
     List<Sesion> findAllByTipoLoginOrderByFechaInicioDesc(String tipoLogin);
 
+    long countByActivaTrue();
+
     @Modifying
     @Query("""
                 UPDATE Sesion s
