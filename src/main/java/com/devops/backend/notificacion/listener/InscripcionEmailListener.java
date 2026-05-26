@@ -6,7 +6,6 @@ import com.devops.backend.shared.email.queue.EmailQueueService;
 import com.devops.backend.shared.events.InscripcionConfirmadaEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -26,7 +25,6 @@ public class InscripcionEmailListener {
     private final QrCodeService qrCodeService;
 
     @Async("emailTaskExecutor")
-    @EventListener
     @TransactionalEventListener(phase = AFTER_COMMIT)
     public void onInscripcionConfirmada(InscripcionConfirmadaEvent event) {
         log.debug("[EMAIL-LISTENER] Encolando confirmacion para ticket #{}", event.getTicket().getIdTicket());
