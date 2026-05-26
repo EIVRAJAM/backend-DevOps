@@ -1,0 +1,89 @@
+name: Semgrep SAST
+
+# Triggers Gitflow:
+#   push a develop, main, release/*, hotfix/*  -> escaneo en la rama destino
+#   PR a develop                               -> baseline scan (solo codigo nuevo)
+#   PR a main                                  -> politica estricta, bloquea ERROR
+on:
+  push:
+    branches: [develop, main, 'release/*', 'hotfix/*']
+  pull_request:
+    branches: [develop, main]
+
+permissions:
+  security-events: write
+  contents: read
+
+jobs:
+  semgrep:
+    name: Semgrep scan
+    runs-on: ubuntu-latest
+    container:
+      image: returntocorp/semgrep
+
+    steps:
+      - name: Fix git ownership
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # historia completa para baseline diff
+
+      - name: Determinar politica segun rama
+        id: policy
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          GIT_REF: ${{ github.ref }}
+        run: |
+          STRICT="false"
+          BASELINE=""
+
+          # PR contra main -> estricto
+          if [ "$EVENT_NAME" = "pull_request" ] && [ "$BASE_REF" = "main" ]; then
+            STRICT="true"
+          fi
+
+          # Push a main / release/* / hotfix/* -> estricto
+          if [ "$GIT_REF" = "refs/heads/main" ] \
+            || [[ "$GIT_REF" == refs/heads/release/* ]] \
+            || [[ "$GIT_REF" == refs/heads/hotfix/* ]]; then
+            STRICT="true"
+          fi
+
+          # PR a develop -> baseline scan, reporta solo findings nuevos
+          if [ "$EVENT_NAME" = "pull_request" ] && [ "$BASE_REF" = "develop" ]; then
+            BASELINE="--baseline-commit=origin/develop"
+          fi
+
+          echo "strict=$STRICT"     >> $GITHUB_OUTPUT
+          echo "baseline=$BASELINE" >> $GITHUB_OUTPUT
+          echo "Politica -> strict=$STRICT  baseline='$BASELINE'"
+
+      - name: Ejecutar Semgrep
+        shell: bash
+        env:
+          STRICT_OUTPUT: ${{ steps.policy.outputs.strict }}
+          BASELINE_OUTPUT: ${{ steps.policy.outputs.baseline }}
+        run: |
+          STRICT_FLAGS=""
+          if [ "$STRICT_OUTPUT" = "true" ]; then
+            STRICT_FLAGS="--error --severity=ERROR"
+          fi
+
+          semgrep scan \
+            --config=p/ci \
+            --config=p/java \
+            --config=p/secrets \
+            --config=.semgrep/ \
+            $BASELINE_OUTPUT \
+            $STRICT_FLAGS \
+            --sarif --output=results.sarif \
+            ./src 
+
+      - name: Publicar SARIF en Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: results.sarif

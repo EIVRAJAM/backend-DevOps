@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualización de evento</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fb;
+            font-family: Arial, sans-serif;
+            color: #333333;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 30px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .content p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+
+        .event-name {
+            color: #b45309;
+            font-weight: bold;
+        }
+
+        .table-container {
+            margin: 25px 0;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: #f59e0b;
+            color: white;
+            padding: 14px;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #92400e;
+            background-color: #fef3c7;
+        }
+
+        .ticket-box {
+            margin-top: 25px;
+            padding: 18px;
+            background-color: #ecfdf5;
+            border-left: 5px solid #10b981;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .ticket-box strong {
+            color: #047857;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #f8fafc;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .content {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            th, td {
+                font-size: 13px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>📢 Cambios en tu evento</h1>
+    </div>
+
+    <div class="content">
+
+        <p>
+            Hola <strong th:text="${nombreUsuario}"></strong>,
+        </p>
+
+        <p>
+            El organizador realizó cambios en tu evento:
+            <span class="event-name" th:text="${nombreEvento}"></span>
+        </p>
+
+        <div class="table-container">
+            <table>
+                <tr>
+                    <th>Campo</th>
+                    <th>Antes</th>
+                    <th>Ahora</th>
+                </tr>
+
+                <tr>
+                    <td class="label">📅 Fecha</td>
+                    <td th:text="${fechaAnterior}"></td>
+                    <td th:text="${fechaNueva}"></td>
+                </tr>
+
+                <tr>
+                    <td class="label">🕒 Hora</td>
+                    <td th:text="${horaAnterior}"></td>
+                    <td th:text="${horaNueva}"></td>
+                </tr>
+
+                <tr>
+                    <td class="label">📍 Lugar</td>
+                    <td th:text="${lugarAnterior}"></td>
+                    <td th:text="${lugarNuevo}"></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="ticket-box">
+            ✅ Tu ticket <strong th:text="${idTicket}"></strong> sigue siendo válido.
+        </div>
+
+    </div>
+
+    <div class="footer">
+        Gracias por confiar en nosotros 💙<br>
+        Equipo de DevOps
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+package com.devops.backend.shared.email.enums;
+
+public enum EmailJobType {
+    REEMBOLSO_SOLICITUD_USUARIO,
+    REEMBOLSO_SOLICITUD_ORGANIZADOR,
+    REEMBOLSO_APROBADA,
+    REEMBOLSO_RECHAZADA,
+    REEMBOLSO_REEMBOLSADA,
+    INSCRIPCION,
+    CHECKIN,
+    RECORDATORIO,
+    CAMBIO_EVENTO
+}

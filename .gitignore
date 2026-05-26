@@ -31,3 +31,21 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# ==========================================
+# CONFIGURACION LOCAL (NO SUBIR)
+# ==========================================
+application-local.properties
+
+# Variables de entorno locales
+.env
+.env.local
+
+# Credenciales Azure descargados
+*.publishsettings
+*.pubxml
+azure-*.json
+
+# Documentacion y skills locales
+docs/resumenes/
+skills/
