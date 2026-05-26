@@ -5,7 +5,6 @@ import com.devops.backend.shared.email.queue.EmailQueueService;
 import com.devops.backend.shared.events.RecordatorioEventoEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -25,7 +24,6 @@ public class RecordatorioEmailListener {
     private final EmailQueueService emailQueueService;
 
     @Async("emailTaskExecutor")
-    @EventListener
     @TransactionalEventListener(phase = AFTER_COMMIT)
     public void onRecordatorioEvento(RecordatorioEventoEvent event) {
         log.debug("[RECORDATORIO] Encolando recordatorio para ticket #{}", event.getTicket().getIdTicket());

@@ -73,7 +73,7 @@ public class Evento {
     private BigDecimal precio;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "moneda", nullable = false, length = 3)
+    @Column(name = "moneda", length = 3)
     private Moneda moneda;
 
     @Column(name = "capacidad_disponible")
@@ -108,7 +108,7 @@ public class Evento {
         if (esDePago == null) {
             esDePago = false;
         }
-        if (moneda == null) {
+        if (moneda == null && Boolean.TRUE.equals(esDePago)) {
             moneda = Moneda.USD;
         }
         if (capacidadMaxima != null) {
