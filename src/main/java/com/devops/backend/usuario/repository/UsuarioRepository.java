@@ -4,6 +4,7 @@ import com.devops.backend.usuario.entity.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long>, JpaSpecificationExecutor<Usuario> {
@@ -15,5 +16,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long>, JpaSpec
     // Verifica duplicado excluyendo el propio id
     boolean existsByDocumentoAndIdUsuarioNot(String documento, Long idUsuario);
     boolean existsByTelefonoAndIdUsuarioNot(String telefono, Long idUsuario);
+
+    long countByEstado(String estado);
+
+    List<Usuario> findTop5ByOrderByCreadoEnDesc();
 
 }

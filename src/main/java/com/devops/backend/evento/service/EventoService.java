@@ -40,6 +40,8 @@ public interface EventoService {
 
         EventoResponseDTO obtenerEventoDisponiblePorId(Long idEvento);
 
+        void verificarEventoEditable(Long idEvento);
+
         Page<EventoResponseDTO> listarMisEventos(
                         Pageable pageable,
                         EstadoEvento estadoEvento,
