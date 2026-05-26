@@ -2,6 +2,7 @@ package com.devops.backend.evento.service;
 
 import com.devops.backend.evento.dto.InscripcionTicketResponseDTO;
 import com.devops.backend.evento.dto.MiEstadoInscripcionResponseDTO;
+import com.devops.backend.evento.dto.MisEventosCanceladosResponse;
 import com.devops.backend.evento.dto.TicketCheckoutResponseDTO;
 import com.devops.backend.evento.dto.TicketResponseDTO;
 
@@ -35,4 +36,7 @@ public interface TicketService {
 
     /** Devuelve el estado de inscripcion del usuario autenticado para un evento. */
     MiEstadoInscripcionResponseDTO obtenerMiEstadoInscripcion(Long eventoId, Long userId);
+
+    /** Devuelve los tickets del usuario cuyos eventos fueron cancelados. */
+    MisEventosCanceladosResponse obtenerMisEventosCancelados(Long userId);
 }

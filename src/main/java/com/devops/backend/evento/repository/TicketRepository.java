@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,6 +64,18 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     long countByEvento_IdEventoAndEstadoTicketNotIn(Long idEvento, List<EstadoTicket> excluidos);
 
     long countByEvento_IdEventoAndCheckinRealizadoTrue(Long idEvento);
+
+    @Query("""
+        SELECT t FROM Ticket t
+        JOIN FETCH t.evento e
+        WHERE t.usuario.idUsuario = :userId
+        AND e.estadoEvento = com.devops.backend.evento.enums.EstadoEvento.CANCELADO
+        AND t.estadoTicket IN :estados
+        ORDER BY t.fechaCompra DESC
+    """)
+    List<Ticket> findByUsuarioAndEventoCancelado(
+            @Param("userId") Long userId,
+            @Param("estados") List<EstadoTicket> estados);
 
     @Modifying
     @Query("UPDATE Ticket t SET t.estadoTicket = :estadoExpirado " +

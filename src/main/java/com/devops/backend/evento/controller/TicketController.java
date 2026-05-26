@@ -2,6 +2,7 @@ package com.devops.backend.evento.controller;
 
 import com.devops.backend.evento.dto.InscripcionTicketResponseDTO;
 import com.devops.backend.evento.dto.MiEstadoInscripcionResponseDTO;
+import com.devops.backend.evento.dto.MisEventosCanceladosResponse;
 import com.devops.backend.evento.dto.TicketCheckoutResponseDTO;
 import com.devops.backend.evento.dto.TicketResponseDTO;
 import com.devops.backend.evento.service.TicketService;
@@ -109,6 +110,21 @@ public class TicketController {
     public ResponseEntity<List<TicketResponseDTO>> obtenerMisTickets(Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
         return ResponseEntity.ok(ticketService.obtenerMisTickets(userId));
+    }
+
+    @Operation(
+            summary = "Listar tickets de eventos cancelados",
+            description = "Devuelve los tickets del usuario autenticado cuyos eventos fueron cancelados. "
+                    + "Incluye informacion sobre la disponibilidad de reembolso para cada ticket."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de tickets de eventos cancelados obtenida exitosamente"),
+            @ApiResponse(responseCode = "401", description = "Token JWT invalido o expirado")
+    })
+    @GetMapping("/mis-eventos-cancelados")
+    public ResponseEntity<MisEventosCanceladosResponse> obtenerMisEventosCancelados(Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        return ResponseEntity.ok(ticketService.obtenerMisEventosCancelados(userId));
     }
 
     // ─────────────────────────── TICKET POR ID ──────────────────────────────
