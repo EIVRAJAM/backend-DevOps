@@ -5,7 +5,6 @@ import com.devops.backend.shared.email.queue.EmailQueueService;
 import com.devops.backend.shared.events.CheckinConfirmadoEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -25,7 +24,6 @@ public class CheckinConfirmadoEmailListener {
     private final EmailQueueService emailQueueService;
 
     @Async("emailTaskExecutor")
-    @EventListener
     @TransactionalEventListener(phase = AFTER_COMMIT)
     public void onCheckinConfirmado(CheckinConfirmadoEvent event) {
         log.debug("[CHECKIN] Encolando confirmacion para ticket #{}", event.getTicket().getIdTicket());
