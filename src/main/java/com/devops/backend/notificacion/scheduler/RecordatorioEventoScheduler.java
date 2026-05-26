@@ -13,7 +13,7 @@ public class RecordatorioEventoScheduler {
 
     private final RecordatorioService recordatorioService;
 
-    @Scheduled(cron = "0 0 10 * * *")
+    @Scheduled(cron = "0 0 * * * *")
     public void enviarRecordatorios() {
         log.info("[SCHEDULER] Iniciando envio de recordatorios de eventos...");
         int publicados = recordatorioService.procesarRecordatorios();

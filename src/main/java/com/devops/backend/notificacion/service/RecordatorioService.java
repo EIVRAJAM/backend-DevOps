@@ -3,6 +3,7 @@ package com.devops.backend.notificacion.service;
 import com.devops.backend.evento.entity.Ticket;
 import com.devops.backend.evento.enums.EstadoTicket;
 import com.devops.backend.evento.repository.TicketRepository;
+import com.devops.backend.shared.email.repository.EmailJobRepository;
 import com.devops.backend.shared.events.RecordatorioEventoEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,18 +20,27 @@ import java.util.List;
 public class RecordatorioService {
 
     private final TicketRepository ticketRepository;
+    private final EmailJobRepository emailJobRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public int procesarRecordatorios() {
-        LocalDate manana = LocalDate.now().plusDays(1);
+        LocalDate hoy = LocalDate.now();
+        LocalDate manana = hoy.plusDays(1);
 
         List<Ticket> tickets = ticketRepository.findTicketsActivosParaFecha(
-                manana, List.of(EstadoTicket.GRATIS, EstadoTicket.PAGADO));
+                hoy, manana,
+                List.of(EstadoTicket.GRATIS, EstadoTicket.PAGADO));
 
         int publicados = 0;
 
         for (Ticket ticket : tickets) {
+            if (emailJobRepository.existsRecordatorioByTicketId(ticket.getIdTicket())) {
+                log.debug("[RECORDATORIO] Ya existe recordatorio para ticket #{} - omitido",
+                        ticket.getIdTicket());
+                continue;
+            }
+
             String email = ticket.getUsuario().getAcceso() != null
                     ? ticket.getUsuario().getAcceso().getCorreoAcceso()
                     : null;
