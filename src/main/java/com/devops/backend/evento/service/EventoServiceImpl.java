@@ -85,17 +85,6 @@ public class EventoServiceImpl implements EventoService {
         }
 
         @Override
-        public void verificarEventoEditable(Long idEvento) {
-                Evento evento = obtenerEvento(idEvento);
-                validarAutorizacion(evento);
-                if (evento.getEstadoEvento() == EstadoEvento.CERRADO
-                                || evento.getEstadoEvento() == EstadoEvento.CANCELADO) {
-                        throw new EventoNoEditableException(
-                                        "No se puede editar un evento en estado " + evento.getEstadoEvento());
-                }
-        }
-
-        @Override
         @Transactional(readOnly = true)
         public EventoResponseDTO obtenerEventoPorId(Long idEvento) {
                 Evento evento = obtenerEvento(idEvento);
