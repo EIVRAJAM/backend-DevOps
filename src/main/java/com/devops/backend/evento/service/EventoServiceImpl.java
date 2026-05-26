@@ -18,6 +18,10 @@ import com.devops.backend.evento.mapper.HistorialEventoMapper;
 import com.devops.backend.evento.repository.EventoRepository;
 import com.devops.backend.evento.repository.HistorialEventoRepository;
 import com.devops.backend.evento.repository.TicketRepository;
+import com.devops.backend.exception.ApiValidationError;
+import com.devops.backend.exception.ValidationException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import com.devops.backend.evento.specification.EventoSpecification;
 import com.devops.backend.exception.BadRequestException;
 import com.devops.backend.exception.ConflictException;
@@ -43,6 +47,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -59,6 +64,7 @@ public class EventoServiceImpl implements EventoService {
         private final EventoAutorizacionService autorizacionService;
         private final EventoStaffService eventoStaffService;
         private final ApplicationEventPublisher eventPublisher;
+        private final Validator validator;
 
         @Override
         public EventoResponseDTO crearEvento(CreateEventoDTO createEventoDTO) {
@@ -75,7 +81,7 @@ public class EventoServiceImpl implements EventoService {
                 Evento evento = eventoMapper.toEntity(createEventoDTO, usuarioCreador);
                 Evento eventoGuardado = eventoRepository.save(evento);
 
-                return eventoMapper.toDTO(eventoGuardado);
+            return eventoMapper.toDTO(eventoGuardado);
         }
 
         @Override
@@ -228,27 +234,27 @@ public class EventoServiceImpl implements EventoService {
         @Override
         public EventoResponseDTO actualizarEvento(
                         Long idEvento,
-                        UpdateEventoDTO updateEventoDTO) {
+                        UpdateEventoDTO dto) {
 
                 Evento evento = obtenerEvento(idEvento);
 
-                validarAutorizacion(evento);
-
-                if (evento.getEstadoEvento() == EstadoEvento.CERRADO
-                                || evento.getEstadoEvento() == EstadoEvento.CANCELADO) {
-                        throw new EventoNoEditableException(
-                                        "No se puede editar un evento en estado " + evento.getEstadoEvento());
+                Set<ConstraintViolation<UpdateEventoDTO>> violations = validator.validate(dto);
+                if (!violations.isEmpty()) {
+                        List<ApiValidationError> errors = violations.stream()
+                                .map(v -> new ApiValidationError(v.getPropertyPath().toString(), v.getMessage()))
+                                .toList();
+                        throw new ValidationException("Invalid request data", errors);
                 }
 
-           validarDatosPagoUpdate(updateEventoDTO, evento);
-           validarParqueadero(updateEventoDTO);
-           validarCapacidadMaxima(updateEventoDTO, evento);
+                validarDatosPagoUpdate(dto, evento);
+                validarParqueadero(dto);
+                validarCapacidadMaxima(dto, evento);
 
             LocalDate fechaAnterior = evento.getFechaEvento();
             LocalTime horaAnterior  = evento.getHoraEvento();
             String lugarAnterior    = evento.getLugarEvento();
 
-            Evento eventoActualizado = eventoMapper.updateEntity(updateEventoDTO, evento);
+            Evento eventoActualizado = eventoMapper.updateEntity(dto, evento);
             Evento eventoGuardado = eventoRepository.save(eventoActualizado);
 
             boolean huboCambio =
@@ -275,6 +281,17 @@ public class EventoServiceImpl implements EventoService {
             }
 
             return eventoMapper.toDTO(eventoGuardado);
+        }
+
+        @Override
+        public void verificarEventoEditable(Long idEvento) {
+                Evento evento = obtenerEvento(idEvento);
+                validarAutorizacion(evento);
+                if (evento.getEstadoEvento() == EstadoEvento.CERRADO
+                                || evento.getEstadoEvento() == EstadoEvento.CANCELADO) {
+                        throw new EventoNoEditableException(
+                                        "No se puede editar un evento en estado " + evento.getEstadoEvento());
+                }
         }
 
         @Override
@@ -567,10 +584,7 @@ public class EventoServiceImpl implements EventoService {
                                         "Si tiene parqueadero, cupos debe ser >= 0");
                 }
 
-                if (!tiene && cupos != null && cupos > 0) {
-                        throw new ConflictException(
-                                        "Si no tiene parqueadero, cupos debe ser 0");
-                }
+
         }
 
         /**
@@ -636,12 +650,6 @@ public class EventoServiceImpl implements EventoService {
                         return;
                 }
 
-                if (dto.precio() != null && dto.precio().compareTo(BigDecimal.ZERO) > 0) {
-                        throw new BadRequestException("No debe especificar precio si el evento es gratuito");
-                }
 
-                if (dto.moneda() != null) {
-                        throw new BadRequestException("No debe especificar moneda si el evento es gratuito");
-                }
         }
 }

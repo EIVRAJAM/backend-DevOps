@@ -189,7 +189,8 @@ public class EventoController {
         @PutMapping("/{id}")
         public ResponseEntity<EventoResponseDTO> actualizarEvento(
                         @Parameter(description = "ID único del evento a actualizar", required = true, example = "1") @PathVariable Long id,
-                        @Valid @RequestBody UpdateEventoDTO updateEventoDTO) {
+                        @RequestBody UpdateEventoDTO updateEventoDTO) {
+                eventoService.verificarEventoEditable(id);
                 EventoResponseDTO eventoActualizado = eventoService.actualizarEvento(id, updateEventoDTO);
                 return ResponseEntity.ok(eventoActualizado);
         }

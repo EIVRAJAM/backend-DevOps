@@ -76,6 +76,9 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findByUsuarioAndEventoCancelado(
             @Param("userId") Long userId,
             @Param("estados") List<EstadoTicket> estados);
+    long countByFechaCompraBetween(LocalDateTime inicio, LocalDateTime fin);
+
+    long countByEvento_IdEventoAndEstadoTicket(Long idEvento, EstadoTicket estadoTicket);
 
     @Modifying
     @Query("UPDATE Ticket t SET t.estadoTicket = :estadoExpirado " +

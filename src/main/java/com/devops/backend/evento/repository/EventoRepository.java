@@ -135,6 +135,8 @@ public interface EventoRepository extends JpaRepository<Evento, Long>, JpaSpecif
      */
     List<Evento> findByEsDePagoFalseAndEstadoAndEstadoEvento(Estado estado, EstadoEvento estadoEvento);
 
+    List<Evento> findTop5ByEstadoEventoAndEstadoOrderByFechaEventoAsc(EstadoEvento estadoEvento, Estado estado);
+
     /**
      * Busca eventos publicados y activos ordenados por fecha
      */
