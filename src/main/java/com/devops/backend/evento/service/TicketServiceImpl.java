@@ -2,8 +2,11 @@ package com.devops.backend.evento.service;
 
 import com.devops.backend.evento.dto.InscripcionTicketResponseDTO;
 import com.devops.backend.evento.dto.MiEstadoInscripcionResponseDTO;
+import com.devops.backend.evento.dto.MisEventosCanceladosResponse;
 import com.devops.backend.evento.dto.TicketCheckoutResponseDTO;
+import com.devops.backend.evento.dto.TicketEventoCanceladoResponse;
 import com.devops.backend.evento.dto.TicketResponseDTO;
+import com.devops.backend.evento.dto.EventoCanceladoInfo;
 import com.devops.backend.evento.entity.Evento;
 import com.devops.backend.evento.entity.Ticket;
 import com.devops.backend.evento.enums.Estado;
@@ -18,6 +21,8 @@ import com.devops.backend.evento.repository.EventoRepository;
 import com.devops.backend.evento.repository.TicketRepository;
 import com.devops.backend.exception.BadRequestException;
 import com.devops.backend.exception.ResourceNotFoundException;
+import com.devops.backend.pago.entity.SolicitudReembolso;
+import com.devops.backend.pago.repository.SolicitudReembolsoRepository;
 import com.devops.backend.pago.service.StripeService;
 import com.devops.backend.shared.events.InscripcionConfirmadaEvent;
 import com.devops.backend.usuario.entity.Usuario;
@@ -57,6 +62,7 @@ public class TicketServiceImpl implements TicketService {
     private final QrCodeService qrCodeService;
     private final ApplicationEventPublisher eventPublisher;
     private final TicketCheckoutExpirationService expirationService;
+    private final SolicitudReembolsoRepository solicitudReembolsoRepository;
 
     @Value("${tickets.checkout.expiration-minutes:15}")
     private long checkoutExpirationMinutes;
@@ -513,5 +519,69 @@ public class TicketServiceImpl implements TicketService {
                 ticket.getCreadoEn(),
                 ticket.getCheckinRealizado(),
                 ticket.getFechaCheckin());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public MisEventosCanceladosResponse obtenerMisEventosCancelados(Long userId) {
+        List<EstadoTicket> estados = List.of(EstadoTicket.PAGADO, EstadoTicket.GRATIS);
+        List<Ticket> tickets = ticketRepository.findByUsuarioAndEventoCancelado(userId, estados);
+
+        List<TicketEventoCanceladoResponse> items = tickets.stream()
+                .map(this::toTicketEventoCanceladoResponse)
+                .toList();
+
+        return new MisEventosCanceladosResponse(items.size(), items);
+    }
+
+    private TicketEventoCanceladoResponse toTicketEventoCanceladoResponse(Ticket ticket) {
+        Evento evento = ticket.getEvento();
+
+        EventoCanceladoInfo eventoInfo = new EventoCanceladoInfo(
+                evento.getIdEvento(),
+                evento.getNombreEvento(),
+                evento.getEstadoEvento().name(),
+                evento.getFechaEvento() != null ? evento.getFechaEvento().toString() : null,
+                evento.getHoraEvento() != null ? evento.getHoraEvento().toString() : null,
+                evento.getLugarEvento()
+        );
+
+        boolean tieneSolicitudActiva = solicitudReembolsoRepository
+                .existsByTicket_IdTicketAndEstadoSolicitudNotIn(
+                        ticket.getIdTicket(),
+                        List.of(com.devops.backend.evento.enums.EstadoSolicitudReembolso.RECHAZADA,
+                                com.devops.backend.evento.enums.EstadoSolicitudReembolso.CANCELADA,
+                                com.devops.backend.evento.enums.EstadoSolicitudReembolso.FALLIDA));
+
+        if (ticket.getEstadoTicket() == EstadoTicket.GRATIS) {
+            return new TicketEventoCanceladoResponse(
+                    ticket.getIdTicket(),
+                    ticket.getEstadoTicket(),
+                    eventoInfo,
+                    false,
+                    "NO_APLICA",
+                    "El evento era gratuito. No aplica reembolso."
+            );
+        }
+
+        if (tieneSolicitudActiva) {
+            return new TicketEventoCanceladoResponse(
+                    ticket.getIdTicket(),
+                    ticket.getEstadoTicket(),
+                    eventoInfo,
+                    false,
+                    "SOLICITADO",
+                    "Ya tienes una solicitud de reembolso en proceso."
+            );
+        }
+
+        return new TicketEventoCanceladoResponse(
+                ticket.getIdTicket(),
+                ticket.getEstadoTicket(),
+                eventoInfo,
+                true,
+                "DISPONIBLE",
+                "El evento fue cancelado. Puedes solicitar el reembolso."
+        );
     }
 }

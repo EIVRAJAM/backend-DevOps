@@ -65,6 +65,17 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     long countByEvento_IdEventoAndCheckinRealizadoTrue(Long idEvento);
 
+    @Query("""
+        SELECT t FROM Ticket t
+        JOIN FETCH t.evento e
+        WHERE t.usuario.idUsuario = :userId
+        AND e.estadoEvento = com.devops.backend.evento.enums.EstadoEvento.CANCELADO
+        AND t.estadoTicket IN :estados
+        ORDER BY t.fechaCompra DESC
+    """)
+    List<Ticket> findByUsuarioAndEventoCancelado(
+            @Param("userId") Long userId,
+            @Param("estados") List<EstadoTicket> estados);
     long countByFechaCompraBetween(LocalDateTime inicio, LocalDateTime fin);
 
     long countByEvento_IdEventoAndEstadoTicket(Long idEvento, EstadoTicket estadoTicket);
