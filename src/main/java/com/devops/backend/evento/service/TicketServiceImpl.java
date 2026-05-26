@@ -42,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -529,6 +530,7 @@ public class TicketServiceImpl implements TicketService {
 
         List<TicketEventoCanceladoResponse> items = tickets.stream()
                 .map(this::toTicketEventoCanceladoResponse)
+                .filter(Objects::nonNull)
                 .toList();
 
         return new MisEventosCanceladosResponse(items.size(), items);
@@ -552,6 +554,17 @@ public class TicketServiceImpl implements TicketService {
                         List.of(com.devops.backend.evento.enums.EstadoSolicitudReembolso.RECHAZADA,
                                 com.devops.backend.evento.enums.EstadoSolicitudReembolso.CANCELADA,
                                 com.devops.backend.evento.enums.EstadoSolicitudReembolso.FALLIDA));
+
+        boolean reembolsoProcesado = solicitudReembolsoRepository
+                .existsByTicket_IdTicketAndEstadoSolicitudIn(
+                        ticket.getIdTicket(),
+                        List.of(com.devops.backend.evento.enums.EstadoSolicitudReembolso.APROBADA,
+                                com.devops.backend.evento.enums.EstadoSolicitudReembolso.PROCESADA,
+                                com.devops.backend.evento.enums.EstadoSolicitudReembolso.REEMBOLSADA));
+
+        if (reembolsoProcesado) {
+            return null;
+        }
 
         if (ticket.getEstadoTicket() == EstadoTicket.GRATIS) {
             return new TicketEventoCanceladoResponse(

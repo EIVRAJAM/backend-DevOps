@@ -16,6 +16,8 @@ public interface SolicitudReembolsoRepository extends JpaRepository<SolicitudRee
     
     boolean existsByTicket_IdTicketAndEstadoSolicitudNotIn(Long idTicket, List<EstadoSolicitudReembolso> estados);
 
+    boolean existsByTicket_IdTicketAndEstadoSolicitudIn(Long idTicket, List<EstadoSolicitudReembolso> estados);
+
     long countByEstadoSolicitud(EstadoSolicitudReembolso estadoSolicitud);
 
 }
