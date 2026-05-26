@@ -567,10 +567,7 @@ public class EventoServiceImpl implements EventoService {
                                         "Si tiene parqueadero, cupos debe ser >= 0");
                 }
 
-                if (!tiene && cupos != null && cupos > 0) {
-                        throw new ConflictException(
-                                        "Si no tiene parqueadero, cupos debe ser 0");
-                }
+
         }
 
         /**
@@ -636,12 +633,6 @@ public class EventoServiceImpl implements EventoService {
                         return;
                 }
 
-                if (dto.precio() != null && dto.precio().compareTo(BigDecimal.ZERO) > 0) {
-                        throw new BadRequestException("No debe especificar precio si el evento es gratuito");
-                }
 
-                if (dto.moneda() != null) {
-                        throw new BadRequestException("No debe especificar moneda si el evento es gratuito");
-                }
         }
 }

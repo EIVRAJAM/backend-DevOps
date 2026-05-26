@@ -138,10 +138,11 @@ public class EventoMapper {
 
         if (dto.tieneParqueadero() != null) {
             evento.setTieneParqueadero(dto.tieneParqueadero());
-        }
-
-        if (dto.cuposParqueadero() != null) {
-            evento.setCuposParqueadero(dto.cuposParqueadero());
+            if (Boolean.FALSE.equals(dto.tieneParqueadero())) {
+                evento.setCuposParqueadero(0);
+            } else if (dto.cuposParqueadero() != null) {
+                evento.setCuposParqueadero(dto.cuposParqueadero());
+            }
         }
 
         if (dto.esDePago() != null) {
